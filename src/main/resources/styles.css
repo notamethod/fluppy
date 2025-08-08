@@ -1,0 +1,10 @@
+.pane {
+    -fx-background-color: #1e1e1e;
+}
+.scrollPane{
+               -fx-background-color: #1e1e1e;
+           }
+.contextMenu{
+-fx-background-color: #2c2c2c;
+-fx-text-fill: white;
+}
