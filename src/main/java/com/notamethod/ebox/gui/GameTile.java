@@ -1,7 +1,6 @@
 package com.notamethod.ebox.gui;
 
-import com.notamethod.ebox.app.ApplicationBean;
-import com.notamethod.ebox.app.GameApp;
+import com.notamethod.ebox.core.GameApp;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import lombok.Data;

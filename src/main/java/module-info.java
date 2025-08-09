@@ -14,12 +14,14 @@ module com.notamethod.ebox {
     requires java.net.http;
     requires org.mapstruct;
     requires org.apache.commons.compress;
+    requires org.tukaani.xz;
     requires org.hibernate.orm.core;
 
     opens com.notamethod.ebox to javafx.fxml;
     exports com.notamethod.ebox;
     exports com.notamethod.ebox.gui;
-    exports com.notamethod.ebox.app;
+    exports com.notamethod.ebox.core;
+    exports com.notamethod.ebox.api.igdb;
     opens com.notamethod.ebox.gui to javafx.fxml;
-    opens com.notamethod.ebox.app to org.hibernate.orm.core;
+    opens com.notamethod.ebox.core to org.hibernate.orm.core;
 }

@@ -1,4 +1,4 @@
-package com.notamethod.ebox.app;
+package com.notamethod.ebox.core;
 
 import com.notamethod.ebox.util.HelperClass;
 

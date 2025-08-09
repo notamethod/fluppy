@@ -736,3 +736,16 @@
     -fx-padding: 5;
     padding: 5;
 }
+
+.custom-dialog {
+    -fx-background-color: #AA5500;
+}
+
+.custom-dialog .content {
+    -fx-font-size: 9px;
+    -fx-text-fill: #333;
+}
+
+.edit-dialog {
+    -fx-background-color: #AA0000;
+}

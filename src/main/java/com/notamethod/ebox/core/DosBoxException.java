@@ -1,4 +1,4 @@
-package com.notamethod.ebox.app;
+package com.notamethod.ebox.core;
 
 public class DosBoxException extends Exception {
     public DosBoxException(int dosboxErrorCode) {

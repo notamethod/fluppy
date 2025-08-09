@@ -13,7 +13,7 @@
       <VBox>
          <children>
               <GridPane hgap="10" style="-fx-padding: 20;" vgap="10">
-                  <GridPane hgap="10" style="-fx-padding: 20;" vgap="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                  <GridPane hgap="10" vgap="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
                       <Label text="Titre:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                       <TextField fx:id="titleField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
       
@@ -65,7 +65,7 @@
                   <RowConstraints />
                </rowConstraints>
               </GridPane>
-            <GridPane>
+            <GridPane style="-fx-padding: 20;">
                 <columnConstraints>
 
                     <ColumnConstraints percentWidth="40" />
@@ -75,15 +75,23 @@
                <children>
                   <Label text="Cycles" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.rowSpan="2">
                      <padding>
-                        <Insets left="40.0" />
+                        <Insets left="20.0" />
                      </padding>
                   </Label>
                    <Label fx:id="cyclesLabel" contentDisplay="CENTER" text="value" GridPane.columnIndex="1" GridPane.rowIndex="0">
                    <padding>
-                       <Insets left="40.0" />
+                       <Insets left="20.0" />
                    </padding>
                    </Label>
                   <Slider fx:id="cyclesSpinner" blockIncrement="100.0" majorTickUnit="100.0" max="3000.0" min="0.0" minorTickCount="0" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                   <Label text="Machine:" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                       <padding>
+                           <Insets left="20.0" top="20.0"/>
+                       </padding>
+                   </Label>
+                   <ComboBox fx:id="comboMachines" GridPane.columnIndex="1" GridPane.rowIndex="2">
+
+                   </ComboBox>
                </children>
                <rowConstraints>
                   <RowConstraints />
@@ -97,12 +105,16 @@
 
                 <VBox>
                     <children>
-
-                    <GridPane hgap="10" style="-fx-padding: 20;" vgap="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <GridPane hgap="10" style="-fx-padding: 0,0,20,0;" vgap="10">
                     <Label text="Executable:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                     <TextField fx:id="exeFile" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                     <Button  text="..."  onAction="#selectExe" GridPane.columnIndex="2" GridPane.rowIndex="0" ></Button>
+                        <Label text="Cover:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <TextField fx:id="coverPath" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Button  text="..."  onAction="#selectCover" GridPane.columnIndex="2" GridPane.rowIndex="1" ></Button>
+
                     </GridPane>
+
                     </children>
                 </VBox>
             </Tab>

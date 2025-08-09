@@ -1,4 +1,4 @@
-package com.notamethod.ebox.app;
+package com.notamethod.ebox.core;
 
 /**
  * Preferences.java
@@ -55,54 +55,14 @@ public class PreferencesBean implements Serializable {
      @return the ShowIcons
       * @param ShowIcons the ShowIcons to set
      */
-    @Setter
-    @Getter
-    private boolean ShowIcons = true;
-    @Setter
-    @Getter
-    private boolean ShowText = true;
+
     @Setter
     @Getter
     private boolean FirstStart = true;
     @Setter
     @Getter
     private boolean CheckForUpdates = true;
-    /**
-     * -- GETTER --
-     *
-     *
-     * -- SETTER --
-     *
-     @return the IconWidth
-      * @param IconWidth the IconWidth to set
-     */
-    @Setter
-    @Getter
-    private int IconWidth = 22;
-    /**
-     * -- GETTER --
-     *
-     *
-     * -- SETTER --
-     *
-     @return the IconHeight
-      * @param IconHeight the IconHeight to set
-     */
-    @Setter
-    @Getter
-    private int IconHeight = 22;
-    /**
-     * -- GETTER --
-     *
-     *
-     * -- SETTER --
-     *
-     @return the IconResize
-      * @param IconResize the IconResize to set
-     */
-    @Setter
-    @Getter
-    private boolean IconResize = true;
+
     @Setter
     @Getter
     private boolean NoConcole = true;
@@ -110,18 +70,7 @@ public class PreferencesBean implements Serializable {
     @Setter
     @Getter
     private int TypeOfFileDialog = 0;
-    @Setter
-    @Getter
-    private int NumerOfColumnsInGameList = 1;
-    @Setter
-    @Getter
-    private int WindowHeight = 444;
-    @Setter
-    @Getter
-    private int WindowWidth = 593;
-    @Setter
-    @Getter
-    private boolean StartWithFloppyFlow = false;
+
     @Getter
     @Setter
     private int gamesCount = 0;
@@ -150,26 +99,19 @@ public class PreferencesBean implements Serializable {
             parts[0] = parts[0].toLowerCase().trim();
             switch (parts[0]) {
                 case "dosboxpath" -> DosBoxPath = parts[1].trim();
-                case "iconwidth" -> IconWidth = Integer.parseInt(parts[1].trim());
-                case "iconheight" -> IconHeight = Integer.parseInt(parts[1].trim());
-                case "iconresize" -> IconResize = Boolean.parseBoolean(parts[1].trim());
-                case "showicons" -> ShowIcons = Boolean.parseBoolean(parts[1].trim());
-                case "showtext" -> ShowText = Boolean.parseBoolean(parts[1].trim());
+
                 case "fullscreen" -> FullScreen = Boolean.parseBoolean(parts[1].trim());
                 case "genres" -> stringToGenres(parts[1].trim());
                 case "keepopen" -> KeepOpen = Boolean.parseBoolean(parts[1].trim());
                 case "typeoffiledialog" -> TypeOfFileDialog = Integer.parseInt(parts[1].trim());
-                case "numberofcolumns" -> NumerOfColumnsInGameList = Integer.parseInt(parts[1].trim());
-                case "windowheight" -> WindowHeight = Integer.parseInt(parts[1].trim());
-                case "windowwidth" -> WindowWidth = Integer.parseInt(parts[1].trim());
+
                 case "lastusedpath" -> LastUsedPath = parts[1].trim();
                 case "keyboardcode" -> KeyBoardCode = parts[1].trim();
                 case "firststart" -> FirstStart = Boolean.parseBoolean(parts[1].trim());
                 case "checkforupdates" -> CheckForUpdates = Boolean.parseBoolean(parts[1].trim());
                 case "usebuiltindosbox" -> BuiltInDosBox = Boolean.parseBoolean(parts[1].trim());
                 case "noconcole" -> NoConcole = Boolean.parseBoolean(parts[1].trim());
-                case "floppyflow" -> StartWithFloppyFlow = Boolean.parseBoolean(parts[1].trim());
-                case "theme" -> Theme = parts[1].trim();
+
                 case "gamesCount" -> gamesCount = Integer.parseInt(parts[1].trim());
             }
         }
@@ -187,24 +129,15 @@ public class PreferencesBean implements Serializable {
                 + "########################################################################\n\n"
                 + "DosBoxPath       := " + DosBoxPath + "\n"
                 + "FirstStart       := " + FirstStart + "\n"
-                + "FloppyFlow       := " + StartWithFloppyFlow + "\n"
                 + "FullScreen       := " + FullScreen + "\n"
                 + "Genres           := " + genresToString() + "\n"
-                + "IconHeight       := " + IconHeight + "\n"
-                + "IconResize       := " + IconResize + "\n"
-                + "IconWidth        := " + IconWidth + "\n"
                 + "KeepOpen         := " + KeepOpen + "\n"
                 + "KeyBoardCode     := " + KeyBoardCode + "\n"
                 + "LastUsedPath     := " + LastUsedPath + "\n"
                 + "CheckForUpdates  := " + CheckForUpdates + "\n"
                 + "NoConcole        := " + NoConcole + "\n"
-                + "NumberOfColumns  := " + NumerOfColumnsInGameList + "\n"
-                + "ShowIcons        := " + ShowIcons + "\n"
-                + "ShowText         := " + ShowText + "\n"
                 + "Theme            := " + Theme + "\n"
                 + "TypeOfFileDialog := " + TypeOfFileDialog + "\n"
-                + "WindowHeight     := " + WindowHeight + "\n"
-                + "WindowWidth      := " + WindowWidth + "\n"
                 + "UseBuiltInDosBox := " + BuiltInDosBox+ "\n"
                 + "gamesCount       := " + gamesCount;
     }
@@ -266,47 +199,9 @@ public class PreferencesBean implements Serializable {
         return KeyBoardCode;
     }
 
-    public void setIconSize(String s) {
-        int[] dimensions = parseSize(s);
-        if (dimensions.length == 2) {
-            this.IconWidth = dimensions[0];
-            this.IconHeight = dimensions[1];
-        } else {
-            System.out.println("[ERROR] Could not set icon size");
-        }
-    }
 
-    private int[] parseSize(String s) {
-        int startParantheze = s.lastIndexOf('(');
-        int endParantheze = s.lastIndexOf(')');
 
-        if (startParantheze > 0 && endParantheze > startParantheze) {
-            String parantheze = s.substring(startParantheze + 1, endParantheze);
-            System.out.println(parantheze);
-            String[] numbersAsString = parantheze.split("x");
-            if (numbersAsString.length == 2) {
 
-                try {
-                    int[] numbersAsInt = new int[]{Integer.parseInt(numbersAsString[0]), Integer.parseInt(numbersAsString[1])};
-                    return numbersAsInt;
-                } catch (NumberFormatException e) {
-                }
-            }
-        }
-        return new int[]{};
-    }
-
-    public int getIconSizeIndex() {
-        final int[] size = {16, 22, 32, 48, 164, 160, 320};
-
-        for (int i = 0; i < size.length; i++) {
-            if (Configuration.pref.getIconWidth() == size[i]) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
 
     /**
      * @param name The name of language or country

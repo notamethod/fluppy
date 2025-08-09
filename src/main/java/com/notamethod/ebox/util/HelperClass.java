@@ -4,10 +4,8 @@
 
 package com.notamethod.ebox.util;
 
-import com.notamethod.ebox.api.igdb.Game;
-import com.notamethod.ebox.app.ApplicationBean;
-import com.notamethod.ebox.app.Configuration;
-import com.notamethod.ebox.app.GameApp;
+import com.notamethod.ebox.core.Configuration;
+import com.notamethod.ebox.core.GameApp;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -32,7 +30,9 @@ public class HelperClass {
     public static final int SOLARIS = 1;
     public static final int WINDOWS = 2;
     public static final int MACOS   = 3;
-
+    public static final String REGEX_ABANDONWARE="jeu-[0-9]{5}-.*";
+    //public static final String REGEX_SIMPLE="*._DOS_??.zip";
+    public static final String REGEX_SIMPLE="(.*)_DOS_[A-Z][A-Z].*";
     /**
      * Determines the system's OS
      * @return the code for the current OS
@@ -166,29 +166,7 @@ public class HelperClass {
                 return null;
         }
     }
-    /**
-     * Copy a file
-     * @param in the file you want to copy
-     * @param out the new file
-     * @throws IOException
-     */
-    public static void copyFile(File in, File out) throws IOException {
-        FileChannel inChannel = new FileInputStream(in).getChannel();
-        FileChannel outChannel = new FileOutputStream(out).getChannel();
-        try {
-            inChannel.transferTo(0, inChannel.size(),
-                    outChannel);
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            if (inChannel != null) {
-                inChannel.close();
-            }
-            if (outChannel != null) {
-                outChannel.close();
-            }
-        }
-    }
+
 
     public static String getGameDirectory(String appName) {
         return  getDirectory(appName, "games");
@@ -285,7 +263,7 @@ public class HelperClass {
 
         /* is it a jar file? */
         if ( !jarFile.getName().endsWith(".jar") )
-        return false;   //no, it's a .class probably
+           return false;   //no, it's a .class probably
 
         String  toExec[] = new String[] { javaBin, "-jar", jarFile.getPath() };
         try{
@@ -300,17 +278,37 @@ public class HelperClass {
         return true;
     }
 
-    public static  Game regexArchive(String name){
-        Pattern pattern = Pattern.compile("jeu-[0-9]{5}-.*");
+    public static  String guessTitleFromFilename(String name){
+        String title=regexArchive(name);
+        if (title==null){
+            title=regexGroup(name, REGEX_SIMPLE, 1);
+        }
+        if(title!=null){
+            return toTitleGame(title);
+        }
+        return null;
+    }
+
+    public static  String regexArchive(String name){
+        Pattern pattern = Pattern.compile(REGEX_ABANDONWARE);
         Matcher matcher = pattern.matcher(name);
         if (matcher.find()){
-
             String[] data=name.split("-");
-            Game metaDataGame = new Game(data[2]);
-            return metaDataGame;
+            return data[2];
         }
         return null;
 
+    }
+    public static  String regexGroup(String name, String regx, int group){
+        Pattern pattern = Pattern.compile(regx);
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.find()){
+            return matcher.group(group);
+        }
+        return null;
+    }
+    public static String toTitleGame(String name) {
+        return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 
     public static void cleanDirectory(Path dir) throws IOException {
@@ -332,8 +330,8 @@ public class HelperClass {
         });
     }
 
-    public static String getCaptureDirectory(ApplicationBean di) {
-        return Configuration.appFolder + "captures" + File.separator + di.getUniqueID() + File.separator;
+    public static String getCaptureDirectory(GameApp di) {
+        return Configuration.appFolder + "captures" + File.separator + di.getId()+ File.separator;
     }
 
     public static void addOtherSettings(String[][] finito, String section, HashMap<String, String> props) {

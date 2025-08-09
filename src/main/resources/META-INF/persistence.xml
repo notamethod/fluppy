@@ -1,6 +1,6 @@
 <persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
     <persistence-unit name="ebox2_pu" transaction-type="RESOURCE_LOCAL">
-        <class>com.notamethod.ebox.app.GameEntity</class>
+        <class>com.notamethod.ebox.core.GameEntity</class>
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:./data/ebdb2"/>

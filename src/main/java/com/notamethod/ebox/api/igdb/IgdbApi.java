@@ -22,6 +22,8 @@ public class IgdbApi {
     public static String bigSize="t_cover_big";
 
     public List<Game> getGames(String name) throws ApiException, MappingException {
+        name=name.replace("-"," ");
+        name=name.replace("_"," ");
         log.info("searching game...{}", name);
         ObjectMapper mapper = new ObjectMapper();
         String endpoint="https://api.igdb.com/v4/games";

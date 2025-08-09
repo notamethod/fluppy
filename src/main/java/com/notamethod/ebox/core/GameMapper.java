@@ -1,4 +1,4 @@
-package com.notamethod.ebox.app;
+package com.notamethod.ebox.core;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,15 +14,6 @@ public interface GameMapper {
     GameMapper INSTANCE = Mappers.getMapper(GameMapper.class);
 
     @Mapping(source = "gameExe", target = "game")
-    @Mapping(source = "exePath", target = "path")
-    @Mapping(source = "imagePath", target = "icon")
-    ApplicationBean toAppBean(GameApp user);
-    @Mapping(source = "icon", target = "imagePath")
-    @Mapping(source = "game", target = "gameExe")
-    @Mapping(source = "path", target = "exePath")
-    @Mapping( target = "year", qualifiedByName = "StrYearConvert")
-    GameApp toGameApp(ApplicationBean bean);
-    @Mapping(source = "gameExe", target = "game")
     @Mapping( target = "gameYear", source="year")
     GameEntity toEntity(GameApp gameApp);
     @Mapping(source = "game", target = "gameExe")
@@ -30,8 +21,6 @@ public interface GameMapper {
     GameApp toGameApp(GameEntity gameEntity);
 
     List<GameApp> toGameApps(List<GameEntity> entityList);
-    List<GameApp> beanToGameApps(List<ApplicationBean> entityList);
-
 
     @Named("StrYearConvert")
     default  Integer strYearConvert(String year ) {

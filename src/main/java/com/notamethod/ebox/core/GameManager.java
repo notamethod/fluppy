@@ -1,4 +1,4 @@
-package com.notamethod.ebox.app;
+package com.notamethod.ebox.core;
 
 import com.notamethod.ebox.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
@@ -15,21 +15,18 @@ public class GameManager {
         this.applicationDatabase = applicationDatabase;
     }
 
-    public int deleteGame(String name, ApplicationList bl) {
+    public int deleteGame(GameApp gameApp) {
         int nbDeleted = 0;
-        String gm =name;
-        ApplicationBean game = bl.getGame(gm);
-        if (game.getIcon() != null) {
 
-        }
-        if (game.getGamePath() != null) {
+        if (gameApp.getGamePath() != null) {
             try {
-                HelperClass.deleteDirectory(Paths.get(game.getGamePath()));
+                HelperClass.deleteDirectory(gameApp.getGamePath());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                log.warn("delete game", e);
             }
         }
-        bl.removeGame(gm);
+        GameEntity entity = applicationDatabase.findById(gameApp.getId());
+      applicationDatabase.delete(entity);
         nbDeleted++;
         return nbDeleted;
     }
@@ -55,16 +52,20 @@ public class GameManager {
         return null;
     }
 
-    public void addGame(GameApp d) {
-        if (HelperClass.gameIsInTempDir(d)) {
+    public void addGame(GameApp game) throws GameManagerException {
+        List<GameEntity> entiites=applicationDatabase.findByNameAndYear(game.getName(), game.getYear());
+        if (!entiites.isEmpty()){
+            throw new GameManagerException("game already in database");
+        }
+        if (HelperClass.gameIsInTempDir(game)) {
             try {
-                HelperClass.moveGameToGames(d);
+                HelperClass.moveGameToGames(game);
             } catch (IOException e) {
                 log.error("error", e);
                 return;
             }
         }
 
-        save(d);
+        save(game);
     }
 }

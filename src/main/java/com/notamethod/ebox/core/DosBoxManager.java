@@ -1,4 +1,4 @@
-package com.notamethod.ebox.app;
+package com.notamethod.ebox.core;
 
 import com.notamethod.ebox.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,8 @@ import java.util.HashMap;
 public class DosBoxManager {
     private static final int DOSBOX_NOTFOUND = 404;
     private static final int DOSBOX_LAUNCH_ERROR = 400;
+
+
 
     /**
      * Writes a DosBOX configuration file to a specific file
@@ -47,125 +49,12 @@ public class DosBoxManager {
     }
 
 
-    public int runApplication(String program, ApplicationBean di) throws DosBoxException {
+    public int runApplication(String program, GameApp gameApp) throws DosBoxException {
 
         log.info("running {}", program);
         int returnOK=0;
 
-        //Create HashMaps for preferences
-        HashMap<String, HashMap<String, String>> allProps = new HashMap<>();
-        HashMap<String, String> cpu = new HashMap<>();
-        HashMap<String, String> renderer = new HashMap<>();
-        HashMap<String, String> sdl = new HashMap<>();
-        HashMap<String, String> dos = new HashMap<>();
-        HashMap<String, String> serial = new HashMap<>();
-        HashMap<String, String> ipx = new HashMap<>();
-        HashMap<String, String> dosbox = new HashMap<>();
-        HashMap<String, String> midi = new HashMap<>();
-        HashMap<String, String> gus = new HashMap<>();
-        HashMap<String, String> mixer = new HashMap<>();
-
-        ArrayList<String> autoexec = new ArrayList<>();
-
-        String capturePath = HelperClass.getCaptureDirectory(di);
-        File dir = new File(capturePath);
-
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-               log.warn("error creating directory");
-
-            }
-        }
-
-        dosbox.put("captures", capturePath);
-
-        // Split the extras string
-        String[] properties = new String[0];
-        String[][] finito = new String[0][0];
-        if (!di.getExtra().isEmpty()) {
-            //   Parse
-            properties = di.getExtra().substring(0, di.getExtra().length() - 1).split(";");
-            finito = new String[properties.length][3];
-            if (!di.getExtra().isEmpty()) {
-                for (int i = 0; i < properties.length; i++) {
-                    int first = properties[i].indexOf(" => ");
-                    int second = properties[i].indexOf(" = ");
-                    if (first <= 0) {
-                        continue;
-                    }
-                    finito[i][0] = properties[i].substring(0, first);
-                    if (finito[i][0].equalsIgnoreCase("autoexec")) {
-                        finito[i][1] = properties[i].substring(first + 4);
-
-                    } else {
-                        finito[i][1] = properties[i].substring(first + 4, second);
-                        finito[i][2] = properties[i].substring(second + 3);
-                    }
-                }
-            }
-        }
-
-        // Add settings to the configuration file
-        if (di.getCycles()>0){
-            cpu.put("cycles", di.getCycles() + "");
-        }
-
-        HelperClass.addOtherSettings(finito, "cpu", cpu);
-        allProps.put("CPU", cpu);
-
-        renderer.put("frameskip", di.getFrameskip() + "");
-        HelperClass.addOtherSettings(finito, "renderer", renderer);
-        allProps.put("RENDER", renderer);
-
-        sdl.put("fullscreen", Configuration.pref.isFullScreen() + "");
-        HelperClass.addOtherSettings(finito, "sdl", sdl);
-        allProps.put("SDL", sdl);
-
-        dos.put("keyboardlayout", Configuration.pref.getKeyboardCode());
-        HelperClass.addOtherSettings(finito, "dos", dos);
-        allProps.put("DOS", dos);
-
-        HelperClass.addOtherSettings(finito, "serial", serial);
-        allProps.put("SERIAL", serial);
-
-        HelperClass.addOtherSettings(finito, "ipx", ipx);
-        allProps.put("IPX", serial);
-
-        HelperClass.addOtherSettings(finito, "dosbox", dosbox);
-        allProps.put("DOSBOX", dosbox);
-
-        HelperClass.addOtherSettings(finito, "mixer", mixer);
-        allProps.put("MIXER", mixer);
-
-        HelperClass.addOtherSettings(finito, "gus", gus);
-        allProps.put("GUS", gus);
-
-        HelperClass.addOtherSettings(finito, "midi", midi);
-        allProps.put("MIDI", midi);
-
-        int number = 0;
-        if (!di.getCdrom().isEmpty()) { // If we should mount a CD ROM
-            String cd = "mount " + di.getCdromLetter() + " \"" + di.getCdrom() + "\" -t cdrom ";
-            if (!di.getCdromLabel().isEmpty()) {
-                cd += "-label " + di.getCdromLabel();
-
-            }
-            autoexec.add(number++, cd);
-        }
-        autoexec.add(number++, "mount c \"" + di.getPath() + "\"");
-        autoexec.add(number++, "C:");
-        autoexec.add(number++, program);
-        for (int i = 0; i < finito.length; i++) {
-            if (finito[i][0].equalsIgnoreCase("autoexec")) {
-                autoexec.add(finito[i][1]);
-
-                // Write configfile
-
-            }
-
-        }
-        writeConfig(Configuration.appFolder + "dosbox.conf",
-                allProps, autoexec);
+       generateConfiguration(program, gameApp);
 
         // Build execute command
         String[] par = new String[6];
@@ -210,5 +99,127 @@ public class DosBoxManager {
             }
         }
         return returnOK;
+    }
+
+    private void generateConfiguration(String program, GameApp gameApp) {
+        //Create HashMaps for preferences
+        HashMap<String, HashMap<String, String>> allProps = new HashMap<>();
+        HashMap<String, String> cpu = new HashMap<>();
+        HashMap<String, String> renderer = new HashMap<>();
+        HashMap<String, String> sdl = new HashMap<>();
+        HashMap<String, String> dos = new HashMap<>();
+        HashMap<String, String> serial = new HashMap<>();
+        HashMap<String, String> ipx = new HashMap<>();
+        HashMap<String, String> dosbox = new HashMap<>();
+        HashMap<String, String> midi = new HashMap<>();
+        HashMap<String, String> gus = new HashMap<>();
+        HashMap<String, String> mixer = new HashMap<>();
+
+        ArrayList<String> autoexec = new ArrayList<>();
+
+        String capturePath = HelperClass.getCaptureDirectory(gameApp);
+        File dir = new File(capturePath);
+
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                log.warn("error creating directory");
+
+            }
+        }
+
+        dosbox.put("captures", capturePath);
+
+        // Split the extras string
+        String[] properties = new String[0];
+        String[][] finito = new String[0][0];
+        if (gameApp.getExtra()!=null && !gameApp.getExtra().isEmpty()) {
+            //   Parse
+            properties = gameApp.getExtra().substring(0, gameApp.getExtra().length() - 1).split(";");
+            finito = new String[properties.length][3];
+            if (!gameApp.getExtra().isEmpty()) {
+                for (int i = 0; i < properties.length; i++) {
+                    int first = properties[i].indexOf(" => ");
+                    int second = properties[i].indexOf(" = ");
+                    if (first <= 0) {
+                        continue;
+                    }
+                    finito[i][0] = properties[i].substring(0, first);
+                    if (finito[i][0].equalsIgnoreCase("autoexec")) {
+                        finito[i][1] = properties[i].substring(first + 4);
+
+                    } else {
+                        finito[i][1] = properties[i].substring(first + 4, second);
+                        finito[i][2] = properties[i].substring(second + 3);
+                    }
+                }
+            }
+        }
+
+        // Add settings to the configuration file
+        if (gameApp.getCycles()>0){
+            cpu.put("cycles", gameApp.getCycles() + "");
+        }
+
+        HelperClass.addOtherSettings(finito, "cpu", cpu);
+        allProps.put("CPU", cpu);
+
+        renderer.put("frameskip", gameApp.getFrameskip() + "");
+        HelperClass.addOtherSettings(finito, "renderer", renderer);
+        allProps.put("RENDER", renderer);
+
+        sdl.put("fullscreen", Configuration.pref.isFullScreen() + "");
+        HelperClass.addOtherSettings(finito, "sdl", sdl);
+        allProps.put("SDL", sdl);
+
+        dos.put("keyboardlayout", Configuration.pref.getKeyboardCode());
+        HelperClass.addOtherSettings(finito, "dos", dos);
+        allProps.put("DOS", dos);
+
+        HelperClass.addOtherSettings(finito, "serial", serial);
+        allProps.put("SERIAL", serial);
+
+        HelperClass.addOtherSettings(finito, "ipx", ipx);
+        allProps.put("IPX", serial);
+
+        HelperClass.addOtherSettings(finito, "dosbox", dosbox);
+        allProps.put("DOSBOX", dosbox);
+
+        HelperClass.addOtherSettings(finito, "mixer", mixer);
+        allProps.put("MIXER", mixer);
+
+        HelperClass.addOtherSettings(finito, "gus", gus);
+        allProps.put("GUS", gus);
+
+        HelperClass.addOtherSettings(finito, "midi", midi);
+        allProps.put("MIDI", midi);
+
+        if (gameApp.getMachine()!=null) {
+            dosbox.put("machine", gameApp.getMachine() + "");
+            HelperClass.addOtherSettings(finito, "dosbox", dosbox);
+            allProps.put("DOSBOX", dosbox);
+        }
+        int number = 0;
+        if (gameApp.getCdrom()!=null && !gameApp.getCdrom().isEmpty()) { // If we should mount a CD ROM
+            String cd = "mount " + gameApp.getCdromLetter() + " \"" + gameApp.getCdrom() + "\" -t cdrom ";
+            if (!gameApp.getCdromLabel().isEmpty()) {
+                cd += "-label " + gameApp.getCdromLabel();
+
+            }
+            autoexec.add(number++, cd);
+        }
+        autoexec.add(number++, "mount c \"" + gameApp.getExePath() + "\"");
+        autoexec.add(number++, "C:");
+        autoexec.add(number++, program);
+        for (int i = 0; i < finito.length; i++) {
+            if (finito[i][0].equalsIgnoreCase("autoexec")) {
+                autoexec.add(finito[i][1]);
+
+                // Write configfile
+
+            }
+
+        }
+        writeConfig(Configuration.appFolder + "dosbox.conf",
+                allProps, autoexec);
     }
 }

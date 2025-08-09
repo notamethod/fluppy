@@ -73,6 +73,9 @@ public class ArchiveExtractor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         return gameOutputDire;
     }
 
@@ -100,7 +103,7 @@ public class ArchiveExtractor {
                 }
             }
 
-        } catch (IOException | ArchiveException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return gameOutputDire;

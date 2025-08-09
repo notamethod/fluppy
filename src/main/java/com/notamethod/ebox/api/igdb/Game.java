@@ -29,6 +29,6 @@ public class Game {
 
             return String.valueOf(dateTime.getYear());
         }
-        return "?";
+        return null;
     }
 }

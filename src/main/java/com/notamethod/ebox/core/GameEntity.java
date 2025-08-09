@@ -1,5 +1,5 @@
 
-package com.notamethod.ebox.app;
+package com.notamethod.ebox.core;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -11,7 +11,7 @@ public class GameEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private long id;
+    private Long id;
     private String name;
 
 
@@ -30,6 +30,7 @@ public class GameEntity {
     private String genre;
 
     private int gameYear;
+    private String machine;
 
     private String publisher;
 
