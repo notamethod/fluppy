@@ -1,0 +1,34 @@
+package com.notamethod.ebox.api.igdb;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
+@Data
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Game {
+    String name;
+    String url;
+    Long id;
+    Long cover;
+    Long first_release_date;
+
+    public Game(String name) {
+        this.name=name.substring(0,1).toUpperCase()+name.substring(1,name.length() );
+    }
+
+    public String getYear(){
+        if (first_release_date!=null){
+            Instant instant = Instant.ofEpochSecond(first_release_date);
+            ZonedDateTime dateTime = instant.atZone(ZoneId.systemDefault());
+
+            return String.valueOf(dateTime.getYear());
+        }
+        return "?";
+    }
+}
