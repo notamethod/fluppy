@@ -8,12 +8,15 @@
 
 .root{
     -fx-background-color: #2D2D30;
+    -fx-font-family: "Retro Pixel Arcade Regular";
+    -fx-font-size: 10px;
     background-color: #2D2D30;
 }
 
 
 /* Label */
 .label{
+-fx-font-size:10 px;
     -fx-text-fill: #AFB1B3;
 }
 

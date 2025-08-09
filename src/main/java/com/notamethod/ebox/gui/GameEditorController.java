@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.List;
 
 @Slf4j
@@ -36,7 +38,9 @@ public class GameEditorController {
     @FXML private ImageView imageGame;
     @FXML private Label cyclesLabel;
     @FXML private Slider cyclesSpinner;
+    @FXML private TextField exeFile;
 
+    private Path exePath;
     @FXML
     public void initialize() {
         cyclesSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -54,12 +58,16 @@ public class GameEditorController {
         //game.setGenre(genreField.getText());
         //game.setPlatform(platformField.getText());
         game.setYear( Integer.parseInt(yearField.getText()));
+        game.setExePath(this.exePath);
+        game.setGameExe(exeFile.getText());
+        game.setCycles((int) cyclesSpinner.getValue());
         //game.setRating(Double.parseDouble(ratingField.getText()));
         return game;
     }
     public void setGame(GameApp game){
         titleField.setText(game.getName());
         yearField.setText(game.getYear()!=null?String.valueOf(game.getYear()):"?");
+        exePath=game.getExePath();
         ImageView imageView = new ImageView();
         try {
            // URL url = game.getImagePath().toUri();
@@ -67,6 +75,8 @@ public class GameEditorController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        cyclesSpinner.setValue(game.getCycles());
+        exeFile.setText(game.getGameExe());
 
     }
 
@@ -97,6 +107,17 @@ public class GameEditorController {
         }
     }
 
+    public void selectExe() {
+        System.out.println("updateAPI()");
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(exePath.toFile());
+        fileChooser.setTitle("Choisir un fichier");
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if (selectedFile != null && selectedFile.isFile()) {
+            exeFile.setText(selectedFile.getAbsoluteFile().getName());
+            exePath = selectedFile.getAbsoluteFile().getParentFile().toPath();
+        }
+    }
     private void updateList() {
     }
 }

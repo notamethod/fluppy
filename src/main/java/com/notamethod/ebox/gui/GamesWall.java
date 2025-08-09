@@ -1,7 +1,9 @@
 package com.notamethod.ebox.gui;
 
-import com.notamethod.ebox.ApplicationDatabase;
+
 import com.notamethod.ebox.app.*;
+import com.notamethod.ebox.gui.common.GameActions;
+import com.notamethod.ebox.gui.common.GameManagerException;
 import com.notamethod.ebox.util.HelperClass;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -23,9 +25,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import lombok.extern.slf4j.Slf4j;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -35,6 +40,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+@Slf4j
 public class GamesWall extends Application {
 
     public ApplicationList bl;
@@ -42,6 +48,8 @@ public class GamesWall extends Application {
     DosBoxManager dosBoxManager = new DosBoxManager();
     URL unknownGame = null;
     ResourceBundle resourceBundle;
+    GameManager gameManager;
+    TilePane tilePane;
 
     @Override
     public void init() throws Exception {
@@ -58,12 +66,15 @@ public class GamesWall extends Application {
             throw new RuntimeException(e);
         }
         bl = applicationDatabase.load(Configuration.gameFile);
-
+        gameManager = new GameManager(applicationDatabase);
         // Locale locale = Locale.getDefault();//new Locale("fr"); // ou "en", "de", etc.
         Locale locale = new Locale("fr"); // ou "en", "de", etc.
         resourceBundle = ResourceBundle.getBundle("language", locale);
         System.out.println(resourceBundle.getString("confirmation.tile"));
         //System.out.println( Messages.getString("confirmation.tile"));
+
+        Font font = FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
+        System.out.println(font.getName());
 
     }
 
@@ -71,11 +82,11 @@ public class GamesWall extends Application {
     public void start(Stage stage) throws MalformedURLException, URISyntaxException {
 
 
-        TilePane pane = new TilePane();
-        pane.setPadding(new Insets(20, 10, 10, 10)); // top, right, bottom, left
-        pane.setHgap(10);
-        pane.setVgap(10);
-        pane.setPrefColumns(5);
+        tilePane = new TilePane();
+        tilePane.setPadding(new Insets(20, 10, 10, 10)); // top, right, bottom, left
+        tilePane.setHgap(10);
+        tilePane.setVgap(10);
+        tilePane.setPrefColumns(5);
 
         // Liste d’URLs d’image
         try {
@@ -83,20 +94,13 @@ public class GamesWall extends Application {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        List<URL> imageUrls = new ArrayList<>();
-        List<String> gameStrList = List.of(bl.getGameList());
-        for (String gameStr : gameStrList) {
-
-            ApplicationBean gameBean = bl.getGame(gameStr);
-            System.out.println("name " + gameBean.getName());
-            GameApp game = GameMapper.INSTANCE.toGameApp( gameBean );
-            GameTile container = addGame(game);
-            pane.getChildren().add(container);
-
-        }
 
 
-        ScrollPane scrollPane = new ScrollPane(pane);
+      System.out.println("loading..."+gameManager.loadAll().size());
+        updateList();
+
+
+        ScrollPane scrollPane = new ScrollPane(tilePane);
         Scene scene = new Scene(scrollPane, 900, 600);
 
 
@@ -131,6 +135,25 @@ public class GamesWall extends Application {
                         success = false;
                     }
                 }
+                GameActions gameActions = new GameActions(new DialogActionsJfx());
+                for (File f : files) {
+                    GameApp beanGame= null;
+                    try {
+                        beanGame = gameActions.createFromFile(f.getAbsoluteFile());
+                    } catch (GameManagerException e) {
+                        JOptionPane.showMessageDialog(null, e.getMessage(), null, JOptionPane.INFORMATION_MESSAGE);
+                        continue;
+                    }
+                    gameManager.addGame(beanGame);
+
+                }
+                try {
+                    updateList();
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
 
             }
             event.setDropCompleted(success);
@@ -143,6 +166,20 @@ public class GamesWall extends Application {
         stage.setTitle("Mur d'images cliquables");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void updateList() throws MalformedURLException, URISyntaxException {
+        List<GameApp> games = gameManager.loadAll();
+        //List<String> gameStrList = List.of(bl.getGameList());
+        for (GameApp gameStr : games) {
+
+            //ApplicationBean gameBean = bl.getGame(gameStr);
+            //System.out.println("name " + gameBean.getName());
+            // GameApp game = GameMapper.INSTANCE.toGameApp( gameBean );
+            GameTile container = addGame(gameStr);
+            tilePane.getChildren().add(container);
+
+        }
     }
 
     private GameTile addGame(GameApp game) throws URISyntaxException, MalformedURLException {
@@ -241,6 +278,7 @@ public class GamesWall extends Application {
                 if (e.getClickCount() == 2) {
                     System.out.println("Double clicked");
                     int returne = 0;
+                    log.debug(game.toString());
                     try {
                         returne = dosBoxManager.runApplication(game.getGameExe(), GameMapper.INSTANCE.toAppBean(game));
                     } catch (DosBoxException ex) {
@@ -267,9 +305,11 @@ public class GamesWall extends Application {
             controller.setGame(gameBean);
 
                     Optional < ButtonType > result = dialog.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
+            if (result.isPresent() && result.get().getButtonData().equals(ButtonBar.ButtonData.OK_DONE)) {
                // GameEditorController controller = loader.getController();
                 GameApp editedGame = controller.getGame();
+                editedGame.setId(gameBean.getId());
+                //editedGame.merge(game);
                 // Utiliser l'objet Game ici
             }
 

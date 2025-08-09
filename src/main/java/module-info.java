@@ -9,6 +9,7 @@ module org.example.ebox2 {
     requires static lombok;
     requires jakarta.persistence;
     requires org.slf4j;
+    requires java.desktop;
 
     opens com.notamethod.ebox to javafx.fxml;
     exports com.notamethod.ebox;
