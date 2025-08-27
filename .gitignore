@@ -24,3 +24,4 @@ target/
 
 /.idea/sonarlint/
 /.idea/sonarlint.xml
+/dependency-reduced-pom.xml
