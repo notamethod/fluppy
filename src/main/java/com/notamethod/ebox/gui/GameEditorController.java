@@ -51,8 +51,6 @@ public class GameEditorController {
                 cyclesLabel.setText("Valeur : " + newVal.intValue());
             }
         });
-       // String[] machines=
-        //ComboBox<String> comboBox = new ComboBox<>();
 
         comboMachines.setItems(FXCollections.observableArrayList(
                 "hercules", "cga","ega","pcjr", "tandy", "svga_s3"

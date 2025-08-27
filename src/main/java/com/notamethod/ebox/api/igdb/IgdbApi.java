@@ -18,8 +18,8 @@ public class IgdbApi {
 
     static String token = System.getenv("IGDB_TOKEN");// Remplace par ton vrai token
     static String user=System.getenv("IGDB_USER");
-    public static String thumbSize="t_thumb";
-    public static String bigSize="t_cover_big";
+    public static final String THUMB_SIZE="t_thumb";
+    public static final String BIG_SIZE="t_cover_big";
 
     public List<Game> getGames(String name) throws ApiException, MappingException {
         name=name.replace("-"," ");
@@ -39,9 +39,14 @@ public class IgdbApi {
                     .build();
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
+        catch (InterruptedException e){
+            Thread.currentThread().interrupt();
+            throw new ApiException("getGames Error "+name, e);
+        }
         catch (Exception e){
             throw new ApiException("getGames Error "+name, e);
         }
+
 
         List<Game> games;
         try {
@@ -71,8 +76,12 @@ public class IgdbApi {
                     .build();
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
-        catch (Exception e){
+        catch (InterruptedException e){
+            Thread.currentThread().interrupt();
             throw new ApiException("getCoverInfo Error "+id, e);
+        }
+        catch (Exception e){
+             throw new ApiException("getCoverInfo Error "+id, e);
         }
 
         List<Cover> covers;

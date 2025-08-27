@@ -8,6 +8,8 @@ import com.notamethod.ebox.core.GameApp;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,11 +25,11 @@ public class ApiCalls {
         return igdbApi.getGames(name);
     }
 
-    public String downloadImage(String imageUrl, String output) throws IOException {
-        String destinationFile = output;
+    public String downloadImage(String imageUrl, String destinationFile) throws IOException, URISyntaxException {
 
-        URL url = new URL(imageUrl);
-        try (InputStream in = url.openStream();
+
+        URI uri = new URI(imageUrl);
+        try (InputStream in = uri.toURL().openStream();
              OutputStream out = new FileOutputStream(destinationFile)) {
             byte[] buffer = new byte[4096];
             int n;
@@ -70,7 +72,7 @@ public class ApiCalls {
             return coversUri;
         }
         for (Cover cover:covers){
-            String imgUrl = size == 2 ? cover.getUrl().replaceAll(IgdbApi.thumbSize, IgdbApi.bigSize) : cover.getUrl();
+            String imgUrl = size == 2 ? cover.getUrl().replaceAll(IgdbApi.THUMB_SIZE, IgdbApi.BIG_SIZE) : cover.getUrl();
             coversUri.add(imgUrl);
         }
         return coversUri;
@@ -89,7 +91,10 @@ public class ApiCalls {
             return null;
         }
         File outputFile = new File(coverFolder, coverFilename);
-        String path = downloadImage("https:" + cover, outputFile.getAbsolutePath() + ".jpg");
-        return path;
+        try {
+            return downloadImage("https:" + cover, outputFile.getAbsolutePath() + ".jpg");
+        } catch (URISyntaxException e) {
+            throw new ApiException("API ERROR", e);
+        }
     }
 }
