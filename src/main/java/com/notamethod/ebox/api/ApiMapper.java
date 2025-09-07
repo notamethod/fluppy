@@ -1,7 +1,9 @@
 package com.notamethod.ebox.api;
 
 import com.notamethod.ebox.api.igdb.Game;
+import com.notamethod.ebox.api.igdb.Genre;
 import com.notamethod.ebox.core.GameApp;
+import com.notamethod.ebox.core.GenreApp;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -18,13 +20,15 @@ public interface ApiMapper {
 
     @Mapping( source = "first_release_date", target = "year", qualifiedByName = "StrYearConvert")
     GameApp toGameApp(Game bean);
-
+    //@Mapping(target = "id", ignore = true)
+    @Mapping( source = "slug", target = "id")
+    GenreApp toGenreApp(Genre bean);
     Game toApiBean(GameApp gameApp);
 
 
     List<GameApp> toGameApps(List<Game> entityList);
     List<Game> toApiBeans(List<GameApp> entityList);
-
+    List<GenreApp> toGenres(List<Genre> genreList);
 
     @Named("StrYearConvert")
     default  Integer strYearConvert(String year ) {

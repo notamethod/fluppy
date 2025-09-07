@@ -12,7 +12,7 @@
         <Tab text="Informations du jeu">
       <VBox>
          <children>
-              <GridPane hgap="10" style="-fx-padding: 20;" vgap="10">
+              <GridPane hgap="15" style="-fx-padding: 20;" vgap="10">
                   <GridPane hgap="10" vgap="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
                       <Label text="Titre:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                       <TextField fx:id="titleField" GridPane.columnIndex="1" GridPane.rowIndex="0" />

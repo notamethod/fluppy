@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class Game {
     Long id;
     Long cover;
     Long first_release_date;
+    List<Genre> genres;
 
     public Game(String name) {
         this.name=name.substring(0,1).toUpperCase()+name.substring(1,name.length() );

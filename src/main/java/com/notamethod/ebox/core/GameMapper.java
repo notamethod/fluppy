@@ -15,10 +15,13 @@ public interface GameMapper {
 
     @Mapping(source = "gameExe", target = "game")
     @Mapping( target = "gameYear", source="year")
+    @Mapping( target = "genres", ignore = true)
     GameEntity toEntity(GameApp gameApp);
     @Mapping(source = "game", target = "gameExe")
     @Mapping(source = "gameYear", target = "year")
     GameApp toGameApp(GameEntity gameEntity);
+
+    GenreEntity toEntity(GenreApp genre);
 
     List<GameApp> toGameApps(List<GameEntity> entityList);
 
@@ -46,4 +49,6 @@ public interface GameMapper {
         }
         return Paths.get(path);
     }
+
+
 }

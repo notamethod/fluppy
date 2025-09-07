@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class GameEditorController {
@@ -68,7 +69,7 @@ public class GameEditorController {
         game.setYear( Integer.parseInt(yearField.getText()));
         game.setExePath(this.exePath);
         game.setGameExe(exeFile.getText());
-        game.setGenre(genreField.getText());
+        //game.setGenre(genreField.getText());
         game.setCycles((int) cyclesSpinner.getValue());
         game.setMachine(comboMachines.getValue());
         String imagePath=coverPath.getText();
@@ -94,7 +95,8 @@ public class GameEditorController {
             coverPath.setText(game.getImagePath().toString());
         }
         cyclesSpinner.setValue(game.getCycles());
-        genreField.setText(game.getGenre());
+        String genres = game.getGenres().stream().map(x->x.getName()).collect(Collectors.joining(","));
+        genreField.setText(genres);
         exeFile.setText(game.getGameExe());
         comboMachines.setValue(game.getMachine());
 

@@ -95,7 +95,7 @@ public class PreferencesBean implements Serializable {
             if (io.trim().startsWith("#") || io.trim().isEmpty()) {
                 continue; // Comment or blank line
             }
-            String parts[] = io.split(":=");
+            String[] parts = io.split(":=");
             parts[0] = parts[0].toLowerCase().trim();
             switch (parts[0]) {
                 case "dosboxpath" -> DosBoxPath = parts[1].trim();
@@ -125,7 +125,7 @@ public class PreferencesBean implements Serializable {
         return "########################################################################\n"
                 + "###                        D-Box' config file                        ###\n"
                 + "###         If it contains errors, D-Box will overwrite it!          ###\n"
-                + "### If you want to reset settings, simply delete the file or a line. ###\n"
+                + "### If you want to reset settings, simply deleteGame the file or a line. ###\n"
                 + "########################################################################\n\n"
                 + "DosBoxPath       := " + DosBoxPath + "\n"
                 + "FirstStart       := " + FirstStart + "\n"

@@ -269,14 +269,12 @@ public class GamesWall extends Application {
         });
 
 
-        // Clic : afficher une action
 
-        // Affichage du menu sur clic droit
         container.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
                 contextMenu.show(container, e.getScreenX(), e.getScreenY());
             } else if (e.getButton() == MouseButton.PRIMARY) {
-                if (e.getClickCount() == 2) {
+                if (e.getClickCount() == 1) {
                     int returne = 0;
                     log.debug(game.toString());
                     try {

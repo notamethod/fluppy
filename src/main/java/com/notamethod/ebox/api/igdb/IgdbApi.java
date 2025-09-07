@@ -27,7 +27,7 @@ public class IgdbApi {
         log.info("searching game...{}", name);
         ObjectMapper mapper = new ObjectMapper();
         String endpoint="https://api.igdb.com/v4/games";
-        String body="fields *;\n" +
+        String body="fields *, genres.*;\n" +
                 "search \""+name+"\";";
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {

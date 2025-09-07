@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.*;
 
 
 @Data
@@ -14,7 +14,6 @@ public class GameApp {
     private Long id;
     private String name;
     private String gameExe;
-    private String genre;
     private String installer;
     private int cycles = 0;
     private Path imagePath;
@@ -28,8 +27,13 @@ public class GameApp {
     private String cdromLetter;
     private String cdromLabel;
     private String machine;
+    private Set<GenreApp> genres = new HashSet<>();
 
 
+    /**
+     * Update game info
+     * @param srcGame
+     */
     public void merge(GameApp srcGame) {
         if (name == null && srcGame.name != null) {
             this.name = srcGame.name;
@@ -37,9 +41,7 @@ public class GameApp {
         if (gameExe == null && srcGame.gameExe != null) {
             this.gameExe = srcGame.gameExe;
         }
-        if (genre == null && srcGame.genre != null) {
-            this.genre = srcGame.genre;
-        }
+
         if (installer == null && srcGame.installer != null) {
             this.installer = srcGame.installer;
         }
@@ -52,7 +54,16 @@ public class GameApp {
         if (exePath == null && srcGame.exePath != null) {
             this.exePath = srcGame.exePath;
         }
+        if (genres.isEmpty() && !srcGame.genres.isEmpty()) {
+            this.genres.addAll(srcGame.genres);
+        }
     }
 
 
+    public void addGenre(String id, String name) {
+        GenreApp genre = new GenreApp();
+        genre.setId(id);
+        genre.setName(name);
+        this.genres.add(genre);
+    }
 }

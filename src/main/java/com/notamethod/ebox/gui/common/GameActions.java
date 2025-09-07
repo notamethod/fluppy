@@ -3,12 +3,11 @@ package com.notamethod.ebox.gui.common;
 
 import com.notamethod.ebox.api.ApiCalls;
 import com.notamethod.ebox.api.ApiException;
+import com.notamethod.ebox.api.ApiMapper;
 import com.notamethod.ebox.api.MappingException;
 import com.notamethod.ebox.api.igdb.Game;
-import com.notamethod.ebox.core.Configuration;
-import com.notamethod.ebox.core.GameApp;
-import com.notamethod.ebox.core.GameManagerException;
-import com.notamethod.ebox.core.OperationCanceledException;
+import com.notamethod.ebox.api.igdb.Genre;
+import com.notamethod.ebox.core.*;
 import com.notamethod.ebox.gui.Messages;
 import com.notamethod.ebox.util.ArchiveExtractor;
 import com.notamethod.ebox.util.FileWizard;
@@ -246,7 +245,18 @@ public class GameActions {
 
             Game game = games.size() > 1 ? chooseGame(games) : games.get(0);
             if (game != null) {
+               // GameApp filledGame = ApiMapper.INSTANCE.toGameApp(game);
+               // List<GenreApp> genres = ApiMapper.INSTANCE.toGenres(game.getGenres());
                 metaGame.setName(game.getName());
+                //FIXME
+                for (Genre genre:game.getGenres()){
+                    GenreApp genraApp = new GenreApp();
+                    genraApp.setId(genre.getSlug());
+                    genraApp.setName(genre.getName());
+                    metaGame.getGenres().add(genraApp);
+
+                }
+                //metaGame.getGenres().addAll(genres);
                 metaGame.setYear(game.getYear() == null ? 1970 : Integer.valueOf(game.getYear()));
                 if (game.getCover() != null) {
                     try {
@@ -268,6 +278,7 @@ public class GameActions {
             return Optional.of(metaGame);
         } catch (Exception e) {
             da.showMessageDialog("Something wrong happened. You have to add the application the hard way.", "Sorry...");
+            log.error("error", e);
         }
         return Optional.empty();
     }

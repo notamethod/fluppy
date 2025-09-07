@@ -2,8 +2,6 @@ package com.notamethod.ebox.core;
 
 import com.notamethod.ebox.gui.Messages;
 
-import java.util.ResourceBundle;
-
 public class GameManagerException extends Throwable {
 
 

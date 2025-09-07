@@ -4,6 +4,9 @@ package com.notamethod.ebox.core;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 @Entity
 @Table(name = "game")
@@ -27,8 +30,6 @@ public class GameEntity {
 
     private Integer cycles = null;
 
-    private String genre;
-
     private int gameYear;
     private String machine;
 
@@ -37,4 +38,10 @@ public class GameEntity {
     private boolean favorite = false;
 
 
+    @ManyToMany(cascade = CascadeType.PERSIST)
+    @JoinTable(
+            name = "game_genre",
+            joinColumns = @JoinColumn(name = "game_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    private Set<GenreEntity> genres= new HashSet<>();
 }

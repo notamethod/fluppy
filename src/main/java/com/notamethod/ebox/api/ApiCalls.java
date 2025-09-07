@@ -2,9 +2,11 @@ package com.notamethod.ebox.api;
 
 import com.notamethod.ebox.api.igdb.Cover;
 import com.notamethod.ebox.api.igdb.Game;
+import com.notamethod.ebox.api.igdb.Genre;
 import com.notamethod.ebox.api.igdb.IgdbApi;
 import com.notamethod.ebox.core.Configuration;
 import com.notamethod.ebox.core.GameApp;
+import com.notamethod.ebox.core.GenreApp;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -54,6 +56,9 @@ public class ApiCalls {
         String path=getCover(Configuration.coverFolder, coverFilename, game.getCover(), size);
         if (path!=null){
             beanGame.setImagePath(Path.of(path));
+        }
+        for (Genre genre : foundGame.getGenres()){
+            beanGame.addGenre(genre.getSlug(), genre.getName());
         }
 
 
