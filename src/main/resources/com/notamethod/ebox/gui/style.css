@@ -751,7 +751,32 @@
 }
 
 .scroll-pane {
-    -fx-background-color: transparent;
+    -fx-background-color: #141414;
     -fx-border-color: transparent;
     -fx-padding: 0;
+}
+
+.ribbon {
+    -fx-background-color: #141414;
+    -fx-border-color: transparent;
+     -fx-border-width: 4;
+}
+
+.ribbon-highlight {
+    -fx-border-color: green;
+    -fx-border-width: 4;
+}
+
+.scanline {
+    -fx-background-color: linear-gradient(to bottom,
+        rgba(0,0,0,0.1) 1px,
+        transparent 1px,
+        transparent 3px);
+}
+
+.crt-scanlines {
+    -fx-background-color: linear-gradient(to bottom,
+        rgba(0,0,0,0.1) 1px,
+        transparent 1px,
+        transparent 3px);
 }

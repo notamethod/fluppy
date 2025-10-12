@@ -6,7 +6,7 @@ import java.io.File;
 
 public class Configuration {
 
-    static final String APP_NAME="ebox";
+    static final String APP_NAME="fluppy";
     public final static PreferencesBean pref = new PreferencesBean();
     public static String appFolder = HelperClass.getWorkingDirectory(APP_NAME).getAbsolutePath() + File.separator;
     public static String gameFile = appFolder + "gamelist.dat";

@@ -7,15 +7,17 @@ import com.notamethod.ebox.core.GameManagerException;
 import com.notamethod.ebox.util.HelperClass;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
-import javafx.animation.ScaleTransition;
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.DisplacementMap;
 import javafx.scene.effect.Effect;
+import javafx.scene.effect.FloatMap;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
@@ -31,7 +33,6 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -51,9 +52,11 @@ public class GamesWall extends Application {
     TilePane tilePane;
     private double xOffset = 0;
     private double yOffset = 0;
+    Effects effects;
     @Override
     public void init() throws Exception {
         super.init();
+        effects = new Effects();
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("ebox2_pu");
         applicationDatabase = new ApplicationDatabase(emf);
         ClassLoader classLoader = GamesWall.class.getClassLoader();
@@ -67,6 +70,7 @@ public class GamesWall extends Application {
         }
 
         gameManager = new GameManager(applicationDatabase);
+        //FIXME:remove locale test
         // Locale locale = Locale.getDefault();//new Locale("fr"); // ou "en", "de", etc.
         Locale locale = new Locale("fr"); // ou "en", "de", etc.
 
@@ -83,36 +87,9 @@ public class GamesWall extends Application {
 
         stage.initStyle(StageStyle.UNDECORATED);
 
-        HBox titleBar = new HBox();
-        titleBar.setStyle("-fx-background-color: red; -fx-padding: 5;");
-        Label title = new Label("Fluppy");
-        title.setTextFill(Color.WHITE);
-      //  titleBar.getChildren().add(title);
-        Button closeBtn = new Button("X");
-        closeBtn.setOnAction(e -> stage.close());
-     //   titleBar.getChildren().add(closeBtn);
-
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        titleBar.getChildren().addAll(title, spacer, closeBtn);
-
-
-        // Bandeau horizontal
-        HBox topRibbon = new HBox();
-        topRibbon.setPrefHeight(80);
-        topRibbon.setSpacing(10);
-       // topRibbon.setStyle("-fx-background-color: darkred;");
-        Label info = new Label("Bandeau supérieur");
-        info.setTextFill(Color.WHITE);
-        ClassLoader classLoader = GamesWall.class.getClassLoader();
-        URL logoUrl = classLoader.getResource("dosdog.png");
-        Image logo = new Image(logoUrl.toString(), 80, 80, false, true);
-        ImageView logoView = new ImageView(logo);
-
-        topRibbon.getChildren().addAll(logoView, info);
-
+        HBox topRibbon=initTopRibbon(stage);
+        //StackPane topRibbon = effects.noiseEffectWrapper(topRibbon0);
+        Animation bordureAnim = effects.getBordureAnim(topRibbon);
 
         tilePane = new TilePane();
         tilePane.setPadding(new Insets(20, 10, 10, 10)); // top, right, bottom, left
@@ -120,28 +97,23 @@ public class GamesWall extends Application {
         tilePane.setVgap(10);
         tilePane.setPrefColumns(5);
 
-        // Liste d’URLs d’image
+
         try {
             init();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-
         System.out.println("loading..." + gameManager.loadAll().size());
         updateList();
 
-        // stage.initStyle(StageStyle.UNDECORATED);
         ScrollPane scrollPane = new ScrollPane(tilePane);
-//        HBox titleBar=getTitleBar();
-//        VBox root = new VBox();
-//        root.getChildren().addAll(titleBar, scrollPane);
 
-        titleBar.setOnMousePressed(event -> {
+        topRibbon.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
             yOffset = event.getSceneY();
         });
-        titleBar.setOnMouseDragged(event -> {
+        topRibbon.setOnMouseDragged(event -> {
             stage.setX(event.getScreenX() - xOffset);
             stage.setY(event.getScreenY() - yOffset);
         });
@@ -151,23 +123,21 @@ public class GamesWall extends Application {
         VBox root0 = new VBox();
         // 👉 Cette ligne est cruciale
         VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
-        root0.getChildren().addAll(titleBar, topRibbon, scrollPane);
+        root0.getChildren().addAll(/*titleBar, */topRibbon, scrollPane);
         Scene scene = new Scene(root0, 900, 700);
 
-        // Autoriser le drop
-        scene.setOnDragOver(event -> {
+        /*  drag&drop on top ribbon */
+        topRibbon.setOnDragOver(event -> {
             if (event.getGestureSource() != scrollPane && event.getDragboard().hasFiles()) {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
-
-
             event.consume();
         });
-        scene.setOnDragExited(event -> {
+        topRibbon.setOnDragEntered(e -> topRibbon.setStyle("-fx-background-color: green;"));
+        topRibbon.setOnDragExited(e -> topRibbon.setStyle("-fx-background-color: #141414;"));
 
-        });
         // Gérer le drop
-        scene.setOnDragDropped(event -> {
+        topRibbon.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
             if (db.hasFiles()) {
@@ -177,12 +147,87 @@ public class GamesWall extends Application {
             event.setDropCompleted(success);
             event.consume();
         });
+        scene.setOnDragExited(event -> {
+        });
+        // Écoute globale du drag
+        scene.setOnDragEntered(event -> {
+            if (event.getDragboard().hasFiles()) {
+              //  bordureAnim.play();
+                topRibbon.getStyleClass().add("ribbon-highlight");
+            }
+        });
+
+        scene.setOnDragExited(event -> {
+            //bordureAnim.stop();
+            topRibbon.getStyleClass().remove("ribbon-highlight");
+        });
         //Scene scene = new Scene(root, 700, 500);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         scrollPane.setStyle("-fx-background: #121212;"); // Fond du ScrollPane
-
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog.png")));
         stage.setScene(scene);
         stage.show();
+    }
+
+
+
+    private HBox initTopRibbon(Stage stage) {
+
+        HBox topRibbon = new HBox();
+        topRibbon.setPrefHeight(90);
+        topRibbon.setSpacing(10);
+        //topRibbon.setStyle("-fx-background-color: #141414; -fx-border-color: transparent;");
+        topRibbon.getStyleClass().add("ribbon");
+        topRibbon.getStyleClass().add("scanline");
+
+        Animation biosAnim = effects.biosEffectAnim(topRibbon);
+        biosAnim.play();
+        Animation distortion = effects.distortionAnim(topRibbon);
+        distortion.play();
+
+
+        //
+        //#FF0000 (rouge vif)
+        //
+        //#00FFFF (cyan)
+        //
+        //#FFFF00 (jaune)
+        //
+        //#FF00FF (magenta)
+        //
+        //#00FF00 (vert fluo)
+
+
+        Label info = new Label("(c) 2025");
+        info.setTextFill(Color.WHITE);
+        ClassLoader classLoader = GamesWall.class.getClassLoader();
+        URL logoUrl = classLoader.getResource("dosdog.png");
+        Image logo = new Image(logoUrl.toString(), 80, 80, false, true);
+        ImageView logoView = new ImageView(logo);
+        URL titleUrl = classLoader.getResource("fluppy3.png");
+        Image titleImage = new Image(titleUrl.toString(), 100, 40, false, true);
+        ImageView titleView = new ImageView(titleImage);
+        Image gear= new Image(getClass().getResourceAsStream("/images/gear1.png"),32, 32, false, false);
+        ImageView gearIcon = new ImageView(gear);
+        Button gearButton = new Button();
+        gearButton.setGraphic(gearIcon);
+        gearButton.setStyle("-fx-background-color: transparent;");
+        //plus
+        ImageView plusImage = new ImageView(new Image(getClass().getResourceAsStream("/images/add1.png"),32, 32, false, false));
+        Button plusButton = new Button();
+        plusButton.setGraphic(plusImage);
+        plusButton.setStyle("-fx-background-color: transparent;");
+        //quite
+        ImageView quitImg = new ImageView(new Image(getClass().getResourceAsStream("/images/quit1.png"),32, 32, false, false));
+        Button quitButton = new Button();
+        quitButton.setGraphic(quitImg);
+        quitButton.setStyle("-fx-background-color: transparent;");
+        quitButton.setOnAction(e -> stage.close());
+        Region spacerRibbon = new Region();
+        HBox.setHgrow(spacerRibbon, Priority.ALWAYS);
+        topRibbon.setAlignment(Pos.CENTER_LEFT);
+        topRibbon.getChildren().addAll(logoView, titleView,info,spacerRibbon, gearButton,plusButton,quitButton);
+        return topRibbon;
     }
 
     private void importFiles(List<File> files) {
@@ -434,4 +479,47 @@ public class GamesWall extends Application {
     }
 
 
+
 }
+/*
+StackPane bandeauWrapper = new StackPane();
+bandeauWrapper.setStyle("-fx-border-width: 2; -fx-border-color: black;");
+bandeauWrapper.getChildren().add(bandeau);
+--
+Timeline scanlineAnim = new Timeline(
+    new KeyFrame(Duration.seconds(0), e -> bandeauWrapper.setStyle("-fx-border-color: gray;")),
+    new KeyFrame(Duration.seconds(0.2), e -> bandeauWrapper.setStyle("-fx-border-color: darkgray;")),
+    new KeyFrame(Duration.seconds(0.4), e -> bandeauWrapper.setStyle("-fx-border-color: lightgray;")),
+    new KeyFrame(Duration.seconds(0.6), e -> bandeauWrapper.setStyle("-fx-border-color: gray;"))
+);
+scanlineAnim.setCycleCount(Animation.INDEFINITE);
+scanlineAnim.play();
+
+FadeTransition ft = new FadeTransition(Duration.seconds(1), bandeauWrapper);
+ft.setFromValue(1.0);
+ft.setToValue(0.7);
+ft.setCycleCount(Animation.INDEFINITE);
+ft.setAutoReverse(true);
+ft.play();
+
+
+
+
+
+bandeau.setStyle("-fx-background-color: black;");
+Label texte = new Label("BIOS Initializing...");
+texte.setTextFill(Color.LIME);
+texte.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
+
+Voici ton image de bruit visuel rétro façon CRT, parfaite pour simuler un effet de "static" ou neige analogique sur ton bandeau JavaFX.
+
+Tu peux l’utiliser comme overlay avec une opacité réduite :
+
+java
+ImageView bruit = new ImageView(new Image("file:resources/noise.png"));
+bruit.setOpacity(0.1);
+bruit.setMouseTransparent(true); // pour ne pas bloquer les interactions
+
+StackPane wrapper = new StackPane(bandeau, bruit);
+
+ */

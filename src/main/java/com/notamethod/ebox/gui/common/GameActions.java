@@ -249,12 +249,13 @@ public class GameActions {
                // List<GenreApp> genres = ApiMapper.INSTANCE.toGenres(game.getGenres());
                 metaGame.setName(game.getName());
                 //FIXME
-                for (Genre genre:game.getGenres()){
+                if (game.getGenres()!=null){
+                for (Genre genre:game.getGenres()) {
                     GenreApp genraApp = new GenreApp();
                     genraApp.setId(genre.getSlug());
                     genraApp.setName(genre.getName());
                     metaGame.getGenres().add(genraApp);
-
+                }
                 }
                 //metaGame.getGenres().addAll(genres);
                 metaGame.setYear(game.getYear() == null ? 1970 : Integer.valueOf(game.getYear()));
