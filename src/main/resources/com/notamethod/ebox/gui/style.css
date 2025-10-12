@@ -749,3 +749,9 @@
 .edit-dialog {
     -fx-background-color: #AA0000;
 }
+
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}

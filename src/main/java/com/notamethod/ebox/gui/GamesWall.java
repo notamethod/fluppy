@@ -27,6 +27,7 @@ import javafx.scene.effect.DropShadow;
 
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +49,8 @@ public class GamesWall extends Application {
     URL unknownGame = null;
     GameManager gameManager;
     TilePane tilePane;
-
+    private double xOffset = 0;
+    private double yOffset = 0;
     @Override
     public void init() throws Exception {
         super.init();
@@ -79,6 +81,39 @@ public class GamesWall extends Application {
     @Override
     public void start(Stage stage) throws MalformedURLException, URISyntaxException {
 
+        stage.initStyle(StageStyle.UNDECORATED);
+
+        HBox titleBar = new HBox();
+        titleBar.setStyle("-fx-background-color: red; -fx-padding: 5;");
+        Label title = new Label("Fluppy");
+        title.setTextFill(Color.WHITE);
+      //  titleBar.getChildren().add(title);
+        Button closeBtn = new Button("X");
+        closeBtn.setOnAction(e -> stage.close());
+     //   titleBar.getChildren().add(closeBtn);
+
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        titleBar.getChildren().addAll(title, spacer, closeBtn);
+
+
+        // Bandeau horizontal
+        HBox topRibbon = new HBox();
+        topRibbon.setPrefHeight(80);
+        topRibbon.setSpacing(10);
+       // topRibbon.setStyle("-fx-background-color: darkred;");
+        Label info = new Label("Bandeau supérieur");
+        info.setTextFill(Color.WHITE);
+        ClassLoader classLoader = GamesWall.class.getClassLoader();
+        URL logoUrl = classLoader.getResource("dosdog.png");
+        Image logo = new Image(logoUrl.toString(), 80, 80, false, true);
+        ImageView logoView = new ImageView(logo);
+
+        topRibbon.getChildren().addAll(logoView, info);
+
+
         tilePane = new TilePane();
         tilePane.setPadding(new Insets(20, 10, 10, 10)); // top, right, bottom, left
         tilePane.setHgap(10);
@@ -102,8 +137,22 @@ public class GamesWall extends Application {
 //        VBox root = new VBox();
 //        root.getChildren().addAll(titleBar, scrollPane);
 
-        StackPane root = new StackPane(scrollPane);
-        Scene scene = new Scene(root, 900, 700);
+        titleBar.setOnMousePressed(event -> {
+            xOffset = event.getSceneX();
+            yOffset = event.getSceneY();
+        });
+        titleBar.setOnMouseDragged(event -> {
+            stage.setX(event.getScreenX() - xOffset);
+            stage.setY(event.getScreenY() - yOffset);
+        });
+        StackPane stack = new StackPane(scrollPane);
+        scrollPane.setFitToWidth(true); // Pour que le contenu prenne toute la largeur
+        scrollPane.setStyle("-fx-background: transparent;"); // Pour éviter les couleurs par défaut
+        VBox root0 = new VBox();
+        // 👉 Cette ligne est cruciale
+        VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
+        root0.getChildren().addAll(titleBar, topRibbon, scrollPane);
+        Scene scene = new Scene(root0, 900, 700);
 
         // Autoriser le drop
         scene.setOnDragOver(event -> {
@@ -131,7 +180,7 @@ public class GamesWall extends Application {
         //Scene scene = new Scene(root, 700, 500);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         scrollPane.setStyle("-fx-background: #121212;"); // Fond du ScrollPane
-        stage.setTitle("Mur d'images cliquables");
+
         stage.setScene(scene);
         stage.show();
     }
@@ -378,6 +427,7 @@ public class GamesWall extends Application {
 
         return titleBar;
     }
+
 
     public static void main(String[] args) {
         launch();
