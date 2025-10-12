@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 public class IgdbApi {
 
-    static String token = System.getenv("IGDB_TOKEN");// Remplace par ton vrai token
+    static String token = System.getenv("IGDB_TOKEN");
     static String user=System.getenv("IGDB_USER");
     public static final String THUMB_SIZE="t_thumb";
     public static final String BIG_SIZE="t_cover_big";
@@ -47,7 +47,11 @@ public class IgdbApi {
             throw new ApiException("getGames Error "+name, e);
         }
 
-
+        if (response.statusCode()>=400){
+            StringBuilder sb = new StringBuilder("External API Error: ");
+            sb.append("access to ").append(endpoint).append(" failed with error code ").append(response.statusCode());
+            throw new ApiException(sb.toString());
+        }
         List<Game> games;
         try {
             games = mapper.readValue(
