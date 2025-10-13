@@ -104,11 +104,10 @@ public class ApplicationDatabase {
 
     public Optional<GenreEntity> getGenre(String id) {
         entityManager.getTransaction().begin();
-        Query q = entityManager.createQuery ("SELECT p FROM GenreEntity p where p.id=:id");
-
+        Query q = entityManager.createQuery ("SELECT p FROM GenreEntity p where p.id=:id",GenreEntity.class);
         q.setParameter ("id", id);
-        GenreEntity genre = (GenreEntity) q.getSingleResult();
+        Optional<GenreEntity> genre = q.getResultStream().findFirst();
         entityManager.getTransaction().commit();
-        return Optional.ofNullable(genre);
+        return genre;
     }
 }
