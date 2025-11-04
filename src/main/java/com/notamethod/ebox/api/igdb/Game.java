@@ -33,4 +33,11 @@ public class Game {
         }
         return null;
     }
+
+    public String toString(){
+        if (this.getYear()!=null){
+            return name+" ("+getYear()+")";
+        }
+        return this.getName();
+    }
 }

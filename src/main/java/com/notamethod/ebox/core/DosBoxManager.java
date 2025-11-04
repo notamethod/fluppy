@@ -1,5 +1,6 @@
 package com.notamethod.ebox.core;
 
+import com.notamethod.ebox.io.PreferencesIO;
 import com.notamethod.ebox.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,8 +13,11 @@ import java.util.HashMap;
 public class DosBoxManager {
     private static final int DOSBOX_NOTFOUND = 404;
     private static final int DOSBOX_LAUNCH_ERROR = 400;
+    private PreferencesBean preferences;
 
-
+    public DosBoxManager() {
+        preferences= PreferencesIO.load();
+    }
 
     /**
      * Writes a DosBOX configuration file to a specific file
@@ -58,21 +62,21 @@ public class DosBoxManager {
 
         // Build execute command
         String[] par = new String[6];
-        par[0] = Configuration.pref.getDosBoxPath();
+        par[0] = preferences.getDosBoxPath();
 
         // If we should try to close the dosbox window or keep it open
-        if (!Configuration.pref.isKeepOpen()) {
+        if (!preferences.isKeepOpen()) {
             par[1] = "-c";
             par[2] = "exit";
         } else {
             par[1] = "-c";
-            par[2] = "@echo Keep on rockin' in the free world!";
+            par[2] = "@echo Keep open";
         }
 
         par[3] = "-conf";
         par[4] = Configuration.appFolder + "dosbox.conf";
 
-        if (Configuration.pref.isNoConcole()) {
+        if (preferences.isNoConsole()) {
             par[5] = "-noconsole";
 
         } else {
@@ -81,7 +85,7 @@ public class DosBoxManager {
             // try to execute from the path if no dosbox path is present
 
         }
-        if (Configuration.pref.getDosBoxPath().isEmpty()) {
+        if (preferences.getDosBoxPath().isEmpty()) {
             par[0] = "dosbox";
         }
 
@@ -91,7 +95,7 @@ public class DosBoxManager {
             Runtime.getRuntime().exec(par);
         } catch (IOException ex) {
             // What to do if no dosbox path is available
-            if (Configuration.pref.getDosBoxPath().isEmpty()) {
+            if (preferences.getDosBoxPath().isEmpty()) {
                throw new DosBoxException(DOSBOX_NOTFOUND);
             } else {
                 log.error("error", ex);
@@ -167,11 +171,11 @@ public class DosBoxManager {
         HelperClass.addOtherSettings(finito, "renderer", renderer);
         allProps.put("RENDER", renderer);
 
-        sdl.put("fullscreen", Configuration.pref.isFullScreen() + "");
+        sdl.put("fullscreen", preferences.isFullScreen() + "");
         HelperClass.addOtherSettings(finito, "sdl", sdl);
         allProps.put("SDL", sdl);
 
-        dos.put("keyboardlayout", Configuration.pref.getKeyboardCode());
+        dos.put("keyboardlayout", preferences.getKeyboardCode());
         HelperClass.addOtherSettings(finito, "dos", dos);
         allProps.put("DOS", dos);
 

@@ -16,6 +16,9 @@ module com.notamethod.ebox {
     requires org.apache.commons.compress;
     requires org.tukaani.xz;
     requires org.hibernate.orm.core;
+    requires javafx.graphics;
+
+
 
     opens com.notamethod.ebox to javafx.fxml;
     exports com.notamethod.ebox;

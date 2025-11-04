@@ -1,6 +1,3 @@
-/**
- * @author Truben
- */
 
 package com.notamethod.ebox.util;
 
@@ -8,13 +5,8 @@ import com.notamethod.ebox.core.Configuration;
 import com.notamethod.ebox.core.GameApp;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Comparator;
@@ -35,6 +27,7 @@ public class HelperClass {
     public static final String REGEX_SIMPLE="(.*)_DOS_[A-Z][A-Z].*";
     /**
      * Determines the system's OS
+     * @author Truben
      * @return the code for the current OS
      */
     public static int getOS() {
@@ -53,6 +46,7 @@ public class HelperClass {
 
     /**
      * Get and creates a app folder
+     * @author Truben
      * @param applicationName
      * @return the folder file
      */
@@ -86,86 +80,9 @@ public class HelperClass {
         return workingDirectory;
     }
 
-    public static boolean isMac() {
-        if(Configuration.pref.getTypeOfFileDialog() == 1)
-            return false;
-        if(Configuration.pref.getTypeOfFileDialog() == 2)
-            return true;
-        if(Configuration.pref.getTypeOfFileDialog() == 0 && "Mac OS X".equals(System.getProperty("os.name")))
-            return true;
-        return false;
-    }
 
-    /**
-     *
-     * Method that shows a file chooser to the user and use the last used path as
-     * its starting point
-     *
-     * @param c the parent component
-     * @param header The dialog's header
-     * @param filter What should be shown
-     * @param directories should we show directories
-     * @return
-     */
-    public static String showFileChooser(Component c, String header,
-                                         FileChooserFilter filter, boolean directories) {
 
-        return showFileChooser(c,header,filter,directories, Configuration.pref.getLastUsedPath());
-    }
 
-    /**
-     * Method that shows a file chooser to the user
-     *
-     * @param c the parent component
-     * @param header The dialog's header
-     * @param filter What should be shown
-     * @param directories should we show directories
-     * @param startDir the starting path
-     * @return
-     */
-    public static String showFileChooser(Component c, String header,
-                                         FileChooserFilter filter, boolean directories, String startDir) {
-        if(isMac()) { // AWT
-            FileDialog fd = new FileDialog((Frame)c.getParent(), header, FileDialog.LOAD);
-
-            if(!startDir.equals(""))
-                fd.setDirectory(startDir); // back to where we were
-
-            fd.pack();
-            fd.setVisible(true);
-
-            if (fd.getFile() != null) {
-                Configuration.pref.setLastUsedPath(fd.getDirectory());
-                if(directories)
-                    return fd.getDirectory();
-                else
-                    return fd.getDirectory() + fd.getFile();
-            }
-            else
-                return null;
-        }
-        else {  // SWING
-            final JFileChooser fc = new JFileChooser();
-            if(directories) fc.setFileSelectionMode(fc.DIRECTORIES_ONLY);
-
-            if(!startDir.equals(""))
-                fc.setCurrentDirectory(new File(startDir)); // back to where we were
-
-            fc.addChoosableFileFilter(filter);
-            int returnVal = fc.showOpenDialog(c);
-
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                Configuration.pref.setLastUsedPath(file.getAbsolutePath());
-                if(directories)
-                    return file.getAbsolutePath();
-                else
-                    return file.getAbsolutePath();
-            }
-            else
-                return null;
-        }
-    }
 
 
     public static String getGameDirectory(String appName) {
@@ -220,7 +137,6 @@ public class HelperClass {
 
     public static void moveDirectory( Path sourceDir, Path targetDir) throws IOException {
 
-
         Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -250,33 +166,6 @@ public class HelperClass {
                 .map(Path::toFile)
                 .forEach(File::delete);
     }
-    public boolean restartApplication( Object classInJarFile ) {
-        String javaBin = System.getProperty("java.home") + "/bin/java";
-        File jarFile;
-        try{
-            jarFile = new File
-            (classInJarFile.getClass().getProtectionDomain()
-            .getCodeSource().getLocation().toURI());
-        } catch(Exception e) {
-            return false;
-        }
-
-        /* is it a jar file? */
-        if ( !jarFile.getName().endsWith(".jar") )
-           return false;   //no, it's a .class probably
-
-        String  toExec[] = new String[] { javaBin, "-jar", jarFile.getPath() };
-        try{
-            Process p = Runtime.getRuntime().exec( toExec );
-        } catch(Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        System.exit(0);
-
-        return true;
-    }
 
     public static  String guessTitleFromFilename(String name){
         String title=regexArchive(name);
@@ -287,6 +176,16 @@ public class HelperClass {
             return toTitleGame(title);
         }
         return null;
+    }
+
+    public static String fromCamelCase(String nameWithCamelCase){
+        String converted = nameWithCamelCase.replaceAll("([a-z])([A-Z])", "$1 $2");
+
+        // Mettre la première lettre en majuscule si nécessaire
+        if (!Character.isUpperCase(converted.charAt(0))) {
+            converted = Character.toUpperCase(converted.charAt(0)) + converted.substring(1);
+        }
+        return converted;
     }
 
     public static  String regexArchive(String name){

@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -27,6 +28,9 @@ public class GameApp {
     private String cdromLetter;
     private String cdromLabel;
     private String machine;
+
+    private List<File> exeFiles = new ArrayList<>();
+    private List<File> installers = new ArrayList<>();
     private Set<GenreApp> genres = new HashSet<>();
 
 

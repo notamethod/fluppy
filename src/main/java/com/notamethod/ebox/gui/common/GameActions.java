@@ -3,17 +3,15 @@ package com.notamethod.ebox.gui.common;
 
 import com.notamethod.ebox.api.ApiCalls;
 import com.notamethod.ebox.api.ApiException;
-import com.notamethod.ebox.api.ApiMapper;
 import com.notamethod.ebox.api.MappingException;
 import com.notamethod.ebox.api.igdb.Game;
 import com.notamethod.ebox.api.igdb.Genre;
 import com.notamethod.ebox.core.*;
+import com.notamethod.ebox.gui.AddGameDialog;
 import com.notamethod.ebox.gui.Messages;
 import com.notamethod.ebox.util.ArchiveExtractor;
 import com.notamethod.ebox.util.FileWizard;
 import com.notamethod.ebox.util.HelperClass;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -91,48 +89,59 @@ public class GameActions {
             mgame = addDirectory(path);
             return mgame;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new GameManagerException("exception.archive.extract");
         }
     }
 
     private GameApp addDirectory(File inFile) throws GameManagerException, OperationCanceledException {
         GameApp mgame = new GameApp();
         mgame.setGamePath(inFile.toPath());
-        File exeFile;
+
         log.info("analyze directory {}", inFile.getAbsolutePath());
         FileWizard fw = new FileWizard();
         List<File> runners = fw.getRunners(inFile);
         int count = runners.size();
         if (count == 0) {
-            throw new GameManagerException("exception.noexec",  inFile.getAbsolutePath());
+            throw new GameManagerException("exception.noexec", inFile.getAbsolutePath());
         }
 
-        String[] possible = new String[count];
+        //File[] possible = new String[count];
+        List<File> possible = new ArrayList<>();
+
         count = 0;
         for (File f : runners) {
-            if (f.toString().toLowerCase().indexOf("setup") == -1 && f.toString().toLowerCase().indexOf("install") == -1 && (f.toString().toLowerCase().endsWith("pif") || f.toString().toLowerCase().endsWith("exe") || f.toString().toLowerCase().endsWith("com") || f.toString().toLowerCase().endsWith("bat"))) {
-                possible[count++] = f.getName();
+            if (!f.toString().toLowerCase().contains("setup") && !f.toString().toLowerCase().contains("install") && (f.toString().toLowerCase().endsWith("pif") || f.toString().toLowerCase().endsWith("exe") || f.toString().toLowerCase().endsWith("com") || f.toString().toLowerCase().endsWith("bat"))) {
+                mgame.getExeFiles().add(f);
+            } else if (f.toString().toLowerCase().contains("setup") || f.toString().toLowerCase().contains("install")) {
+                mgame.getInstallers().add(f);
             }
         }
-        String chosen = possible[0];
-        if (count > 1) {
-            Optional<String> o = da.showListInputDialog(
-                    Messages.getString("dialog.select_executable.header"),
-                    Messages.getString("dialog.select_executable.content", mgame.getGamePath()),
-                    possible, possible[0]);
-            if (o.isPresent()) {
-                chosen = o.get();
-            } else {
-                throw new OperationCanceledException("Canceled");
-            }
+        if ( mgame.getExeFiles().isEmpty()) {
+            throw new GameManagerException("exception.noexec", inFile.getAbsolutePath());
+        }
+        if (mgame.getExeFiles().size() > 1) {
+            log.info("multiple exe found");
+
+            return mgame;
+//            Optional<String> o = da.showListInputDialog(
+//                    Messages.getString("dialog.select_executable.header"),
+//                    Messages.getString("dialog.select_executable.content", mgame.getGamePath()),
+//                    possible, possible[0]);
+//            if (o.isPresent()) {
+//                chosen = o.get();
+//            } else {
+//                throw new OperationCanceledException("Canceled");
+//            }
+        }
+    else{
+            log.info("one exe found");
+            mgame.setExePath(mgame.getExeFiles().get(0).toPath());
+            mgame.setGameExe(mgame.getExeFiles().get(0).getName());
+//            File exeFile=
+//            mgame.setExePath(exeFile.toPath());
+//            mgame.setGameExe(exeFile.getName());
         }
 
-        for (File f : runners) {
-            if (f.toString().endsWith(chosen)) {
-                exeFile = f;
-                mgame.setExePath(exeFile.toPath());
-            }
-        }
         return mgame;
     }
 
@@ -148,7 +157,7 @@ public class GameActions {
             return gameAppList;
         for (File f : inFiles) {
             try {
-               // GameApp beanGame = createFromFile(f.getAbsoluteFile());
+                // GameApp beanGame = createFromFile(f.getAbsoluteFile());
                 createFromFile(f.getAbsoluteFile()).ifPresent(gameAppList::add);
                 //gameAppList.add(beanGame);
             } catch (GameManagerException e) {
@@ -168,6 +177,129 @@ public class GameActions {
      * @return
      */
     public Optional<GameApp> createFromFile(File inFile) throws GameManagerException, OperationCanceledException {
+
+
+        GameApp metaGame = null;
+        if (inFile.isDirectory()) {
+            metaGame = addDirectory(inFile);
+        } else if (ArchiveExtractor.isArchive(inFile)) {
+            metaGame = addArchive(inFile);
+
+        } else if (metaGame == null && (!inFile.getName().toLowerCase().endsWith("exe") && !inFile.getName().toLowerCase().endsWith("com") && !inFile.getName().toLowerCase().endsWith("bat") && !inFile.getName().toLowerCase().endsWith("pif"))) {
+            if (!da.showConfirmDialog("You're almost there...", "This doesn't look like an executable file. Executable files normally ends with .bat, .exe or .com.\n\nDo you still want to continue?"))
+                return null;
+        } else {
+            metaGame = new GameApp();
+        }
+        String searchString = calculateSearchString(metaGame, inFile.getName());
+        ApiCalls apiCalls = new ApiCalls();
+        AddGameDialog dialog = new AddGameDialog(metaGame, searchString, apiCalls);
+        Game game = dialog.showAndWaitForResult();
+        try {
+
+
+//            Optional<String> input = da.showInputDialog(
+//                    null, Messages.getString("dialog.select_appname.text"),
+//                    searchString);
+//
+//            if (input.isEmpty()) {
+//                return Optional.empty();
+//            } else {
+//                metaGame.setName(searchString);
+//            }
+//
+//
+//
+//            List<Game> games = findGame(metaGame.getName(), apiCalls);
+//
+//            if (games.isEmpty()) {
+//                log.info("no games found through API");
+//                if (!da.showConfirmDialog("Game not found", "Adding game " + metaGame.getName() + " to the list ?")) {
+//                    return Optional.empty();
+//                } else {
+//                    Game dummyGame = new Game();
+//                    dummyGame.setName(metaGame.getName());
+//                    games.add(dummyGame);
+//                }
+//            }
+//
+//
+//            Game game = games.size() > 1 ? chooseGame(games) : games.get(0);
+
+            if (game != null) {
+                // GameApp filledGame = ApiMapper.INSTANCE.toGameApp(game);
+                // List<GenreApp> genres = ApiMapper.INSTANCE.toGenres(game.getGenres());
+                metaGame.setName(game.getName());
+                //FIXME
+
+                if (game.getGenres() != null) {
+                    for (Genre genre : game.getGenres()) {
+                        GenreApp genraApp = new GenreApp();
+                        genraApp.setId(genre.getSlug());
+                        genraApp.setName(genre.getName());
+                        metaGame.getGenres().add(genraApp);
+                    }
+                }
+                //metaGame.getGenres().addAll(genres);
+                metaGame.setYear(game.getYear() == null ? 1970 : Integer.valueOf(game.getYear()));
+                if (game.getCover() != null) {
+                    try {
+                        String coverFilename = "cover_" + game.getName().replace(" ", "").toLowerCase() + game.getYear();
+                        metaGame.setImagePath(Paths.get(apiCalls.getCover(Configuration.coverFolder, coverFilename, game.getCover(), 2)));
+                    } catch (ApiException | MappingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                //TODO: cover
+            } else {
+                return Optional.empty();
+            }
+
+            if (!da.showConfirmDialog("null", "Adding game " + metaGame.getName() + " to the list ?")) {
+                return Optional.empty();
+            }
+
+            return Optional.of(metaGame);
+        } catch (Exception e) {
+            da.showMessageDialog("Something wrong happened. You have to add the application the hard way.", "Sorry...");
+            log.error("error", e);
+        }
+        return Optional.empty();
+    }
+
+    private String calculateSearchString(GameApp metaGame, String sourceFileName) {
+        String guessSource = null;
+        File exeFile = null;
+        String searchString="";
+        if (metaGame.getExePath() != null) {
+            exeFile = metaGame.getExePath().toFile();
+            guessSource = exeFile.getName();
+            metaGame.setGameExe(exeFile.getName());
+            metaGame.setExePath(Paths.get(exeFile.getAbsolutePath().substring(0, exeFile.getAbsolutePath().lastIndexOf(File.separatorChar))));
+             searchString = exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
+        }
+
+
+        //TODO: set intallers
+
+
+        if (sourceFileName != null) {
+            String title = HelperClass.guessTitleFromFilename(sourceFileName);
+            if (title != null) {
+
+                searchString = title;
+            }
+        }
+        return HelperClass.fromCamelCase(searchString);
+    }
+
+    /**
+     * A metod that tries to insert an application into
+     * dbox' database using a file or directory
+     *
+     * @return
+     */
+    public Optional<GameApp> createFromFileOld(File inFile) throws GameManagerException, OperationCanceledException {
         //File exeFile = inFile;
         //MetaDataGame metaDataGame;
         String guessSource = null;
@@ -199,15 +331,15 @@ public class GameActions {
                     }
                 }
             }
-           // String[] choice = new String[2];
-           // choice[0] = exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
-            String searchString=exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
+            // String[] choice = new String[2];
+            // choice[0] = exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
+            String searchString = exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
 
             if (guessSource != null) {
-                String title=HelperClass.guessTitleFromFilename(inFile.getName());
+                String title = HelperClass.guessTitleFromFilename(inFile.getName());
                 if (title != null) {
 
-                    searchString= title;
+                    searchString = title;
                 }
             }
 
@@ -218,15 +350,10 @@ public class GameActions {
 
             if (input.isEmpty()) {
                 return Optional.empty();
-            }else{
+            } else {
                 metaGame.setName(searchString);
             }
 
-//            if (input.equals(choice[1])) {
-//                da.showInputDialog("name ?", "Type the name of the application", choice[1]).ifPresent(metaGame::setName);
-//            } else {
-//                metaGame.setName(input);
-//            }
 
             ApiCalls apiCalls = new ApiCalls();
             List<Game> games = findGame(metaGame.getName(), apiCalls);
@@ -245,17 +372,17 @@ public class GameActions {
 
             Game game = games.size() > 1 ? chooseGame(games) : games.get(0);
             if (game != null) {
-               // GameApp filledGame = ApiMapper.INSTANCE.toGameApp(game);
-               // List<GenreApp> genres = ApiMapper.INSTANCE.toGenres(game.getGenres());
+                // GameApp filledGame = ApiMapper.INSTANCE.toGameApp(game);
+                // List<GenreApp> genres = ApiMapper.INSTANCE.toGenres(game.getGenres());
                 metaGame.setName(game.getName());
                 //FIXME
-                if (game.getGenres()!=null){
-                for (Genre genre:game.getGenres()) {
-                    GenreApp genraApp = new GenreApp();
-                    genraApp.setId(genre.getSlug());
-                    genraApp.setName(genre.getName());
-                    metaGame.getGenres().add(genraApp);
-                }
+                if (game.getGenres() != null) {
+                    for (Genre genre : game.getGenres()) {
+                        GenreApp genraApp = new GenreApp();
+                        genraApp.setId(genre.getSlug());
+                        genraApp.setName(genre.getName());
+                        metaGame.getGenres().add(genraApp);
+                    }
                 }
                 //metaGame.getGenres().addAll(genres);
                 metaGame.setYear(game.getYear() == null ? 1970 : Integer.valueOf(game.getYear()));
@@ -268,11 +395,11 @@ public class GameActions {
                     }
                 }
                 //TODO: cover
-            }else{
+            } else {
                 return Optional.empty();
             }
 
-            if (!da.showConfirmDialog("null", "Adding game " + metaGame.getName() + " to the list ?" )) {
+            if (!da.showConfirmDialog("null", "Adding game " + metaGame.getName() + " to the list ?")) {
                 return Optional.empty();
             }
 
@@ -283,7 +410,6 @@ public class GameActions {
         }
         return Optional.empty();
     }
-
 
     public void showErrors(List<String> errors) {
         da.showErrorDialog(errors);

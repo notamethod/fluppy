@@ -4,20 +4,17 @@ package com.notamethod.ebox.gui;
 import com.notamethod.ebox.core.*;
 import com.notamethod.ebox.gui.common.GameActions;
 import com.notamethod.ebox.core.GameManagerException;
+import com.notamethod.ebox.io.PreferencesIO;
 import com.notamethod.ebox.util.HelperClass;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.DisplacementMap;
 import javafx.scene.effect.Effect;
-import javafx.scene.effect.FloatMap;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
@@ -46,6 +43,7 @@ import java.util.*;
 public class GamesWall extends Application {
 
     ApplicationDatabase applicationDatabase;
+    PreferencesBean preferences;
     DosBoxManager dosBoxManager = new DosBoxManager();
     URL unknownGame = null;
     GameManager gameManager;
@@ -57,11 +55,13 @@ public class GamesWall extends Application {
     public void init() throws Exception {
         super.init();
         effects = new Effects();
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("ebox2_pu");
+        EntityManagerFactory emf = JpaUtil.getEntityManagerFactory();
+
         applicationDatabase = new ApplicationDatabase(emf);
+        preferences = PreferencesIO.load();
         ClassLoader classLoader = GamesWall.class.getClassLoader();
         unknownGame = classLoader.getResource("unknown.jpg");
-        Configuration.pref.readConfig(Configuration.configFile);
+
         try {
             Path directory = Paths.get(Configuration.tempFolder);
             HelperClass.cleanDirectory(directory);
@@ -212,11 +212,19 @@ public class GamesWall extends Application {
         Button gearButton = new Button();
         gearButton.setGraphic(gearIcon);
         gearButton.setStyle("-fx-background-color: transparent;");
+        gearButton.setOnAction(e -> {
+            PreferencesDialog dialog = new PreferencesDialog(stage);
+            dialog.showAndWait();
+        });
         //plus
         ImageView plusImage = new ImageView(new Image(getClass().getResourceAsStream("/images/add1.png"),32, 32, false, false));
         Button plusButton = new Button();
         plusButton.setGraphic(plusImage);
         plusButton.setStyle("-fx-background-color: transparent;");
+        plusButton.setOnAction(e -> {
+            AddGameDialog dialog = new AddGameDialog(null, "searchString", null);
+            dialog.showAndWait();
+        });
         //quite
         ImageView quitImg = new ImageView(new Image(getClass().getResourceAsStream("/images/quit1.png"),32, 32, false, false));
         Button quitButton = new Button();

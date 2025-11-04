@@ -42,6 +42,7 @@ public class ArchiveExtractor {
             }else{
                 gameOutputDire.mkdirs();
             }
+            //for (SevenZArchiveEntry entry : sevenZFile.getEntries()) {
             while ((entry = sevenZFile.getNextEntry()) != null) {
                 File outputFile = new File(gameOutputDire, entry.getName());
 
@@ -71,7 +72,7 @@ public class ArchiveExtractor {
             log.info("Successfully extracted in : " + gameOutputDire.getAbsolutePath());
 
         } catch (IOException e) {
-            e.printStackTrace();
+            throw e;
         }
         catch (Exception e) {
             e.printStackTrace();
