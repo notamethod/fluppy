@@ -1,4 +1,4 @@
-module com.notamethod.ebox {
+module com.notamethod.fluppy {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
@@ -20,11 +20,11 @@ module com.notamethod.ebox {
 
 
 
-    opens com.notamethod.ebox to javafx.fxml;
-    exports com.notamethod.ebox;
-    exports com.notamethod.ebox.gui;
-    exports com.notamethod.ebox.core;
-    exports com.notamethod.ebox.api.igdb;
-    opens com.notamethod.ebox.gui to javafx.fxml;
-    opens com.notamethod.ebox.core to org.hibernate.orm.core;
+    opens com.notamethod.fluppy to javafx.fxml;
+    exports com.notamethod.fluppy;
+    exports com.notamethod.fluppy.gui;
+    exports com.notamethod.fluppy.core;
+    exports com.notamethod.fluppy.api.igdb;
+    opens com.notamethod.fluppy.gui to javafx.fxml;
+    opens com.notamethod.fluppy.core to org.hibernate.orm.core;
 }

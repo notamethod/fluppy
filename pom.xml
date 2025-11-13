@@ -204,7 +204,7 @@
                                     <transformers>
                                         <transformer
                                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                            <mainClass>com.notamethod.ebox.gui.GamesWall</mainClass>
+                                            <mainClass>com.notamethod.fluppy.gui.GamesWall</mainClass>
                                         </transformer>
                                     </transformers>
                                 </configuration>
