@@ -117,13 +117,22 @@ public class GamesWall extends Application {
             stage.setX(event.getScreenX() - xOffset);
             stage.setY(event.getScreenY() - yOffset);
         });
+
+        // Label overlay
+        Label dropLabel = new Label(Messages.getString("drop.here"));
+        dropLabel.setTextFill(Color.GRAY);
+        dropLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        dropLabel.setVisible(false); // caché par défaut
+
         StackPane stack = new StackPane(scrollPane);
         scrollPane.setFitToWidth(true); // Pour que le contenu prenne toute la largeur
         scrollPane.setStyle("-fx-background: transparent;"); // Pour éviter les couleurs par défaut
         VBox root0 = new VBox();
-        // 👉 Cette ligne est cruciale
+        // Cette ligne est cruciale
         VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
-        root0.getChildren().addAll(/*titleBar, */topRibbon, scrollPane);
+        StackPane topRibbon0 = new StackPane(topRibbon, dropLabel);
+        //panel.setPrefSize(300, 200);
+        root0.getChildren().addAll(/*titleBar, */topRibbon0, scrollPane);
         Scene scene = new Scene(root0, 900, 700);
 
         /*  drag&drop on top ribbon */
@@ -133,7 +142,10 @@ public class GamesWall extends Application {
             }
             event.consume();
         });
-        topRibbon.setOnDragEntered(e -> topRibbon.setStyle("-fx-background-color: green;"));
+        topRibbon.setOnDragEntered(e -> {
+            topRibbon.setStyle("-fx-background-color: green;");
+           // topRibbon.s
+        });
         topRibbon.setOnDragExited(e -> topRibbon.setStyle("-fx-background-color: #141414;"));
 
         // Gérer le drop
@@ -152,14 +164,18 @@ public class GamesWall extends Application {
         // Écoute globale du drag
         scene.setOnDragEntered(event -> {
             if (event.getDragboard().hasFiles()) {
-              //  bordureAnim.play();
+               bordureAnim.play();
+               dropLabel.setVisible(true);
                 topRibbon.getStyleClass().add("ribbon-highlight");
             }
         });
 
         scene.setOnDragExited(event -> {
-            //bordureAnim.stop();
+            bordureAnim.stop();
+            dropLabel.setVisible(false);
             topRibbon.getStyleClass().remove("ribbon-highlight");
+            topRibbon.setStyle("-fx-border-color: transparent"); // Fond du ScrollPane
+            ;
         });
         //Scene scene = new Scene(root, 700, 500);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());

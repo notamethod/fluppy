@@ -762,11 +762,16 @@
      -fx-border-width: 4;
 }
 
-.ribbon-highlight {
+.ribbon-highlightold {
     -fx-border-color: green;
     -fx-border-width: 4;
-}
 
+}
+.ribbon-highlight {
+
+    -fx-border-width: 4;
+    -fx-border-style: dashed;
+}
 .scanline {
     -fx-background-color: linear-gradient(to bottom,
         rgba(0,0,0,0.1) 1px,
