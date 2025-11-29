@@ -34,7 +34,7 @@ public class FileActions {
             mgame = addDirectory(path);
             return mgame;
         } catch (IOException e) {
-            throw new GameManagerException("exception.archive.extract");
+            throw new GameManagerException("exception.archive.extract", e);
         }
     }
 
