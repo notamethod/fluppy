@@ -25,6 +25,8 @@ import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,10 +62,11 @@ public class AddGameDialog extends Stage {
         List <String> extractionErrors =new ArrayList<>();
         Map<String, List <String>> errorTypes = new HashMap<>();
         errorTypes.put("Error extracting the folowwing files:",extractionErrors);
-        for (int i=0;i<metaGamesFiles.size();i++){
+        int row=0;
+        for (File metaGameFile : metaGamesFiles){
             GameApp metaGame=null;
             try {
-                 metaGame=   processFile(metaGamesFiles.get(i));
+                 metaGame= processFile(metaGameFile);
 
             } catch (GameManagerException e) {
                log.error("archive extraction",e);
@@ -72,11 +75,11 @@ public class AddGameDialog extends Stage {
             }
             if (metaGame==null){
                 haErrors=true;
-                extractionErrors.add(metaGamesFiles.get(i).getAbsolutePath());
+                extractionErrors.add(metaGameFile.getAbsolutePath());
                 continue;
             }
 
-            int j=i+1;
+
             String searchString=metaGame.getSearchName();
 
             ComboBox<File> comboExeFiles = new ComboBox<>();
@@ -104,18 +107,14 @@ public class AddGameDialog extends Stage {
             });
 
             Label titleGame = new Label(searchString);
-
-//                    Messages.getString("dialog.select_executable.content", mgame.getGamePath()),
-            Label label = new Label(Messages.getString("dialog.select_executable.header"));
-            label.setMinWidth(112);
-//                    HBox row = new HBox(10, label, comboBox); // 10 = espacement horizontal
-//                    row.setAlignment(Pos.CENTER_LEFT);
-            //comboBox.setTooltip(new Tooltip(p.getComments().toString()));
+            Label labelExe = new Label(Messages.getString("dialog.select_executable.header"));
+            labelExe.setMinWidth(112);
             Label labelSearch = new Label(Messages.getString("dialog.select_appname.text.short"));
             TextField nameSearch = new TextField(searchString);
             Button refreshButton = new Button("<>");
 
             ComboBox<GameApiBean> foundBox = new ComboBox<>();
+            foundBox.setMaxWidth(400);
             foundBoxes.add(foundBox);
             refreshButton.setOnAction(e -> {
                 foundBox.getItems().clear();
@@ -126,16 +125,17 @@ public class AddGameDialog extends Stage {
 
             });
 
-            grid.add(titleGame, 0, i,2,1);
-            grid.add(label, 0, j);
-            grid.add(comboExeFiles, 1, j);
-            grid.add(labelSearch, 2, j);
-            grid.add(nameSearch, 3, j);
-            grid.add(refreshButton, 4, j);
+            grid.add(titleGame, 0, row++,6,1);
+            grid.add(labelExe, 0, row);
+            grid.add(comboExeFiles, 1, row);
+            grid.add(labelSearch, 2, row);
+            grid.add(nameSearch, 3, row);
+            grid.add(refreshButton, 4, row);
             Label labelFound= new Label(Messages.getString("dialog.select_appname.text.short"));
 
-            grid.add(labelFound, 5, j);
-            grid.add(foundBox, 6, j);
+            grid.add(labelFound, 5, row);
+            grid.add(foundBox, 6, row);
+            row++;
             //HBox cheminBox = new HBox(10, cheminField, browseButton);
 
             if (searchString!=null){
@@ -171,6 +171,12 @@ public class AddGameDialog extends Stage {
 
         cancelButton.setOnAction(e -> {
             result.clear();
+            try {
+                Path directory = Paths.get(Configuration.tempFolder);
+                HelperClass.cleanDirectory(directory);
+            } catch (IOException ioe) {
+                log.error("clean temp directory", ioe);
+            }
             close();
         });
         Label labelError= new Label();
