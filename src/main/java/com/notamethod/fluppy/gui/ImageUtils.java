@@ -27,4 +27,21 @@ public class ImageUtils {
         imageView.setPreserveRatio(preserveRatio);
         return imageView;
     }
+    public static ImageView resize(Image image, int fitHeight,int fitWidth) {
+        double height=image.getHeight();
+        double width=image.getWidth();
+        boolean preserveRatio=true;
+
+        double minRatio=STANDARD_RATIO-(STANDARD_RATIO*tolerance);
+        double maxRatio=STANDARD_RATIO+(STANDARD_RATIO*tolerance);
+        double ratio=width/height;
+        if (ratio<maxRatio && ratio>minRatio){
+            preserveRatio=false;
+        }
+        ImageView imageView  = new ImageView(image);
+        imageView.setFitWidth(fitWidth);
+        imageView.setFitHeight(fitHeight);
+        imageView.setPreserveRatio(preserveRatio);
+        return imageView;
+    }
 }
