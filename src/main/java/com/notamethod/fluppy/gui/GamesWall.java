@@ -24,6 +24,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -51,6 +52,7 @@ public class GamesWall extends Application {
     private double xOffset = 0;
     private double yOffset = 0;
     Effects effects;
+
     @Override
     public void init() throws Exception {
         super.init();
@@ -87,13 +89,13 @@ public class GamesWall extends Application {
 
         stage.initStyle(StageStyle.UNDECORATED);
 
-        HBox topRibbon=initTopRibbon(stage);
+        HBox topRibbon = initTopRibbon(stage);
         //StackPane topRibbon = effects.noiseEffectWrapper(topRibbon0);
         Animation bordureAnim = effects.getBordureAnim(topRibbon);
 
         tilePane = new TilePane();
         tilePane.setPadding(new Insets(20, 10, 10, 10)); // top, right, bottom, left
-        tilePane.setHgap(10);
+        tilePane.setHgap(5);
         tilePane.setVgap(10);
         tilePane.setPrefColumns(5);
 
@@ -109,6 +111,16 @@ public class GamesWall extends Application {
 
         ScrollPane scrollPane = new ScrollPane(tilePane);
 
+        scrollPane.setPannable(true); // active le drag à la souris
+        //speed scrollpane
+        scrollPane.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
+            double deltaY = e.getDeltaY();
+            double height = scrollPane.getContent().getBoundsInLocal().getHeight();
+            double vValue = scrollPane.getVvalue();
+            // facteur de vitesse (ici x3)
+            scrollPane.setVvalue(vValue - deltaY / height * 3);
+            e.consume();
+        });
         topRibbon.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
             yOffset = event.getSceneY();
@@ -144,7 +156,7 @@ public class GamesWall extends Application {
         });
         topRibbon.setOnDragEntered(e -> {
             topRibbon.setStyle("-fx-background-color: green;");
-           // topRibbon.s
+            // topRibbon.s
         });
         topRibbon.setOnDragExited(e -> topRibbon.setStyle("-fx-background-color: #141414;"));
 
@@ -153,7 +165,7 @@ public class GamesWall extends Application {
             Dragboard db = event.getDragboard();
             boolean success = false;
             if (db.hasFiles()) {
-                success=true;
+                success = true;
                 importFiles(db.getFiles());
             }
             event.setDropCompleted(success);
@@ -164,8 +176,8 @@ public class GamesWall extends Application {
         // Écoute globale du drag
         scene.setOnDragEntered(event -> {
             if (event.getDragboard().hasFiles()) {
-               bordureAnim.play();
-               dropLabel.setVisible(true);
+                bordureAnim.play();
+                dropLabel.setVisible(true);
                 topRibbon.getStyleClass().add("ribbon-highlight");
             }
         });
@@ -186,7 +198,6 @@ public class GamesWall extends Application {
     }
 
 
-
     private HBox initTopRibbon(Stage stage) {
 
         HBox topRibbon = new HBox();
@@ -202,6 +213,7 @@ public class GamesWall extends Application {
         distortion.play();
 
 
+        //00050d almost black
         //
         //#FF0000 (rouge vif)
         //
@@ -223,7 +235,7 @@ public class GamesWall extends Application {
         URL titleUrl = classLoader.getResource("fluppy3.png");
         Image titleImage = new Image(titleUrl.toString(), 100, 40, false, true);
         ImageView titleView = new ImageView(titleImage);
-        Image gear= new Image(getClass().getResourceAsStream("/images/gear1.png"),32, 32, false, false);
+        Image gear = new Image(getClass().getResourceAsStream("/images/gear1.png"), 32, 32, false, false);
         ImageView gearIcon = new ImageView(gear);
         Button gearButton = new Button();
         gearButton.setGraphic(gearIcon);
@@ -233,7 +245,7 @@ public class GamesWall extends Application {
             dialog.showAndWait();
         });
         //plus
-        ImageView plusImage = new ImageView(new Image(getClass().getResourceAsStream("/images/add1.png"),32, 32, false, false));
+        ImageView plusImage = new ImageView(new Image(getClass().getResourceAsStream("/images/add1.png"), 32, 32, false, false));
         Button plusButton = new Button();
         plusButton.setGraphic(plusImage);
         plusButton.setStyle("-fx-background-color: transparent;");
@@ -243,7 +255,7 @@ public class GamesWall extends Application {
         });
 
         //quite
-        ImageView quitImg = new ImageView(new Image(getClass().getResourceAsStream("/images/quit1.png"),32, 32, false, false));
+        ImageView quitImg = new ImageView(new Image(getClass().getResourceAsStream("/images/quit1.png"), 32, 32, false, false));
         Button quitButton = new Button();
         quitButton.setGraphic(quitImg);
         quitButton.setStyle("-fx-background-color: transparent;");
@@ -251,7 +263,7 @@ public class GamesWall extends Application {
         Region spacerRibbon = new Region();
         HBox.setHgrow(spacerRibbon, Priority.ALWAYS);
         topRibbon.setAlignment(Pos.CENTER_LEFT);
-        topRibbon.getChildren().addAll(logoView, titleView,info,spacerRibbon, gearButton,plusButton,quitButton);
+        topRibbon.getChildren().addAll(logoView, titleView, info, spacerRibbon, gearButton, plusButton, quitButton);
         return topRibbon;
     }
 
@@ -264,7 +276,7 @@ public class GamesWall extends Application {
             try {
                 gameManager.addGame(gameApp);
             } catch (GameManagerException e) {
-                errors.add(e.getLocalizedMessage()+": "+gameApp.getGamePath());
+                errors.add(e.getLocalizedMessage() + ": " + gameApp.getGamePath());
                 log.error("import error", e);
             }
         }
@@ -279,30 +291,23 @@ public class GamesWall extends Application {
         List<GameApp> games = gameManager.loadAll();
         tilePane.getChildren().clear();
         for (GameApp gameStr : games) {
+
             GameTile container = addGame(gameStr);
             tilePane.getChildren().add(container);
+          
         }
     }
 
     private GameTile addGame(GameApp game) {
-        ImageView imageView=null;
-        Image image;
-        StackPane stackPane=null;
-        if (game.getImagePath() != null) {
-            image = new Image(game.getImagePath().toUri().toString());
-            imageView = ImageUtils.resize(image);
-        } else {
-             stackPane = getNoCoverGame(game);
 
-        }
-
+        StackPane imagePane = ImageFactory.getThumb(game);
 
         //**********************************
         // Panneau d'infos caché
         HBox infoPanelActions = new HBox();
 
         VBox infoPanel = new VBox();
-        Button launchButton=new Button(">");
+        Button launchButton = new Button(">");
 
         launchButton.setOnAction(e -> {
             try {
@@ -322,11 +327,10 @@ public class GamesWall extends Application {
         infoPanel.setOpacity(0);
         GameTile container;
         // Empilement vertical : image puis panneau
-        if (imageView!=null) {
-             container = new GameTile(5, game, imageView, infoPanel);
-        }else{
-            container = new GameTile(5, game, stackPane, infoPanel);
-        }
+
+
+        container = new GameTile(5, game, imagePane, infoPanel);
+
 
 //250*330
         // Animation fade in/out
@@ -388,7 +392,6 @@ public class GamesWall extends Application {
         });
 
 
-
         container.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
                 contextMenu.show(container, e.getScreenX(), e.getScreenY());
@@ -413,15 +416,15 @@ public class GamesWall extends Application {
         ImageView imageView = null;
 
         try {
-           Image image = new Image(unknownGame.toURI().toString());
-             imageView = new ImageView(image);
+            Image image = new Image(unknownGame.toURI().toString());
+            imageView = new ImageView(image);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
 
 
         // Créer le texte
-        Label label = new Label(game.getName()+"\n"+game.getYear());
+        Label label = new Label(game.getName() + "\n" + game.getYear());
         label.setStyle("-fx-text-fill: white; -fx-font-size: 8px; -fx-background-color: rgba(0,0,0,0.5);");
 
         // Empiler l'image et le texte
@@ -433,7 +436,7 @@ public class GamesWall extends Application {
     }
 
     private void actionDelete(GameApp game) {
-        if (gameManager.deleteGame(game)>0){
+        if (gameManager.deleteGame(game) > 0) {
             updateList();
         }
 
@@ -502,7 +505,6 @@ public class GamesWall extends Application {
     public static void main(String[] args) {
         launch();
     }
-
 
 
 }

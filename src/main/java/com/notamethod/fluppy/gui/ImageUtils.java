@@ -1,7 +1,13 @@
 package com.notamethod.fluppy.gui;
 
+import com.notamethod.fluppy.core.GameApp;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+
+import java.net.URISyntaxException;
+import java.net.URL;
 
 
 public class ImageUtils {
@@ -27,7 +33,7 @@ public class ImageUtils {
         imageView.setPreserveRatio(preserveRatio);
         return imageView;
     }
-    public static ImageView resize(Image image, int fitHeight,int fitWidth) {
+    public static ImageView resize(Image image, int fitWidth, int fitHeight) {
         double height=image.getHeight();
         double width=image.getWidth();
         boolean preserveRatio=true;
@@ -43,5 +49,37 @@ public class ImageUtils {
         imageView.setFitHeight(fitHeight);
         imageView.setPreserveRatio(preserveRatio);
         return imageView;
+    }
+
+    public static StackPane getNoCoverGame(GameApp game, ImageView imageView, int fitWidth,int fitHeight) {
+
+        // Créer le texte
+        Label label = new Label(game.getName()+"\n"+game.getYear());
+        label.setStyle("-fx-text-fill: white; -fx-font-size: 8px; -fx-background-color: rgba(0,0,0,0.5);");
+
+        // Empiler l'image et le texte
+        StackPane stackPane = new StackPane();
+        imageView.setFitWidth(fitWidth);
+        imageView.setFitHeight(fitHeight);
+
+        stackPane.getChildren().addAll(imageView, label);
+        return stackPane;
+    }
+
+    public static ImageView getNoCoverImageView( int fitWidth,int fitHeight) {
+        ClassLoader classLoader = GamesWall.class.getClassLoader();
+        URL unknownGame = classLoader.getResource("unknown.jpg");
+        ImageView imageView = null;
+
+        try {
+            Image image = new Image(unknownGame.toURI().toString());
+            imageView = new ImageView(image);
+            imageView.resize(fitWidth, fitHeight);
+            return imageView;
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 }
