@@ -18,7 +18,7 @@ public class Effects {
 
         FadeTransition clignotement = new FadeTransition(Duration.seconds(0.5), node);
         clignotement.setFromValue(1.0);
-        clignotement.setToValue(0.7);
+        clignotement.setToValue(0.9);
         clignotement.setCycleCount(Animation.INDEFINITE);
         clignotement.setAutoReverse(true);
 
@@ -63,8 +63,8 @@ public class Effects {
         bruit.setOpacity(0.1);
         bruit.setMouseTransparent(true); // pour ne pas bloquer les interactions
 
-        StackPane wrapper = new StackPane(node, bruit);
-        return wrapper;
+        return new StackPane(node, bruit);
+
     }
 
     public static Animation getBordureAnim(Node topRibbon) {

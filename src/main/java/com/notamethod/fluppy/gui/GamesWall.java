@@ -24,7 +24,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -46,7 +45,7 @@ public class GamesWall extends Application {
     ApplicationDatabase applicationDatabase;
     PreferencesBean preferences;
     DosBoxManager dosBoxManager = new DosBoxManager();
-    URL unknownGame = null;
+
     GameManager gameManager;
     TilePane tilePane;
     private double xOffset = 0;
@@ -61,9 +60,6 @@ public class GamesWall extends Application {
 
         applicationDatabase = new ApplicationDatabase(emf);
         preferences = PreferencesIO.load();
-        ClassLoader classLoader = GamesWall.class.getClassLoader();
-        unknownGame = classLoader.getResource("unknown.jpg");
-
         try {
             Path directory = Paths.get(Configuration.tempFolder);
             HelperClass.cleanDirectory(directory);
@@ -89,7 +85,7 @@ public class GamesWall extends Application {
 
         stage.initStyle(StageStyle.UNDECORATED);
 
-        HBox topRibbon = initTopRibbon(stage);
+        HBox topRibbon = createTopRibbon(stage);
         //StackPane topRibbon = effects.noiseEffectWrapper(topRibbon0);
         Animation bordureAnim = effects.getBordureAnim(topRibbon);
 
@@ -98,7 +94,7 @@ public class GamesWall extends Application {
         tilePane.setHgap(5);
         tilePane.setVgap(10);
         tilePane.setPrefColumns(5);
-
+        tilePane.setAlignment(Pos.TOP_CENTER);
 
         try {
             init();
@@ -121,6 +117,7 @@ public class GamesWall extends Application {
             scrollPane.setVvalue(vValue - deltaY / height * 3);
             e.consume();
         });
+
         topRibbon.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
             yOffset = event.getSceneY();
@@ -138,12 +135,13 @@ public class GamesWall extends Application {
 
         StackPane stack = new StackPane(scrollPane);
         scrollPane.setFitToWidth(true); // Pour que le contenu prenne toute la largeur
-        scrollPane.setStyle("-fx-background: transparent;"); // Pour éviter les couleurs par défaut
+        scrollPane.setStyle("-fx-background: transparent;");
+
         VBox root0 = new VBox();
         // Cette ligne est cruciale
         VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
         StackPane topRibbon0 = new StackPane(topRibbon, dropLabel);
-        //panel.setPrefSize(300, 200);
+
         root0.getChildren().addAll(/*titleBar, */topRibbon0, scrollPane);
         Scene scene = new Scene(root0, 900, 700);
 
@@ -187,7 +185,6 @@ public class GamesWall extends Application {
             dropLabel.setVisible(false);
             topRibbon.getStyleClass().remove("ribbon-highlight");
             topRibbon.setStyle("-fx-border-color: transparent"); // Fond du ScrollPane
-            ;
         });
         //Scene scene = new Scene(root, 700, 500);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
@@ -198,12 +195,11 @@ public class GamesWall extends Application {
     }
 
 
-    private HBox initTopRibbon(Stage stage) {
+    private HBox createTopRibbon(Stage stage) {
 
         HBox topRibbon = new HBox();
-        topRibbon.setPrefHeight(90);
-        topRibbon.setSpacing(10);
-        //topRibbon.setStyle("-fx-background-color: #141414; -fx-border-color: transparent;");
+        topRibbon.setPrefHeight(60);
+        topRibbon.setSpacing(15);
         topRibbon.getStyleClass().add("ribbon");
         topRibbon.getStyleClass().add("scanline");
 
@@ -212,28 +208,14 @@ public class GamesWall extends Application {
         Animation distortion = effects.distortionAnim(topRibbon);
         distortion.play();
 
-
-        //00050d almost black
-        //
-        //#FF0000 (rouge vif)
-        //
-        //#00FFFF (cyan)
-        //
-        //#FFFF00 (jaune)
-        //
-        //#FF00FF (magenta)
-        //
-        //#00FF00 (vert fluo)
-
-
         Label info = new Label("(c) 2025");
         info.setTextFill(Color.WHITE);
         ClassLoader classLoader = GamesWall.class.getClassLoader();
         URL logoUrl = classLoader.getResource("dosdog.png");
-        Image logo = new Image(logoUrl.toString(), 80, 80, false, true);
+        Image logo = new Image(logoUrl.toString(), 60, 60, false, true);
         ImageView logoView = new ImageView(logo);
         URL titleUrl = classLoader.getResource("fluppy3.png");
-        Image titleImage = new Image(titleUrl.toString(), 100, 40, false, true);
+        Image titleImage = new Image(titleUrl.toString(), 90, 50, true, true);
         ImageView titleView = new ImageView(titleImage);
         Image gear = new Image(getClass().getResourceAsStream("/images/gear1.png"), 32, 32, false, false);
         ImageView gearIcon = new ImageView(gear);
@@ -268,7 +250,6 @@ public class GamesWall extends Application {
     }
 
     private void importFiles(List<File> files) {
-
         GameActions gameActions = new GameActions(new DialogActionsJfx());
         List<GameApp> gampeApps = gameActions.createFromFiles(files);
         List<String> errors = new ArrayList<>();
@@ -291,15 +272,12 @@ public class GamesWall extends Application {
         List<GameApp> games = gameManager.loadAll();
         tilePane.getChildren().clear();
         for (GameApp gameStr : games) {
-
             GameTile container = addGame(gameStr);
             tilePane.getChildren().add(container);
-          
         }
     }
 
     private GameTile addGame(GameApp game) {
-
         StackPane imagePane = ImageFactory.getThumb(game);
 
         //**********************************
@@ -330,7 +308,6 @@ public class GamesWall extends Application {
 
 
         container = new GameTile(5, game, imagePane, infoPanel);
-
 
 //250*330
         // Animation fade in/out
@@ -411,35 +388,12 @@ public class GamesWall extends Application {
         return container;
     }
 
-    private StackPane getNoCoverGame(GameApp game) {
 
-        ImageView imageView = null;
-
-        try {
-            Image image = new Image(unknownGame.toURI().toString());
-            imageView = new ImageView(image);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-
-
-        // Créer le texte
-        Label label = new Label(game.getName() + "\n" + game.getYear());
-        label.setStyle("-fx-text-fill: white; -fx-font-size: 8px; -fx-background-color: rgba(0,0,0,0.5);");
-
-        // Empiler l'image et le texte
-        StackPane stackPane = new StackPane();
-        imageView.setFitWidth(150);
-        imageView.setFitHeight(200);
-        stackPane.getChildren().addAll(imageView, label);
-        return stackPane;
-    }
 
     private void actionDelete(GameApp game) {
         if (gameManager.deleteGame(game) > 0) {
             updateList();
         }
-
     }
 
     private void actionEdit(GameApp gameBean) {
@@ -451,8 +405,6 @@ public class GamesWall extends Application {
             dialog.setTitle("Éditer un jeu");
 
             GameEditorController controller = loader.getController();
-
-
             controller.setGame(gameBean);
 
             Optional<ButtonType> result = dialog.showAndWait();
@@ -491,62 +443,9 @@ public class GamesWall extends Application {
         return shadow;
     }
 
-    public HBox getTitleBar() {
-        HBox titleBar = new HBox();
-        titleBar.setStyle("-fx-background-color: black; -fx-padding: 10;");
-        Label title = new Label("SDOG-L");
-        title.setTextFill(Color.WHITE);
-        titleBar.getChildren().add(title);
-
-        return titleBar;
-    }
-
 
     public static void main(String[] args) {
         launch();
     }
-
-
 }
-/*
-StackPane bandeauWrapper = new StackPane();
-bandeauWrapper.setStyle("-fx-border-width: 2; -fx-border-color: black;");
-bandeauWrapper.getChildren().add(bandeau);
---
-Timeline scanlineAnim = new Timeline(
-    new KeyFrame(Duration.seconds(0), e -> bandeauWrapper.setStyle("-fx-border-color: gray;")),
-    new KeyFrame(Duration.seconds(0.2), e -> bandeauWrapper.setStyle("-fx-border-color: darkgray;")),
-    new KeyFrame(Duration.seconds(0.4), e -> bandeauWrapper.setStyle("-fx-border-color: lightgray;")),
-    new KeyFrame(Duration.seconds(0.6), e -> bandeauWrapper.setStyle("-fx-border-color: gray;"))
-);
-scanlineAnim.setCycleCount(Animation.INDEFINITE);
-scanlineAnim.play();
 
-FadeTransition ft = new FadeTransition(Duration.seconds(1), bandeauWrapper);
-ft.setFromValue(1.0);
-ft.setToValue(0.7);
-ft.setCycleCount(Animation.INDEFINITE);
-ft.setAutoReverse(true);
-ft.play();
-
-
-
-
-
-bandeau.setStyle("-fx-background-color: black;");
-Label texte = new Label("BIOS Initializing...");
-texte.setTextFill(Color.LIME);
-texte.setFont(Font.font("Courier New", FontWeight.BOLD, 14));
-
-Voici ton image de bruit visuel rétro façon CRT, parfaite pour simuler un effet de "static" ou neige analogique sur ton bandeau JavaFX.
-
-Tu peux l’utiliser comme overlay avec une opacité réduite :
-
-java
-ImageView bruit = new ImageView(new Image("file:resources/noise.png"));
-bruit.setOpacity(0.1);
-bruit.setMouseTransparent(true); // pour ne pas bloquer les interactions
-
-StackPane wrapper = new StackPane(bandeau, bruit);
-
- */

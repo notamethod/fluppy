@@ -1,4 +1,6 @@
-# Dos Box Frontend (another one)
+# Fluppy
+
+One day, this app will proudly be a glorified DOSBox front‑end
 
 
 ## APIs
