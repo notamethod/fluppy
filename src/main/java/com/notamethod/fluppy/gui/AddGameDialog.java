@@ -46,7 +46,6 @@ public class AddGameDialog extends Stage {
         this.apiCalls=apiCalls;
         initModality(Modality.APPLICATION_MODAL);
         fileActions = new FileActions();
-        //initOwner(owner);
         setTitle("Add Game");
         VBox content = new VBox(10);
         content.setPadding(new Insets(10));
@@ -86,9 +85,7 @@ public class AddGameDialog extends Stage {
             comboExeFilesList.add(comboExeFiles);
             comboExeFiles.setConverter(getFileConverter());
 
-            //comboBox.setEditable(true);
             if (metaGame.getExeFiles()==null && metaGame.getExePath()!=null){
-                //
             }else{
                 List<File> sorted=sortRunners(searchString, metaGame.getExeFiles());
                 comboExeFiles.getItems().addAll(sorted);
@@ -119,10 +116,12 @@ public class AddGameDialog extends Stage {
             refreshButton.setOnAction(e -> {
                 foundBox.getItems().clear();
                 foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
-                if (!foundBox.getItems().isEmpty()){
-                    foundBox.setValue(foundBox.getItems().getFirst());
+                if (foundBox.getItems().isEmpty()){
+                    GameApiBean dummyGame = new GameApiBean();
+                    dummyGame.setName(nameSearch.getText());
+                    foundBox.getItems().add(dummyGame);
                 }
-
+                foundBox.setValue(foundBox.getItems().getFirst());
             });
 
             grid.add(titleGame, 0, row++,6,1);
@@ -331,6 +330,7 @@ public class AddGameDialog extends Stage {
         } catch (ApiException | MappingException e) {
             log.error("Internal Error", e);
         }
+        //TODO
         if (!games.isEmpty()) {
             return games;
         }
