@@ -16,47 +16,58 @@ import java.nio.file.Paths;
 @Slf4j
 public class ArchiveExtractor {
 
+    private final String outputDirectory;
+
+    public ArchiveExtractor(String outputDirectory) {
+        this.outputDirectory=outputDirectory;
+    }
 
     public static boolean isArchive(File exeFile) {
         return exeFile.getName().toLowerCase().endsWith("7z") || exeFile.getName().toLowerCase().endsWith("zip");
     }
 
+    public File extractFile(File file) throws IOException {
+        return extractFile(file, false);
+    }
 
-    public File extractFile(File archiveFile, File outputDir) throws IOException {
+    public File extractFile(File archiveFile, boolean replace) throws IOException {
+        File outputDir = new File(outputDirectory);
         if (archiveFile.getName().toLowerCase().endsWith("7z")){
-            return extract7z( archiveFile,  outputDir);
+            return extract7z( archiveFile, replace);
         }else{
-            return extractZip( archiveFile.getAbsolutePath(),  outputDir.getAbsolutePath());
+            return extractZip( archiveFile.getAbsolutePath(),  outputDir.getAbsolutePath(), replace);
         }
     }
 
-    protected File extract7z(File archiveFile, File outputDir) throws IOException{
+    protected File extract7z(File archiveFile, boolean replace) throws IOException{
         log.info("extract 7z archive...");
-        File gameOutputDire=gameOutputDir(archiveFile, outputDir);
+        File fileOutputDirectory=new File(outputDirectory,sanitizeName(archiveFile));
         try (SevenZFile sevenZFile = new SevenZFile(archiveFile)) {
             SevenZArchiveEntry entry;
-
-            if (gameOutputDire.exists()){
+            if (!replace && fileOutputDirectory.exists()){
                 throw new IOException("target not empty");
             }else{
-                gameOutputDire.mkdirs();
+                fileOutputDirectory.mkdirs();
             }
-            //for (SevenZArchiveEntry entry : sevenZFile.getEntries()) {
             while ((entry = sevenZFile.getNextEntry()) != null) {
-                File outputFile = new File(gameOutputDire, entry.getName());
-
+                File outputFile = new File(fileOutputDirectory, entry.getName());
+                String canonicalDestinationPath = outputFile.getCanonicalPath();
+                if (!Path.of(canonicalDestinationPath).normalize().startsWith(Path.of(outputDirectory).normalize())) {
+                    throw new IOException("Entry is outside of the target dir.");
+                }
                 if (entry.isDirectory()) {
-                    Files.createDirectories(outputFile.toPath());
+                    if (canonicalDestinationPath.startsWith(outputDirectory)) {
+                      Files.createDirectories(outputFile.toPath());
+                    }
                     continue;
                 }
 
-                // Crée le dossier parent si nécessaire
                 Path parent = outputFile.toPath().getParent();
                 if (parent != null) {
                     Files.createDirectories(parent);
                 }
 
-                // Écrit le fichier extrait
+                // write file
                 try (OutputStream out = new FileOutputStream(outputFile)) {
                     byte[] buffer = new byte[8192];
                     int bytesRead;
@@ -68,7 +79,7 @@ public class ArchiveExtractor {
                 }
             }
 
-            log.info("Successfully extracted in : " + gameOutputDire.getAbsolutePath());
+            log.info("Successfully extracted in : " + fileOutputDirectory.getAbsolutePath());
 
         } catch (IOException e) {
             throw e;
@@ -76,12 +87,12 @@ public class ArchiveExtractor {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return gameOutputDire;
+        return fileOutputDirectory;
     }
 
 
 
-    protected File extractZip(String zipFilePath, String xoutputDir) {
+    protected File extractZip(String zipFilePath, String xoutputDir, boolean replace) {
         log.info("extract zip archive...");
         File gameOutputDire=gameOutputDir(new File(zipFilePath), new File(xoutputDir));
         try (InputStream fi = Files.newInputStream(Paths.get(zipFilePath));
@@ -117,6 +128,13 @@ public class ArchiveExtractor {
         String withoutExtension=archiveFile.getName().replaceAll(extPattern, "");
         return new File(outputDir.getAbsolutePath(), withoutExtension);
     }
+    private String sanitizeName(File archiveFile) {
+        boolean removeAllExtensions=false;
+        String extPattern = "(?<!^)[.]" + (removeAllExtensions ? ".*" : "[^.]*$");
+        return archiveFile.getName().replaceAll(extPattern, "");
+
+    }
+
 
 
 }

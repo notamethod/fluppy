@@ -389,7 +389,6 @@ public class GamesWall extends Application {
     }
 
 
-
     private void actionDelete(GameApp game) {
         if (gameManager.deleteGame(game) > 0) {
             updateList();

@@ -82,10 +82,10 @@ public class GameActions {
 
     private GameApp addArchive(File file) throws GameManagerException, OperationCanceledException {
         GameApp mgame;// = new GameApp();
-        ArchiveExtractor extractor = new ArchiveExtractor();
-        String output = Configuration.tempFolder;
+        ArchiveExtractor extractor = new ArchiveExtractor(Configuration.tempFolder);
+
         try {
-            File path = extractor.extractFile(file, new File(output));
+            File path = extractor.extractFile(file);
             mgame = addDirectory(path);
             return mgame;
         } catch (IOException e) {
