@@ -24,7 +24,7 @@ public class IgdbApi {
     public List<GameApiBean> getGames(String name) throws ApiException, MappingException {
         name=name.replace("-"," ");
         name=name.replace("_"," ");
-        log.info("searching game...{}", name);
+        log.info("searching game ->{}<-", name);
         ObjectMapper mapper = new ObjectMapper();
         String endpoint="https://api.igdb.com/v4/games";
         String body="fields *, genres.*;\n" +

@@ -77,7 +77,7 @@ public class HelperClass {
             if (!workingDirectory.mkdirs())
                 throw new RuntimeException("The working directory could not be created: " + workingDirectory);
 
-        log.info("Working directory is "+workingDirectory.getAbsolutePath());
+        log.debug("Working directory is "+workingDirectory.getAbsolutePath());
         return workingDirectory;
     }
 
