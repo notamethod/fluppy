@@ -55,13 +55,15 @@ public class ImageUtils {
 
         // Créer le texte
         Label label = new Label(game.getName()+"\n"+game.getYear());
+
         label.setStyle("-fx-text-fill: white; -fx-font-size: 8px; -fx-background-color: rgba(0,0,0,0.5);");
 
         // Empiler l'image et le texte
         StackPane stackPane = new StackPane();
         imageView.setFitWidth(fitWidth);
         imageView.setFitHeight(fitHeight);
-
+        label.maxWidthProperty().bind(stackPane.widthProperty());
+        label.setWrapText(true); // si tu veux que le texte passe à la ligne
         stackPane.getChildren().addAll(imageView, label);
         return stackPane;
     }

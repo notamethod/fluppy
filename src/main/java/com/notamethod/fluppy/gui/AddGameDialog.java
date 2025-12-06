@@ -53,9 +53,10 @@ public class AddGameDialog extends Stage {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-
-
-
+        ScrollPane scrollPane = new ScrollPane(grid);
+        scrollPane.setPannable(true); // active le drag à la souris
+        content.setStyle("-fx-background-color: transparent;");
+        grid.setStyle("-fx-background-color: black;");
         List<ComboBox<GameApiBean>> foundBoxes=new ArrayList<>();
         List<ComboBox<File>> comboExeFilesList = new ArrayList<>();
         List <String> extractionErrors =new ArrayList<>();
@@ -104,6 +105,7 @@ public class AddGameDialog extends Stage {
             });
 
             Label titleGame = new Label(searchString);
+            titleGame.getStyleClass().add("subtitle");
             Label labelExe = new Label(Messages.getString("dialog.select_executable.header"));
             labelExe.setMinWidth(112);
             Label labelSearch = new Label(Messages.getString("dialog.select_appname.text.short"));
@@ -186,12 +188,26 @@ public class AddGameDialog extends Stage {
         }
         HBox buttonBox = new HBox(10, saveButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
-        content.getChildren().add(grid);
+        scrollPane.setStyle("-fx-background-color: red;");
+        content.getChildren().add(scrollPane);
         VBox layout = new VBox(15,
                 content,
                 labelError,
                 buttonBox
         );
+
+        this.setOnCloseRequest(event -> {
+            result.clear();
+            try {
+                Path directory = Paths.get(Configuration.tempFolder);
+                HelperClass.cleanDirectory(directory);
+            } catch (IOException ioe) {
+                log.error("clean temp directory", ioe);
+            }
+            event.consume();
+            close();
+        });
+
         layout.setPadding(new Insets(20));
         Scene scene=new Scene(layout);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
@@ -221,7 +237,7 @@ public class AddGameDialog extends Stage {
                     metaGame.setYear(game.getYear() == null ? 1970 : Integer.valueOf(game.getYear()));
                     if (game.getCover() != null) {
                         try {
-                            String coverFilename = "cover_" + game.getName().replace(" ", "").toLowerCase() + game.getYear();
+                            String coverFilename = "cover_" + game.getName().replace(" ", "").replace("?", "").toLowerCase() + game.getYear();
                             metaGame.setImagePath(Paths.get(apiCalls.getCover(Configuration.coverFolder, coverFilename, game.getCover(), 2)));
                         } catch (ApiException | MappingException e) {
                             throw new RuntimeException(e);
@@ -285,11 +301,11 @@ public class AddGameDialog extends Stage {
         if (sourceFileName != null) {
             String title = HelperClass.guessTitleFromFilename(sourceFileName);
             if (title != null) {
-
                 searchString = title;
             }
         }
-        String textSearch=HelperClass.fromCamelCase(searchString);
+
+        String textSearch=searchString.isEmpty()?"":  HelperClass.fromCamelCase(searchString);
         metaGame.setSearchName(textSearch);
         return textSearch;
     }

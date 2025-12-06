@@ -169,14 +169,19 @@ public class HelperClass {
     }
 
     public static  String guessTitleFromFilename(String name){
+        if (name==null){
+            return null;
+        }
         String title=regexArchive(name);
         if (title==null){
             title=regexGroup(name, REGEX_SIMPLE, 1);
         }
-        if(title!=null){
-            return toTitleGame(title);
+        if (title==null){
+            int pos = name.lastIndexOf(".");
+            title=pos>0?name.substring(0, pos):name;
         }
-        return null;
+        return toTitleGame(title);
+
     }
 
     public static String fromCamelCase(String nameWithCamelCase){
@@ -208,7 +213,7 @@ public class HelperClass {
         return null;
     }
     public static String toTitleGame(String name) {
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
+        return name.substring(0, 1).toUpperCase() + name.substring(1).replace("_", " ");
     }
 
     public static void cleanDirectory(Path dir) throws IOException {

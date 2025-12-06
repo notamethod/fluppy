@@ -20,6 +20,10 @@
     -fx-text-fill: #AFB1B3;
 }
 
+.subtitle{
+-fx-text-fill: #00FF55;
+}
+
 
 /* Pane */
 .pane-grid{
@@ -772,6 +776,8 @@
     -fx-border-width: 4;
     -fx-border-style: dashed;
 }
+
+
 .scanline {
     -fx-background-color: linear-gradient(to bottom,
         rgba(0,0,0,0.1) 1px,
@@ -779,9 +785,3 @@
         transparent 3px);
 }
 
-.crt-scanlines {
-    -fx-background-color: linear-gradient(to bottom,
-        rgba(0,0,0,0.1) 1px,
-        transparent 1px,
-        transparent 3px);
-}

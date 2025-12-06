@@ -31,11 +31,11 @@ public class ArchiveExtractor {
     }
 
     public File extractFile(File archiveFile, boolean replace) throws IOException {
-        File outputDir = new File(outputDirectory);
+
         if (archiveFile.getName().toLowerCase().endsWith("7z")){
             return extract7z( archiveFile, replace);
         }else{
-            return extractZip( archiveFile.getAbsolutePath(),  outputDir.getAbsolutePath(), replace);
+            return extractZip( archiveFile, replace);
         }
     }
 
@@ -66,7 +66,6 @@ public class ArchiveExtractor {
                 if (parent != null) {
                     Files.createDirectories(parent);
                 }
-
                 // write file
                 try (OutputStream out = new FileOutputStream(outputFile)) {
                     byte[] buffer = new byte[8192];
@@ -78,7 +77,6 @@ public class ArchiveExtractor {
                     }
                 }
             }
-
             log.info("Successfully extracted in : " + fileOutputDirectory.getAbsolutePath());
 
         } catch (IOException e) {
@@ -92,17 +90,26 @@ public class ArchiveExtractor {
 
 
 
-    protected File extractZip(String zipFilePath, String xoutputDir, boolean replace) {
+    protected File extractZip(File zipFile, boolean replace) {
         log.info("extract zip archive...");
-        File gameOutputDire=gameOutputDir(new File(zipFilePath), new File(xoutputDir));
-        try (InputStream fi = Files.newInputStream(Paths.get(zipFilePath));
+        File fileOutputDirectory=new File(outputDirectory,sanitizeName(zipFile));
+
+        try (InputStream fi = Files.newInputStream(zipFile.toPath());
              BufferedInputStream bi = new BufferedInputStream(fi);
              ArchiveInputStream i = new ArchiveStreamFactory()
                      .createArchiveInputStream(ArchiveStreamFactory.ZIP, bi)) {
-
             ArchiveEntry entry;
             while ((entry = i.getNextEntry()) != null) {
-                Path outputPath = Paths.get(gameOutputDire.getAbsolutePath(), entry.getName());
+
+                Path outputPath = Paths.get(fileOutputDirectory.getAbsolutePath(), entry.getName());
+                String canonicalDestinationPath = outputPath.toFile().getCanonicalPath();
+                if (!Path.of(canonicalDestinationPath).normalize().startsWith(Path.of(outputDirectory).normalize())) {
+                    throw new IOException("Entry is outside of the target dir.");
+                }
+
+
+
+
                 if (entry.isDirectory()) {
                     Files.createDirectories(outputPath);
                 } else {
@@ -117,7 +124,7 @@ public class ArchiveExtractor {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return gameOutputDire;
+        return fileOutputDirectory;
     }
 
 

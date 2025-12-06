@@ -41,6 +41,7 @@ public class GameManager {
             GenreEntity gent = applicationDatabase.getGenre(genre.getId()).orElse(GameMapper.INSTANCE.toEntity(genre));
             gameEntity.getGenres().add(gent);
         }
+        //TODO: why in a dedcated class ?
         applicationDatabase.saveGame(gameEntity);
     }
 
@@ -57,6 +58,12 @@ public class GameManager {
     }
 
     public void addGame(GameApp game) throws GameManagerException {
+        if (game.getName()==null){
+            log.error("game name is null");
+            return;
+        }
+
+        log.debug("adding game ->{} <- to database", game.getName());
         List<GameEntity> entiites = applicationDatabase.findGameByNameAndYear(game.getName(), game.getYear());
         if (!entiites.isEmpty()) {
             throw new GameManagerException("game already in database");

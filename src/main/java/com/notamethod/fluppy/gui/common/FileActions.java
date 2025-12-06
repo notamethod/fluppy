@@ -64,9 +64,7 @@ public class FileActions {
         }
         if (mgame.getExeFiles().size() > 1) {
             log.info("multiple exe found");
-
             return mgame;
-
         }
     else{
             log.info("one exe found");
