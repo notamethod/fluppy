@@ -6,8 +6,7 @@ import jakarta.persistence.Query;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Slf4j
@@ -65,7 +64,23 @@ public class ApplicationDatabase {
         Query q = entityManager.createQuery ("SELECT p FROM GameEntity p where p.name=:name");
         q.setParameter ("name", name);
         List<GameEntity> results = q.getResultList ();
+        entityManager.getTransaction().commit();
+        return results;
+    }
 
+    public List<GameEntity> findGameByGenre(String genreId) {
+        return findGameByGenre(genreId, -1);
+    }
+    public List<GameEntity> findGameByGenre(String genreId, int maxResult) {
+        entityManager.getTransaction().begin();
+        Query q = entityManager.createQuery ("""
+                SELECT game FROM GameEntity game JOIN game.genres genre
+                WHERE genre.id = :genreId
+                """);
+        q.setParameter ("genreId", genreId);
+        if (maxResult>0)
+            q.setMaxResults(maxResult);
+        List<GameEntity> results = q.getResultList ();
         entityManager.getTransaction().commit();
         return results;
     }
@@ -94,13 +109,27 @@ public class ApplicationDatabase {
         entityManager.getTransaction().commit();
         return games;
     }
-    public List<GenreEntity> loadAllGanres() {
+    public List<GenreEntity> loadAllGenres() {
         entityManager.getTransaction().begin();
         List<GenreEntity> genres = entityManager.createQuery("SELECT genre FROM GenreEntity genre order by genre.id", GenreEntity.class).getResultList();
         entityManager.getTransaction().commit();
         return genres;
     }
 
+    public  Map<String, Long> getTopGenres(int limit) {
+        entityManager.getTransaction().begin();
+        int count=0;
+        List<Object[]> games = entityManager.createQuery("SELECT g.id, COUNT(gm) FROM GenreEntity g JOIN g.games gm GROUP BY g.id ORDER BY COUNT(gm) DESC").getResultList();
+        entityManager.getTransaction().commit();
+        Map<String, Long> map = new LinkedHashMap<>();
+        for (Object[] o : games){
+            map.put((String) o[0], (Long) o[1]);
+            count++;
+            if (count>=limit)
+                return map;
+        }
+        return map;
+    }
 
     public Optional<GenreEntity> getGenre(String id) {
         entityManager.getTransaction().begin();
@@ -109,5 +138,21 @@ public class ApplicationDatabase {
         Optional<GenreEntity> genre = q.getResultStream().findFirst();
         entityManager.getTransaction().commit();
         return genre;
+    }
+
+    public List<GameEntity> loadAllGamesButNot(Set<Long> gameIds) {
+        entityManager.getTransaction().begin();
+        Query q = entityManager.createQuery("SELECT game FROM GameEntity game where game.id not in :gameIds order by game.name", GameEntity.class);
+        q.setParameter ("gameIds", gameIds);
+        entityManager.getTransaction().commit();
+        return q.getResultList ();
+    }
+
+    public List<GameEntity> runGameQuery(String query, int maxResult) {
+        entityManager.getTransaction().begin();
+        Query q = entityManager.createQuery(query, GameEntity.class);
+        entityManager.getTransaction().commit();
+        q.setMaxResults(maxResult);
+        return q.getResultList ();
     }
 }

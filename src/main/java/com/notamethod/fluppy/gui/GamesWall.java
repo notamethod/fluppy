@@ -47,10 +47,16 @@ public class GamesWall extends Application {
     DosBoxManager dosBoxManager = new DosBoxManager();
 
     GameManager gameManager;
-    TilePane tilePane;
+    CategoryManager categoryManager;
+
+    TilePane tilePanex;
+    List<VBox> gamesBlocks = new ArrayList<>();
+    VBox content;
     private double xOffset = 0;
     private double yOffset = 0;
     Effects effects;
+    private Category expandCategory=null;
+    List<Category> gameCategories = new ArrayList<>();
 
     @Override
     public void init() throws Exception {
@@ -68,16 +74,12 @@ public class GamesWall extends Application {
         }
 
         gameManager = new GameManager(applicationDatabase);
+        categoryManager = new CategoryManager(applicationDatabase);
+        gameCategories = categoryManager.getShownCategories();
         //FIXME:remove locale test
         // Locale locale = Locale.getDefault();//new Locale("fr"); // ou "en", "de", etc.
         Locale locale = new Locale("fr"); // ou "en", "de", etc.
-
-
-        //System.out.println( Messages.getString("confirmation.tile"));
-
         Font font = FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
-        System.out.println(font.getName());
-
     }
 
     @Override
@@ -89,23 +91,16 @@ public class GamesWall extends Application {
         //StackPane topRibbon = effects.noiseEffectWrapper(topRibbon0);
         Animation bordureAnim = effects.getBordureAnim(topRibbon);
 
-        tilePane = new TilePane();
-        tilePane.setPadding(new Insets(20, 10, 10, 10)); // top, right, bottom, left
-        tilePane.setHgap(5);
-        tilePane.setVgap(10);
-        tilePane.setPrefColumns(5);
-        tilePane.setAlignment(Pos.TOP_CENTER);
-
         try {
             init();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        System.out.println("loading..." + gameManager.loadAll().size());
+        content = new VBox();
         updateList();
 
-        ScrollPane scrollPane = new ScrollPane(tilePane);
+
+        ScrollPane scrollPane = new ScrollPane(content);
 
         scrollPane.setPannable(true); // active le drag à la souris
         //speed scrollpane
@@ -118,14 +113,7 @@ public class GamesWall extends Application {
             e.consume();
         });
 
-        topRibbon.setOnMousePressed(event -> {
-            xOffset = event.getSceneX();
-            yOffset = event.getSceneY();
-        });
-        topRibbon.setOnMouseDragged(event -> {
-            stage.setX(event.getScreenX() - xOffset);
-            stage.setY(event.getScreenY() - yOffset);
-        });
+
 
         // Label overlay
         Label dropLabel = new Label(Messages.getString("drop.here"));
@@ -133,7 +121,6 @@ public class GamesWall extends Application {
         dropLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         dropLabel.setVisible(false); // caché par défaut
 
-        StackPane stack = new StackPane(scrollPane);
         scrollPane.setFitToWidth(true); // Pour que le contenu prenne toute la largeur
         scrollPane.setStyle("-fx-background: transparent;");
 
@@ -246,6 +233,16 @@ public class GamesWall extends Application {
         HBox.setHgrow(spacerRibbon, Priority.ALWAYS);
         topRibbon.setAlignment(Pos.CENTER_LEFT);
         topRibbon.getChildren().addAll(logoView, titleView, info, spacerRibbon, gearButton, plusButton, quitButton);
+
+        topRibbon.setOnMousePressed(event -> {
+            xOffset = event.getSceneX();
+            yOffset = event.getSceneY();
+        });
+        topRibbon.setOnMouseDragged(event -> {
+            stage.setX(event.getScreenX() - xOffset);
+            stage.setY(event.getScreenY() - yOffset);
+        });
+
         return topRibbon;
     }
 
@@ -267,14 +264,96 @@ public class GamesWall extends Application {
         updateList();
     }
 
-
     private void updateList() {
-        List<GameApp> games = gameManager.loadAll();
-        tilePane.getChildren().clear();
-        for (GameApp gameStr : games) {
-            GameTile container = addGame(gameStr);
-            tilePane.getChildren().add(container);
+        this.gamesBlocks.clear();
+        content.getChildren().clear();
+        Set<Long> gameIds = new HashSet<>();
+        if (expandCategory!=null){
+            VBox box = createBlock(expandCategory, 25, gameIds);
+            gamesBlocks.add(box);
+
+        }else {
+            for (int i = 0; i < gameCategories.size(); i++) {
+                VBox box = createBlock(gameCategories.get(i), 5, gameIds);
+                if (box != null) {
+                    gamesBlocks.add(box);
+                }
+            }
         }
+
+        content.getChildren().addAll(this.gamesBlocks);
+    }
+
+    private VBox createBlock(Category category, int count, Set<Long> gameIds) {
+        List<GameApp> games;
+        switch (category.getCategoryType()){
+            case RECENTLY_ADDED:
+                games =gameManager.getLastAdded(count);
+                break;
+            case MOST_PLAYED:
+                games =gameManager.getMostPlayedGames(count);
+                break;
+            case FAVORITES:
+                games =gameManager.getFavoriteGames(count);
+                break;
+            case GENRE:
+                if ("all".equals(category.getId())){
+                    games =gameManager.loadAllButNot(gameIds);
+                }else {
+                    games = gameManager.getFromGenre(category.getId(), count);
+                }
+                break;
+            default:
+                games =null;
+        }
+        if (games!=null&& !games.isEmpty()){
+            return createBlock(category, games, gameIds);
+        }
+        return null;
+    }
+
+
+    private VBox createBlock(Category category, List<GameApp> games, Set<Long> gameIds){
+        TilePane tilePane = new TilePane();
+        tilePane.setPadding(new Insets(20, 10, 10, 0)); // top, right, bottom, left
+        tilePane.setHgap(5);
+        tilePane.setVgap(10);
+        tilePane.setPrefColumns(5);
+        tilePane.setAlignment(Pos.TOP_LEFT);
+        for (GameApp gameStr : games) {
+            if (!gameIds.contains(gameStr.getId())) {
+                gameIds.add(gameStr.getId());
+                GameTile container = addGame(gameStr);
+                tilePane.getChildren().add(container);
+            }
+        }
+        VBox vBox = new VBox();
+        vBox.setPadding(new Insets(20, 10, 10, 50)); // top, right, bottom, left
+        Label blockTitle = new Label(category.getLabel());
+        blockTitle.getStyleClass().add("blockTitle");
+        // Ajouter une action au clic
+        blockTitle.setOnMouseClicked(event -> {
+            activateCategory(category);
+        });
+        vBox.getChildren().addAll(blockTitle, tilePane);
+        return vBox;
+    }
+
+    private void activateCategory(Category category) {
+
+        if (category.getCategoryType().equals(CategoryType.GENRE)&& "all".equals(category.getId()))
+            return;
+        if (expandCategory!=null && expandCategory.getCategoryType().equals(category.getCategoryType())
+        && category.getId().equals(expandCategory.getId())){
+            expandCategory=null;
+        }
+        else if (expandCategory == null || (expandCategory!=null && !category.getId().equals(expandCategory.getId()))){
+            expandCategory=category;
+        }
+        else {
+            expandCategory = null;
+        }
+        updateList();
     }
 
     private GameTile addGame(GameApp game) {
@@ -289,7 +368,8 @@ public class GamesWall extends Application {
 
         launchButton.setOnAction(e -> {
             try {
-                dosBoxManager.runApplication(game.getGameExe(), game);
+                Long time=dosBoxManager.runApplication(game.getGameExe(), game);
+                gameManager.updateTime(game, time);
             } catch (DosBoxException ex) {
                 throw new RuntimeException(ex);
             }
@@ -374,13 +454,14 @@ public class GamesWall extends Application {
                 contextMenu.show(container, e.getScreenX(), e.getScreenY());
             } else if (e.getButton() == MouseButton.PRIMARY) {
                 if (e.getClickCount() == 1) {
-                    int returne = 0;
+                    long returne = 0;
                     log.debug(game.toString());
                     try {
                         returne = dosBoxManager.runApplication(game.getGameExe(), game);
                     } catch (DosBoxException ex) {
                         throw new RuntimeException(ex);
                     }
+                    gameManager.updateTime(game, returne);
                     System.out.println(returne);
                 }
             }
@@ -441,7 +522,6 @@ public class GamesWall extends Application {
 
         return shadow;
     }
-
 
     public static void main(String[] args) {
         launch();

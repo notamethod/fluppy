@@ -4,6 +4,7 @@ package com.notamethod.fluppy.core;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +37,9 @@ public class GameEntity {
     private String publisher;
 
     private boolean favorite = false;
+    private LocalDateTime added;
+    private LocalDateTime lastPlayed;
+    private Long timePlayed;
 
 
     @ManyToMany(cascade = CascadeType.PERSIST)

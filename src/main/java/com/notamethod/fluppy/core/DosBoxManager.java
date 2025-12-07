@@ -4,8 +4,10 @@ import com.notamethod.fluppy.io.PreferencesIO;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -53,7 +55,7 @@ public class DosBoxManager {
     }
 
 
-    public int runApplication(String program, GameApp gameApp) throws DosBoxException {
+    public long runApplication(String program, GameApp gameApp) throws DosBoxException {
 
         log.info("running {}", program);
         int returnOK=0;
@@ -90,9 +92,28 @@ public class DosBoxManager {
         }
 
         // Try to execute
+        long now = java.time.Instant.now().toEpochMilli();
+        Process process = null;
+        long exitCode = 0;
+        long diff=0;
         try {
             log.info("executing dosbox with params");
-            Runtime.getRuntime().exec(par);
+             process =  Runtime.getRuntime().exec(par);
+            // Lire la sortie standard
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+// Attendre la fin
+             exitCode = process.waitFor();
+            long then = java.time.Instant.now().toEpochMilli();
+             diff=(then-now)/1000;
+            log.info("Time is "+diff);
+            System.out.println("Terminé avec code : " + exitCode);
         } catch (IOException ex) {
             // What to do if no dosbox path is available
             if (preferences.getDosBoxPath().isEmpty()) {
@@ -101,8 +122,14 @@ public class DosBoxManager {
                 log.error("error", ex);
                 throw new DosBoxException(DOSBOX_NOTFOUND);
             }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-        return returnOK;
+
+        if (exitCode!=0){
+            return 1000-exitCode;
+        }
+        return diff;
     }
 
     private void generateConfiguration(String program, GameApp gameApp) {

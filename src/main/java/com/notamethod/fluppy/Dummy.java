@@ -21,11 +21,3 @@ public class Dummy {
         return imagePaths2;
     }
 }
-//List<String> options = Arrays.asList("Rouge", "Vert", "Bleu");
-//ChoiceDialog<String> dialog = new ChoiceDialog<>("Vert", options);
-//dialog.setTitle("Choix de couleur");
-//dialog.setHeaderText("Veuillez choisir une couleur");
-//dialog.setContentText("Couleur :");
-//
-//Optional<String> result = dialog.showAndWait();
-//result.ifPresent(color -> System.out.println("Couleur choisie : " + color));

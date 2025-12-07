@@ -785,3 +785,11 @@
         transparent 3px);
 }
 
+.blockTitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #4bccc3;
+
+}
+.blockTitle:hover {
+    -fx-cursor: hand;
+}

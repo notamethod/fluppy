@@ -4,10 +4,12 @@ import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Slf4j
 public class GameManager {
+    private static final int MAX_GENRE = 3;
     private ApplicationDatabase applicationDatabase;
 
     public GameManager(ApplicationDatabase applicationDatabase) {
@@ -32,7 +34,9 @@ public class GameManager {
 
 
     public List<GameApp> loadAll() {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.loadAllGames());
+        List<GameApp> games = GameMapper.INSTANCE.toGameApps(applicationDatabase.loadAllGames());
+        log.debug("Loaded {} games", games.size());
+        return games;
     }
 
     public void save(GameApp gameApp) {
@@ -42,13 +46,13 @@ public class GameManager {
             gameEntity.getGenres().add(gent);
         }
         //TODO: why in a dedcated class ?
+        gameEntity.setAdded(LocalDateTime.now());
         applicationDatabase.saveGame(gameEntity);
     }
 
     public GameApp getGame(String name) {
         if (name == null)
             return null;
-
         name = name.toLowerCase();
         List<GameEntity> entiites = applicationDatabase.findGameByName(name);
         if (!entiites.isEmpty()) {
@@ -58,7 +62,7 @@ public class GameManager {
     }
 
     public void addGame(GameApp game) throws GameManagerException {
-        if (game.getName()==null){
+        if (game.getName() == null) {
             log.error("game name is null");
             return;
         }
@@ -66,7 +70,14 @@ public class GameManager {
         log.debug("adding game ->{} <- to database", game.getName());
         List<GameEntity> entiites = applicationDatabase.findGameByNameAndYear(game.getName(), game.getYear());
         if (!entiites.isEmpty()) {
-            throw new GameManagerException("game already in database");
+            StringBuilder b = new StringBuilder();
+            for (GameEntity gamelog:entiites){
+                b.append(gamelog.getId()).append("/").append(gamelog.getGame()).append("/")
+                        .append(gamelog.getGameYear())
+                        .append("/").append(gamelog.getGamePath())
+                        .append(">>>");
+            }
+            throw new GameManagerException("game already in database: "+b.toString());
         }
         if (HelperClass.gameIsInTempDir(game)) {
             try {
@@ -76,7 +87,40 @@ public class GameManager {
                 return;
             }
         }
-
         save(game);
+    }
+
+    public void updateTime(GameApp game, Long time) {
+        GameEntity entiity= applicationDatabase.findGameById(game.getId());
+
+        entiity.setTimePlayed(entiity.getTimePlayed()==null?time:entiity.getTimePlayed()+time);
+        entiity.setLastPlayed(LocalDateTime.now());
+        applicationDatabase.saveGame(entiity);
+    }
+
+    public List<GameApp> loadAllButNot(Set<Long> gameIds) {
+        List<GameApp> games = GameMapper.INSTANCE.toGameApps(applicationDatabase.loadAllGamesButNot(gameIds));
+        log.debug("Loaded {} games", games.size());
+        return games;
+    }
+
+    public  List<GameApp> getMostPlayedGames(int maxResult) {
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where game.timePlayed>60 order by game.timePlayed DESC",maxResult));
+    }
+
+    public  List<GameApp> getFavoriteGames(int maxResult) {
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where game.favorite=true order by game.name",maxResult));
+    }
+
+    public List<GameApp> getLastAdded(int maxResult) {
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game order by game.added DESC",maxResult));
+    }
+    public List<GameApp> getLastPlayed() {
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game order by game.lastPlayed DESC",5));
+    }
+
+    public List<GameApp> getFromGenre(String genre, int limit) {
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByGenre(genre, limit));
+
     }
 }

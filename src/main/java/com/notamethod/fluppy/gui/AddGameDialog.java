@@ -38,7 +38,7 @@ public class AddGameDialog extends Stage {
 
     private ApiCalls apiCalls;
     private final ObservableList<GameApp> result = FXCollections.observableArrayList();
-
+    private static final String  FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
     private FileActions fileActions;
     private boolean haErrors=false;
     public AddGameDialog(List<File> metaGamesFiles,  ApiCalls apiCalls) {
@@ -62,7 +62,8 @@ public class AddGameDialog extends Stage {
         List <String> extractionErrors =new ArrayList<>();
         Map<String, List <String>> errorTypes = new HashMap<>();
         errorTypes.put("Error extracting the folowwing files:",extractionErrors);
-        int row=0;
+        int listRow=0;
+        int order=0;
         for (File metaGameFile : metaGamesFiles){
             GameApp metaGame=null;
             try {
@@ -78,7 +79,7 @@ public class AddGameDialog extends Stage {
                 extractionErrors.add(metaGameFile.getAbsolutePath());
                 continue;
             }
-
+            order++;
 
             String searchString=metaGame.getSearchName();
 
@@ -103,7 +104,7 @@ public class AddGameDialog extends Stage {
                     }
                 }
             });
-
+            Label orderLabel = new Label(String.valueOf(order));
             Label titleGame = new Label(searchString);
             titleGame.getStyleClass().add("subtitle");
             Label labelExe = new Label(Messages.getString("dialog.select_executable.header"));
@@ -125,20 +126,23 @@ public class AddGameDialog extends Stage {
                 }
                 foundBox.setValue(foundBox.getItems().getFirst());
             });
-
-            grid.add(titleGame, 0, row++,6,1);
-            grid.add(labelExe, 0, row);
-            grid.add(comboExeFiles, 1, row);
-            grid.add(labelSearch, 2, row);
-            grid.add(nameSearch, 3, row);
-            grid.add(refreshButton, 4, row);
+            System.out.println("before grid "+listRow+"<->"+order);
+            grid.add(titleGame, 0, listRow++,6,1);
+            grid.add(orderLabel, 0, listRow);
+            grid.add(labelExe, 1, listRow);
+            grid.add(comboExeFiles, 2, listRow);
+            grid.add(labelSearch, 3, listRow);
+            grid.add(nameSearch, 4, listRow);
+            grid.add(refreshButton, 5, listRow);
             Label labelFound= new Label(Messages.getString("dialog.select_appname.text.short"));
 
-            grid.add(labelFound, 5, row);
-            grid.add(foundBox, 6, row);
-            row++;
-            //HBox cheminBox = new HBox(10, cheminField, browseButton);
+            grid.add(labelFound, 6, listRow);
+            grid.add(foundBox, 7, listRow);
 
+            listRow++;
+            //HBox cheminBox = new HBox(10, cheminField, browseButton);
+            System.out.println("after grid "+listRow+"<->"+order);
+            System.out.println("after grid "+foundBoxes.size());
             if (searchString!=null){
                 foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
                 if (!foundBox.getItems().isEmpty()){
@@ -218,12 +222,12 @@ public class AddGameDialog extends Stage {
     private void updateGameList(List<ComboBox<GameApiBean>> foundBoxes, List<ComboBox<File>> comboExeFilesList) {
         int i=0;
         for (GameApp metaGame:result){
+            log.debug("meta "+metaGame.getName()+"-"+metaGame.getGameExe());
             GameApiBean game=foundBoxes.get(i).getValue();
             try {
                 if (game != null) {
                     metaGame.setName(game.getName());
                     //FIXME
-
                     if (game.getGenres() != null) {
                         for (Genre genre : game.getGenres()) {
                             GenreApp genraApp = new GenreApp();
@@ -237,24 +241,22 @@ public class AddGameDialog extends Stage {
                     metaGame.setYear(game.getYear() == null ? 1970 : Integer.valueOf(game.getYear()));
                     if (game.getCover() != null) {
                         try {
-                            String coverFilename = "cover_" + game.getName().replace(" ", "").replace("?", "").toLowerCase() + game.getYear();
+                            String sanitizedName = game.getName().replaceAll(FORBIDDEN_CHARS_NAME, "");
+                            String coverFilename = "cover_" + sanitizedName.replace(" ", "").toLowerCase() + game.getYear();
                             metaGame.setImagePath(Paths.get(apiCalls.getCover(Configuration.coverFolder, coverFilename, game.getCover(), 2)));
                         } catch (ApiException | MappingException e) {
-                            throw new RuntimeException(e);
+                           // throw new RuntimeException(e);
+                            log.error("error",e);
                         }
                     }
                     File exeFile=comboExeFilesList.get(i).getValue();
                     metaGame.setGameExe(exeFile.getName());
                     metaGame.setExePath(Paths.get(exeFile.getAbsolutePath().substring(0, exeFile.getAbsolutePath().lastIndexOf(File.separatorChar))));
 
-                    //TODO: cover
+                    log.debug("meta2 "+metaGame.getName()+"-"+metaGame.getGameExe());
                 } else {
-                    continue;
+                  //  continue;
                 }
-
-//                if (!da.showConfirmDialog("null", "Adding game " + metaGame.getName() + " to the list ?")) {
-//                    return Optional.empty();
-//                }
 
               //  return Optional.of(metaGame);
             } catch (Exception e) {
@@ -263,7 +265,7 @@ public class AddGameDialog extends Stage {
             }
            // return Optional.empty();
 
-
+            i++;
         }
     }
 
