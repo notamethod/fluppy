@@ -28,8 +28,8 @@ public class ImageUtils {
             preserveRatio=false;
         }
         ImageView imageView  = new ImageView(image);
-        imageView.setFitWidth(150);
-        imageView.setFitHeight(200);
+        imageView.setFitWidth(STANDARD_WIDTH);
+        imageView.setFitHeight(STANDARD_HEIGHT);
         imageView.setPreserveRatio(preserveRatio);
         return imageView;
     }
@@ -63,7 +63,7 @@ public class ImageUtils {
         imageView.setFitWidth(fitWidth);
         imageView.setFitHeight(fitHeight);
         label.maxWidthProperty().bind(stackPane.widthProperty());
-        label.setWrapText(true); // si tu veux que le texte passe à la ligne
+        label.setWrapText(true);
         stackPane.getChildren().addAll(imageView, label);
         return stackPane;
     }

@@ -10,8 +10,7 @@ import jakarta.persistence.EntityManagerFactory;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.Effect;
@@ -25,6 +24,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 
 import javafx.scene.text.Font;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -49,7 +49,8 @@ public class GamesWall extends Application {
     GameManager gameManager;
     CategoryManager categoryManager;
 
-    TilePane tilePanex;
+    StackPane midRoot;
+    GameDetailPanel detailPane;
     List<VBox> gamesBlocks = new ArrayList<>();
     VBox content;
     private double xOffset = 0;
@@ -61,6 +62,8 @@ public class GamesWall extends Application {
     @Override
     public void init() throws Exception {
         super.init();
+        //DTP
+
         effects = new Effects();
         EntityManagerFactory emf = JpaUtil.getEntityManagerFactory();
 
@@ -75,11 +78,17 @@ public class GamesWall extends Application {
 
         gameManager = new GameManager(applicationDatabase);
         categoryManager = new CategoryManager(applicationDatabase);
+        detailPane = new GameDetailPanel(dosBoxManager, gameManager);
         gameCategories = categoryManager.getShownCategories();
         //FIXME:remove locale test
         // Locale locale = Locale.getDefault();//new Locale("fr"); // ou "en", "de", etc.
         Locale locale = new Locale("fr"); // ou "en", "de", etc.
-        Font font = FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
+        FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
+        FontUtils.loadCustomFont("MonkeyIsland-1991.ttf", 16);
+        FontUtils.loadCustomFont("MonkeyIsland-1990.ttf", 16);
+        FontUtils.loadCustomFont("lucasarts-scumm-menu-shadow.otf", 16);
+        FontUtils.loadCustomFont("lucasarts-scumm-solid.otf", 16);
+        FontUtils.loadCustomFont("lucasarts-scumm-outline.otf", 16);
     }
 
     @Override
@@ -113,8 +122,6 @@ public class GamesWall extends Application {
             e.consume();
         });
 
-
-
         // Label overlay
         Label dropLabel = new Label(Messages.getString("drop.here"));
         dropLabel.setTextFill(Color.GRAY);
@@ -123,13 +130,20 @@ public class GamesWall extends Application {
 
         scrollPane.setFitToWidth(true); // Pour que le contenu prenne toute la largeur
         scrollPane.setStyle("-fx-background: transparent;");
+        scrollPane.setId("scrollpane-tiles");
 
         VBox root0 = new VBox();
         // Cette ligne est cruciale
         VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
         StackPane topRibbon0 = new StackPane(topRibbon, dropLabel);
 
-        root0.getChildren().addAll(/*titleBar, */topRibbon0, scrollPane);
+
+        midRoot = new StackPane();
+        midRoot.setId("midRoot");
+        midRoot.getChildren().addAll(scrollPane, detailPane);
+
+        root0.getChildren().addAll(/*titleBar, */topRibbon0, midRoot);
+        midRoot.setId("realRoot");
         Scene scene = new Scene(root0, 900, 700);
 
         /*  drag&drop on top ribbon */
@@ -315,6 +329,7 @@ public class GamesWall extends Application {
 
     private VBox createBlock(Category category, List<GameApp> games, Set<Long> gameIds){
         TilePane tilePane = new TilePane();
+        tilePane.setId("tilePane-"+category.getCategoryType());
         tilePane.setPadding(new Insets(20, 10, 10, 0)); // top, right, bottom, left
         tilePane.setHgap(5);
         tilePane.setVgap(10);
@@ -324,6 +339,7 @@ public class GamesWall extends Application {
             if (!gameIds.contains(gameStr.getId())) {
                 gameIds.add(gameStr.getId());
                 GameTile container = addGame(gameStr);
+
                 tilePane.getChildren().add(container);
             }
         }
@@ -359,45 +375,16 @@ public class GamesWall extends Application {
     private GameTile addGame(GameApp game) {
         StackPane imagePane = ImageFactory.getThumb(game);
 
-        //**********************************
         // Panneau d'infos caché
-        HBox infoPanelActions = new HBox();
 
-        VBox infoPanel = new VBox();
-        Button launchButton = new Button(">");
-
-        launchButton.setOnAction(e -> {
-            try {
-                Long time=dosBoxManager.runApplication(game.getGameExe(), game);
-                gameManager.updateTime(game, time);
-            } catch (DosBoxException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        infoPanel.setPrefWidth(150);
-        infoPanel.setStyle("-fx-background-color: #2c2c2c; -fx-padding: 10px;");
-        infoPanelActions.getChildren().add(launchButton); // column=1 row=0
-        infoPanelActions.getChildren().add(new Button("y"));  // column=2 row=0
-        infoPanel.getChildren().add(infoPanelActions);
-        infoPanel.getChildren().add(new Label(game.getName()));
-        infoPanel.getChildren().add(new Label(String.valueOf(game.getYear())));
-        infoPanel.setVisible(false);
-        infoPanel.setOpacity(0);
         GameTile container;
+
         // Empilement vertical : image puis panneau
 
 
-        container = new GameTile(5, game, imagePane, infoPanel);
+        container = new GameTile(5, game, imagePane);
 
-//250*330
-        // Animation fade in/out
-        FadeTransition fadePanelIn = new FadeTransition(Duration.millis(300), infoPanel);
-        fadePanelIn.setFromValue(0);
-        fadePanelIn.setToValue(1);
-
-        FadeTransition fadePanelOut = new FadeTransition(Duration.millis(300), infoPanel);
-        fadePanelOut.setFromValue(1);
-        fadePanelOut.setToValue(0);
+        container.setId("container-"+game.getName());
 
         //*****************************************
 
@@ -411,40 +398,50 @@ public class GamesWall extends Application {
         MenuItem editItem = new MenuItem(Messages.getString("game.action.edit"));
         MenuItem deleteItem = new MenuItem("Supprimer");
 
-// Actions des items
-        openItem.setOnAction(e -> System.out.println("Ouvrir : " + game.getName()));
-        infoItem.setOnAction(e -> System.out.println("Infos : " + game.getName()));
         editItem.setOnAction(e -> actionEdit(game));
         deleteItem.setOnAction(e -> actionDelete(game));
 
 // Ajout des items au menu
         contextMenu.getItems().addAll(openItem, editItem, infoItem, deleteItem);
 
+        PauseTransition hoverDelay = new PauseTransition(Duration.millis(800));
+        hoverDelay.setOnFinished(e -> {
+            Point2D point=caculatePosition(container);
+            detailPane.show(game, point.getX(), point.getY());
+        });
+        PauseTransition hoverDelayExit = new PauseTransition(Duration.millis(50));
+        hoverDelayExit.setOnFinished(e -> {
+            if (!detailPane.isHover())
+                detailPane.hide();
+
+        });
+
         container.setOnMouseEntered(e -> {
             //imageView.setOpacity(0.0); // démarre transparent
             FadeTransition fadeIn = new FadeTransition(Duration.millis(600), container);
-            fadeIn.setFromValue(0.7);
-            fadeIn.setToValue(1.0);
+            fadeIn.setFromValue(1.0);
+            fadeIn.setToValue(0.9);
             fadeIn.play();
             ScaleTransition zoomIn = new ScaleTransition(Duration.millis(300), container);
-            zoomIn.setToX(1.05);
-            zoomIn.setToY(1.05);
+            zoomIn.setToX(1.04);
+            zoomIn.setToY(1.04);
             zoomIn.play();
-            infoPanel.setVisible(true);
-            fadePanelIn.play();
+            hoverDelay.playFromStart();
+
         });
 
         container.setOnMouseExited(e -> {
             FadeTransition hoverFade = new FadeTransition(Duration.millis(300), container);
-            hoverFade.setFromValue(0.7);
+            hoverFade.setFromValue(0.9);
             hoverFade.setToValue(1.0);
             hoverFade.play();
             ScaleTransition zoomOut = new ScaleTransition(Duration.millis(200), container);
             zoomOut.setToX(1.0);
             zoomOut.setToY(1.0);
             zoomOut.play();
-            fadePanelOut.play();
-            fadePanelOut.setOnFinished(ev -> infoPanel.setVisible(false));
+            hoverDelay.stop();
+            hoverDelayExit.playFromStart();
+
 
         });
 
@@ -466,7 +463,34 @@ public class GamesWall extends Application {
                 }
             }
         });
+
+//        // Netflix-style : cacher seulement si la souris quitte la tuile ET le panneau
+//        container.hoverProperty().addListener((obs, wasHover, isHover) -> {
+//            if (!isHover && !detailPane.isHover()) {
+//                detailPane.hide();
+//            }
+//        });
+//
+//        detailPane.hoverProperty().addListener((obs, wasHover, isHover) -> {
+//            if (!isHover && !container.isHover()) {
+//                detailPane.hide();
+//            }
+//        });
         return container;
+    }
+
+    private Point2D caculatePosition(GameTile container) {
+        int fixX=-200;
+        int fixY=-270;
+        int prevWidth=600;
+        Bounds bounds = container.localToScene(container.getBoundsInLocal());
+        Bounds screen = midRoot.localToScene(midRoot.getBoundsInLocal());
+        Point2D point = container.getScene().getRoot().sceneToLocal(bounds.getMinX(), bounds.getMinY());
+        Point2D fixedPoint=point.add(fixX,fixY);
+        double diffx=(fixedPoint.getX()+prevWidth)-900/*screen.getMaxX()*/;
+        if (diffx>0)
+            fixedPoint=fixedPoint.add(-1.1*diffx,0);
+        return fixedPoint;
     }
 
 

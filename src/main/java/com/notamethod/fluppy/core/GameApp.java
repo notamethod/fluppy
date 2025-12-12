@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -32,6 +33,10 @@ public class GameApp {
     private List<File> exeFiles = new ArrayList<>();
     private List<File> installers = new ArrayList<>();
     private Set<GenreApp> genres = new HashSet<>();
+    private int ageRating;
+    private LocalDateTime added;
+    private LocalDateTime lastPlayed;
+    private Long timePlayed;
 
     /**
      * Update game info

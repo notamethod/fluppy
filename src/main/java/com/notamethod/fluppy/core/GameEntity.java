@@ -39,8 +39,9 @@ public class GameEntity {
     private boolean favorite = false;
     private LocalDateTime added;
     private LocalDateTime lastPlayed;
+    @Column(nullable = false)
     private Long timePlayed;
-
+    private int ageRating;
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(

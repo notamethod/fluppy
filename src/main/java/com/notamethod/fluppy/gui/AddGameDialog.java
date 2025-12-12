@@ -64,6 +64,8 @@ public class AddGameDialog extends Stage {
         errorTypes.put("Error extracting the folowwing files:",extractionErrors);
         int listRow=0;
         int order=0;
+        this.setMaxHeight(500);
+        this.setMaxWidth(1500);
         for (File metaGameFile : metaGamesFiles){
             GameApp metaGame=null;
             try {
@@ -112,10 +114,14 @@ public class AddGameDialog extends Stage {
             Label labelSearch = new Label(Messages.getString("dialog.select_appname.text.short"));
             TextField nameSearch = new TextField(searchString);
             Button refreshButton = new Button("<>");
-
+            Button deleteButton = new Button("x");
             ComboBox<GameApiBean> foundBox = new ComboBox<>();
             foundBox.setMaxWidth(400);
             foundBoxes.add(foundBox);
+            deleteButton.setOnAction(e -> {
+                foundBox.setValue(null);
+                foundBox.setDisable(true);
+            });
             refreshButton.setOnAction(e -> {
                 foundBox.getItems().clear();
                 foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
@@ -125,10 +131,10 @@ public class AddGameDialog extends Stage {
                     foundBox.getItems().add(dummyGame);
                 }
                 foundBox.setValue(foundBox.getItems().getFirst());
+
             });
-            System.out.println("before grid "+listRow+"<->"+order);
             grid.add(titleGame, 0, listRow++,6,1);
-            grid.add(orderLabel, 0, listRow);
+            grid.add(deleteButton, 0, listRow);
             grid.add(labelExe, 1, listRow);
             grid.add(comboExeFiles, 2, listRow);
             grid.add(labelSearch, 3, listRow);
@@ -193,6 +199,7 @@ public class AddGameDialog extends Stage {
         HBox buttonBox = new HBox(10, saveButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
         scrollPane.setStyle("-fx-background-color: red;");
+        VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
         content.getChildren().add(scrollPane);
         VBox layout = new VBox(15,
                 content,
@@ -221,9 +228,16 @@ public class AddGameDialog extends Stage {
 
     private void updateGameList(List<ComboBox<GameApiBean>> foundBoxes, List<ComboBox<File>> comboExeFilesList) {
         int i=0;
+
         for (GameApp metaGame:result){
+            if (foundBoxes.get(i).isDisabled()){
+                metaGame=null;
+                i++;
+                continue;
+            }
             log.debug("meta "+metaGame.getName()+"-"+metaGame.getGameExe());
             GameApiBean game=foundBoxes.get(i).getValue();
+
             try {
                 if (game != null) {
                     metaGame.setName(game.getName());

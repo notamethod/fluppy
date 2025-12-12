@@ -785,6 +785,12 @@
         transparent 3px);
 }
 
+.game-title{
+     -fx-text-fill: #b3b300;
+    -fx-font-family: "Monkey Island 1990", "Courier New";
+    -fx-font-size: 16px;
+}
+
 .blockTitle {
     -fx-font-size: 14px;
     -fx-text-fill: #4bccc3;

@@ -3,8 +3,13 @@ package com.notamethod.fluppy.gui;
 
 
 import javafx.scene.text.Font;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FontUtils {
+
+    private FontUtils() {
+    }
 
     /**
      * Charge une police personnalisée depuis les ressources.
@@ -14,10 +19,15 @@ public class FontUtils {
      */
     public static Font loadCustomFont(String fontPath, double size) {
         try {
-            return Font.loadFont(FontUtils.class.getResourceAsStream("/font/"+fontPath), size);
+            Font font = Font.loadFont(FontUtils.class.getResourceAsStream("/font/"+fontPath), size);
+            if (font==null){
+                log.warn("Erreur lors du chargement de la police : " + fontPath);
+                return Font.getDefault();
+            }
+            log.info("Font loaded: "+font.getName()+"<->"+font.getFamily());
+            return font;
         } catch (Exception e) {
-            System.err.println("Erreur lors du chargement de la police : " + fontPath);
-            e.printStackTrace();
+            log.warn("Erreur lors du chargement de la police : " + fontPath,e);
             return Font.getDefault();
         }
     }
