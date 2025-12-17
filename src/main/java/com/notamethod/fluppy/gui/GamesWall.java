@@ -56,7 +56,7 @@ public class GamesWall extends Application {
     private double xOffset = 0;
     private double yOffset = 0;
     Effects effects;
-    private Category expandCategory=null;
+    private Category expandCategory = null;
     List<Category> gameCategories = new ArrayList<>();
 
     @Override
@@ -284,11 +284,11 @@ public class GamesWall extends Application {
         this.gamesBlocks.clear();
         content.getChildren().clear();
         Set<Long> gameIds = new HashSet<>();
-        if (expandCategory!=null){
+        if (expandCategory != null) {
             VBox box = createBlock(expandCategory, 25, gameIds);
             gamesBlocks.add(box);
 
-        }else {
+        } else {
             for (int i = 0; i < gameCategories.size(); i++) {
                 VBox box = createBlock(gameCategories.get(i), 5, gameIds);
                 if (box != null) {
@@ -302,36 +302,36 @@ public class GamesWall extends Application {
 
     private VBox createBlock(Category category, int count, Set<Long> gameIds) {
         List<GameApp> games;
-        switch (category.getCategoryType()){
+        switch (category.getCategoryType()) {
             case RECENTLY_ADDED:
-                games =gameManager.getLastAdded(count);
+                games = gameManager.getLastAdded(count);
                 break;
             case MOST_PLAYED:
-                games =gameManager.getMostPlayedGames(count);
+                games = gameManager.getMostPlayedGames(count);
                 break;
             case FAVORITES:
-                games =gameManager.getFavoriteGames(count);
+                games = gameManager.getFavoriteGames(count);
                 break;
             case GENRE:
-                if ("all".equals(category.getId())){
-                    games =gameManager.loadAllButNot(gameIds);
-                }else {
+                if ("all".equals(category.getId())) {
+                    games = gameManager.loadAllButNot(gameIds);
+                } else {
                     games = gameManager.getFromGenre(category.getId(), count);
                 }
                 break;
             default:
-                games =null;
+                games = null;
         }
-        if (games!=null&& !games.isEmpty()){
+        if (games != null && !games.isEmpty()) {
             return createBlock(category, games, gameIds);
         }
         return null;
     }
 
 
-    private VBox createBlock(Category category, List<GameApp> games, Set<Long> gameIds){
+    private VBox createBlock(Category category, List<GameApp> games, Set<Long> gameIds) {
         TilePane tilePane = new TilePane();
-        tilePane.setId("tilePane-"+category.getCategoryType());
+        tilePane.setId("tilePane-" + category.getCategoryType());
         tilePane.setPadding(new Insets(20, 10, 10, 0)); // top, right, bottom, left
         tilePane.setHgap(5);
         tilePane.setVgap(10);
@@ -359,16 +359,14 @@ public class GamesWall extends Application {
 
     private void activateCategory(Category category) {
 
-        if (category.getCategoryType().equals(CategoryType.GENRE)&& "all".equals(category.getId()))
+        if (category.getCategoryType().equals(CategoryType.GENRE) && "all".equals(category.getId()))
             return;
-        if (expandCategory!=null && expandCategory.getCategoryType().equals(category.getCategoryType())
-        && category.getId().equals(expandCategory.getId())){
-            expandCategory=null;
-        }
-        else if (expandCategory == null || (expandCategory!=null && !category.getId().equals(expandCategory.getId()))){
-            expandCategory=category;
-        }
-        else {
+        if (expandCategory != null && expandCategory.getCategoryType().equals(category.getCategoryType())
+                && category.getId().equals(expandCategory.getId())) {
+            expandCategory = null;
+        } else if (expandCategory == null || (expandCategory != null && !category.getId().equals(expandCategory.getId()))) {
+            expandCategory = category;
+        } else {
             expandCategory = null;
         }
         updateList();
@@ -386,7 +384,7 @@ public class GamesWall extends Application {
 
         container = new GameTile(5, game, imagePane);
 
-        container.setId("container-"+game.getName());
+        container.setId("container-" + game.getName());
 
         //*****************************************
 
@@ -408,7 +406,7 @@ public class GamesWall extends Application {
 
         PauseTransition hoverDelay = new PauseTransition(Duration.millis(800));
         hoverDelay.setOnFinished(e -> {
-            Point2D point=caculatePosition(container);
+            Point2D point = caculatePosition(container);
             detailPane.show(game, point.getX(), point.getY());
         });
         PauseTransition hoverDelayExit = new PauseTransition(Duration.millis(50));
@@ -482,16 +480,16 @@ public class GamesWall extends Application {
     }
 
     private Point2D caculatePosition(GameTile container) {
-        int fixX=-200;
-        int fixY=-270;
-        int prevWidth=600;
+        int fixX = -200;
+        int fixY = -270;
+        int prevWidth = 600;
         Bounds bounds = container.localToScene(container.getBoundsInLocal());
         Bounds screen = midRoot.localToScene(midRoot.getBoundsInLocal());
         Point2D point = container.getScene().getRoot().sceneToLocal(bounds.getMinX(), bounds.getMinY());
-        Point2D fixedPoint=point.add(fixX,fixY);
-        double diffx=(fixedPoint.getX()+prevWidth)-900/*screen.getMaxX()*/;
-        if (diffx>0)
-            fixedPoint=fixedPoint.add(-1.1*diffx,0);
+        Point2D fixedPoint = point.add(fixX, fixY);
+        double diffx = (fixedPoint.getX() + prevWidth) - 900/*screen.getMaxX()*/;
+        if (diffx > 0)
+            fixedPoint = fixedPoint.add(-1.1 * diffx, 0);
         return fixedPoint;
     }
 

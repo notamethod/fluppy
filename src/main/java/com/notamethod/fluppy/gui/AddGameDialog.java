@@ -146,9 +146,6 @@ public class AddGameDialog extends Stage {
             grid.add(foundBox, 7, listRow);
 
             listRow++;
-            //HBox cheminBox = new HBox(10, cheminField, browseButton);
-            System.out.println("after grid "+listRow+"<->"+order);
-            System.out.println("after grid "+foundBoxes.size());
             if (searchString!=null){
                 foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
                 if (!foundBox.getItems().isEmpty()){

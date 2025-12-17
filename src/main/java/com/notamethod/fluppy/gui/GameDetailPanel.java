@@ -77,7 +77,6 @@ public class GameDetailPanel extends StackPane {
         );
         genre.setText(genres);
         long played=game.getTimePlayed()/60;
-        log.debug("time"+played);
         if (played>60) {
             timePlayed.setText(Messages.getString("game.timeplayed.hour",String.valueOf(played / 60)));
         }
