@@ -785,17 +785,20 @@
         transparent 3px);
 }
 
+.blockTitle {
+
+   -fx-font-family: "LucasArts SCUMM - Subtitle - Roman", "Courier New";
+    -fx-font-size: 28px;
+    -fx-text-fill: #b5a98f;
+}
+
 .game-title{
      -fx-text-fill: #b3b300;
     -fx-font-family: "Monkey Island 1990", "Courier New";
     -fx-font-size: 16px;
 }
 
-.blockTitle {
-    -fx-font-size: 14px;
-    -fx-text-fill: #4bccc3;
 
-}
 .blockTitle:hover {
     -fx-cursor: hand;
 }

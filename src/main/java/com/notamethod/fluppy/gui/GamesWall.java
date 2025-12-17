@@ -89,6 +89,8 @@ public class GamesWall extends Application {
         FontUtils.loadCustomFont("lucasarts-scumm-menu-shadow.otf", 16);
         FontUtils.loadCustomFont("lucasarts-scumm-solid.otf", 16);
         FontUtils.loadCustomFont("lucasarts-scumm-outline.otf", 16);
+        FontUtils.loadCustomFont("lucasarts-scumm-credits.otf", 16);
+        FontUtils.loadCustomFont("lucasarts-scumm-subtitle-roman.otf", 16);
     }
 
     @Override
