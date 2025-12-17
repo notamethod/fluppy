@@ -40,8 +40,16 @@ public class GameEntity {
     private LocalDateTime added;
     private LocalDateTime lastPlayed;
     @Column(nullable = false)
-    private Long timePlayed;
+    private Long timePlayed= 0L;
     private int ageRating;
+
+
+    @PrePersist
+    public void prePersist() {
+        if (timePlayed == null) {
+            timePlayed=0L;
+        }
+    }
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(

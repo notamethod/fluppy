@@ -42,27 +42,22 @@ public class GameDetailPanel extends StackPane {
 
         descriptionLabel.setStyle("-fx-text-fill: white; -fx-wrap-text: true;");
         name.getStyleClass().add("game-title");
-        //label.maxWidthProperty().bind(stackPane.widthProperty());
         name.setWrapText(true);
         launchButton = new Button("Lancer");
         editButton = new Button("Éditer");
         VBox leftContent = new VBox(10, name, genre, timePlayed, new VBox(5, launchButton, editButton));
         HBox content = new HBox(10, imageView, leftContent);
-        // VBox content = new VBox(10, imageView, descriptionLabel, new VBox(5, launchButton, editButton));
         setMaxSize(550, 200);
         launchButton.setOnMouseClicked(e -> {
-            if (e.getButton() == MouseButton.PRIMARY) {
-                if (e.getClickCount() == 1) {
-                    long returne = 0;
-                    log.debug(game.toString());
-                    try {
-                        returne = dosBoxManager.runApplication(game.getGameExe(), game);
-                    } catch (DosBoxException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    gameManager.updateTime(game, returne);
-                    System.out.println(returne);
+            if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 1) {
+                long returne = 0;
+                log.debug(game.toString());
+                try {
+                    returne = dosBoxManager.runApplication(game.getGameExe(), game);
+                } catch (DosBoxException ex) {
+                    throw new RuntimeException(ex);
                 }
+                gameManager.updateTime(game, returne);
             }
         });
         getChildren().add(content);
@@ -81,8 +76,14 @@ public class GameDetailPanel extends StackPane {
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)
         );
         genre.setText(genres);
-        if (game.getTimePlayed()>60){
-            timePlayed.setText(Messages.getString("game.timeplayed "+game.getTimePlayed()/60));
+        long played=game.getTimePlayed()/60;
+        log.debug("time"+played);
+        if (played>60) {
+            timePlayed.setText(Messages.getString("game.timeplayed.hour",String.valueOf(played / 60)));
+        }
+            else if (played>1) {
+            timePlayed.setText(Messages.getString("game.timeplayed.min",String.valueOf(played)));
+
         }else{
             timePlayed.setText(Messages.getString("game.neverplayed"));
         }
