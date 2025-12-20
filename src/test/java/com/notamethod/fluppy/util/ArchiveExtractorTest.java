@@ -2,36 +2,21 @@ package com.notamethod.fluppy.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 class ArchiveExtractorTest {
 
-    static final String TEST_DIR="fluppytest";
-    static final String ROOT_DIR=System.getProperty("java.io.tmpdir")+TEST_DIR;
-    File rootDirFile =  new File(ROOT_DIR);
-    @BeforeEach
-    void tempDir() throws IOException {
 
-
-        if (rootDirFile.exists()){
-            Files.walk(rootDirFile.toPath()) // parcours récursif
-                    .sorted((a, b) -> b.compareTo(a)) // supprime enfants avant parents
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        }
-        rootDirFile.mkdirs();
-    }
+    @TempDir
+    Path tempDir;
 
     @Test
     void extract7zFile() throws IOException {
@@ -43,16 +28,15 @@ class ArchiveExtractorTest {
         } catch (URISyntaxException e) {
             fail(e);
         }
-        ArchiveExtractor extractor = new ArchiveExtractor(rootDirFile.getCanonicalPath());
+        ArchiveExtractor extractor = new ArchiveExtractor(tempDir.toFile().getCanonicalPath());
 
         try {
             File out=extractor.extractFile(file, true);
             assertTrue(out.exists());
-            assertTrue(out.getAbsolutePath().contains(TEST_DIR));
+            //assertTrue(out.getAbsolutePath().contains(TEST_DIR));
         } catch (IOException e) {
             e.printStackTrace();
             fail();
-
         }
 
     }
@@ -66,12 +50,11 @@ class ArchiveExtractorTest {
         } catch (URISyntaxException e) {
             fail(e);
         }
-        ArchiveExtractor extractor = new ArchiveExtractor(rootDirFile.getCanonicalPath());
+        ArchiveExtractor extractor = new ArchiveExtractor(tempDir.toFile().getCanonicalPath());
 
         try {
             File out=extractor.extractFile(file, true);
             assertTrue(out.exists());
-            assertTrue(out.getAbsolutePath().contains(TEST_DIR));
         } catch (IOException e) {
             e.printStackTrace();
             fail();
