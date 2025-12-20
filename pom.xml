@@ -10,6 +10,7 @@
     <name>fluppy-box</name>
 
     <properties>
+        <sonar.organization>notamethod</sonar.organization>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javafx.version>21.0.6</javafx.version>
         <junit.version>5.10.2</junit.version>
