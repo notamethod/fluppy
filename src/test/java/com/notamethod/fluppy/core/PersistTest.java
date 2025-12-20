@@ -2,6 +2,8 @@ package com.notamethod.fluppy.core;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,10 +13,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PersistTest {
 
+    private EntityManagerFactory emf;
+    private ApplicationDatabase applicationDatabase;
+    @BeforeEach
+    void setup() {
+        emf = Persistence.createEntityManagerFactory("ebox2_pu");
+        applicationDatabase = new ApplicationDatabase(emf);
+    }
+
+    @AfterEach
+    void tearDown() {
+        applicationDatabase.close();
+    }
+
     @Test
     void saveGame() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("ebox2_pu");
-        ApplicationDatabase applicationDatabase = new ApplicationDatabase(emf);
+
 
 
         GameManager gameManager = new GameManager(applicationDatabase);
@@ -59,10 +73,10 @@ public class PersistTest {
         games = applicationDatabase.findGameByName("zzz");
         assertEquals(1, games.getFirst().getGenres().size(), "list with two element");
     }
+
     @Test
     public void testGroupByGenre(){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("ebox2_pu");
-        ApplicationDatabase applicationDatabase = new ApplicationDatabase(emf);
+
         GameEntity gameEntity = new GameEntity();
         gameEntity.setName("zzz");
         GenreEntity gent = new GenreEntity();

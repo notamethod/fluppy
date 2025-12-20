@@ -20,8 +20,7 @@ module com.notamethod.fluppy {
 
 
 
-    opens com.notamethod.fluppy to javafx.fxml;
-    exports com.notamethod.fluppy;
+
     exports com.notamethod.fluppy.gui;
     exports com.notamethod.fluppy.core;
     exports com.notamethod.fluppy.api.igdb;

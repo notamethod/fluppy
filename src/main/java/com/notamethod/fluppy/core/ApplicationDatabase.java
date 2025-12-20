@@ -155,4 +155,9 @@ public class ApplicationDatabase {
         q.setMaxResults(maxResult);
         return q.getResultList ();
     }
+    public void close(){
+        entityManager.close();
+        emf.close();
+
+    }
 }
