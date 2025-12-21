@@ -29,11 +29,6 @@ public class PersistTest {
     @Test
     void saveGame() {
 
-
-
-        GameManager gameManager = new GameManager(applicationDatabase);
-
-
         GameEntity gameEntity = new GameEntity();
         gameEntity.setGame("xxx");
         gameEntity.setName("xxx");

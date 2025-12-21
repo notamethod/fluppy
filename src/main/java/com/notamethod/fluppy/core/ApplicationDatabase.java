@@ -140,10 +140,12 @@ public class ApplicationDatabase {
         return genre;
     }
 
-    public List<GameEntity> loadAllGamesButNot(Set<Long> gameIds) {
+    public List<GameEntity> loadAllGamesButNot(Set<Long> gameIds, boolean nsfw) {
         entityManager.getTransaction().begin();
-        Query q = entityManager.createQuery("SELECT game FROM GameEntity game where game.id not in :gameIds order by game.name", GameEntity.class);
+
+        Query q = entityManager.createQuery("SELECT game FROM GameEntity game where game.id not in :gameIds   AND (:nsfw is true OR game.ageRating < 1)  order by game.name", GameEntity.class);
         q.setParameter ("gameIds", gameIds);
+        q.setParameter ("nsfw", nsfw);
         entityManager.getTransaction().commit();
         return q.getResultList ();
     }
@@ -151,10 +153,21 @@ public class ApplicationDatabase {
     public List<GameEntity> runGameQuery(String query, int maxResult) {
         entityManager.getTransaction().begin();
         Query q = entityManager.createQuery(query, GameEntity.class);
+
         entityManager.getTransaction().commit();
         q.setMaxResults(maxResult);
         return q.getResultList ();
     }
+
+    public List<GameEntity> runGameQuery(String query, boolean nsfw, int maxResult) {
+        entityManager.getTransaction().begin();
+        Query q = entityManager.createQuery(query, GameEntity.class);
+        q.setParameter ("nsfw", nsfw);
+        entityManager.getTransaction().commit();
+        q.setMaxResults(maxResult);
+        return q.getResultList ();
+    }
+
     public void close(){
         entityManager.close();
         emf.close();

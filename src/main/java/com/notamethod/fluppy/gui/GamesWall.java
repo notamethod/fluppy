@@ -42,6 +42,9 @@ import java.util.*;
 @Slf4j
 public class GamesWall extends Application {
 
+    private static final int WIDTH=900;
+    private static final int HEIGHT=700;
+    private static final int ROW_SIZE=9;
     ApplicationDatabase applicationDatabase;
     PreferencesBean preferences;
     DosBoxManager dosBoxManager = new DosBoxManager();
@@ -58,7 +61,7 @@ public class GamesWall extends Application {
     Effects effects;
     private Category expandCategory = null;
     List<Category> gameCategories = new ArrayList<>();
-
+    private double width=WIDTH;
     @Override
     public void init() throws Exception {
         super.init();
@@ -76,7 +79,7 @@ public class GamesWall extends Application {
             throw new RuntimeException(e);
         }
 
-        gameManager = new GameManager(applicationDatabase);
+        gameManager = new GameManager(applicationDatabase, preferences);
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(dosBoxManager, gameManager);
         gameCategories = categoryManager.getShownCategories();
@@ -146,7 +149,7 @@ public class GamesWall extends Application {
 
         root0.getChildren().addAll(/*titleBar, */topRibbon0, midRoot);
         midRoot.setId("realRoot");
-        Scene scene = new Scene(root0, 900, 700);
+        Scene scene = new Scene(root0, WIDTH, HEIGHT);
 
         /*  drag&drop on top ribbon */
         topRibbon.setOnDragOver(event -> {
@@ -227,7 +230,17 @@ public class GamesWall extends Application {
         gearButton.setStyle("-fx-background-color: transparent;");
         gearButton.setOnAction(e -> {
             PreferencesDialog dialog = new PreferencesDialog(stage);
-            dialog.showAndWait();
+            PreferencesBean neawBean = dialog.showAndWaitForResult();
+            if (neawBean!=null) {
+                if (preferences.isNsfw() != neawBean.isNsfw()) {
+                    preferences.setNsfw(!preferences.isNsfw());
+                    updateList();
+                }
+                if (preferences.isFullScreen() != neawBean.isFullScreen()) {
+                    preferences.setFullScreen(!preferences.isFullScreen());
+                    //updateList();
+                }
+            }
         });
         //plus
         ImageView plusImage = new ImageView(new Image(getClass().getResourceAsStream("/images/add1.png"), 32, 32, false, false));
@@ -235,8 +248,19 @@ public class GamesWall extends Application {
         plusButton.setGraphic(plusImage);
         plusButton.setStyle("-fx-background-color: transparent;");
         plusButton.setOnAction(e -> {
-            AddGameDialog dialog = new AddGameDialog(null, null);
-            dialog.showAndWait();
+           if(stage.isFullScreen()){
+               stage.setFullScreen(false);
+               stage.setMaximized(false);
+               stage.setWidth(WIDTH);
+               width=width;
+               stage.setHeight(HEIGHT);
+               stage.centerOnScreen();
+           }else {
+               stage.setFullScreen(true);
+               width=stage.getWidth();
+           }
+           // AddGameDialog dialog = new AddGameDialog(null, null);
+            //dialog.showAndWait();
         });
 
         //quite
@@ -290,7 +314,7 @@ public class GamesWall extends Application {
 
         } else {
             for (int i = 0; i < gameCategories.size(); i++) {
-                VBox box = createBlock(gameCategories.get(i), 5, gameIds);
+                VBox box = createBlock(gameCategories.get(i), ROW_SIZE, gameIds);
                 if (box != null) {
                     gamesBlocks.add(box);
                 }
@@ -484,10 +508,11 @@ public class GamesWall extends Application {
         int fixY = -270;
         int prevWidth = 600;
         Bounds bounds = container.localToScene(container.getBoundsInLocal());
+        System.out.println(width);
         Bounds screen = midRoot.localToScene(midRoot.getBoundsInLocal());
         Point2D point = container.getScene().getRoot().sceneToLocal(bounds.getMinX(), bounds.getMinY());
         Point2D fixedPoint = point.add(fixX, fixY);
-        double diffx = (fixedPoint.getX() + prevWidth) - 900/*screen.getMaxX()*/;
+        double diffx = (fixedPoint.getX() + prevWidth) - width/*screen.getMaxX()*/;
         if (diffx > 0)
             fixedPoint = fixedPoint.add(-1.1 * diffx, 0);
         return fixedPoint;

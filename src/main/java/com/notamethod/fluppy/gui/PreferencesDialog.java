@@ -7,6 +7,7 @@ import javafx.scene.*;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;
 import javafx.geometry.*;
+
 import java.io.File;
 
 public class PreferencesDialog extends Stage {
@@ -15,6 +16,8 @@ public class PreferencesDialog extends Stage {
     private CheckBox fullscreenCheck;
     private ListView<String> typeList;
     private PreferencesBean preferences;
+    private CheckBox nsfwCheck;
+    private PreferencesBean result;
 
     public PreferencesDialog(Stage owner) {
         initModality(Modality.APPLICATION_MODAL);
@@ -44,7 +47,8 @@ public class PreferencesDialog extends Stage {
         typeList.getItems().addAll("dosbox", "dosbox-x");
         typeList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         typeList.setPrefHeight(80);
-
+        nsfwCheck = new CheckBox("NSFW");
+        nsfwCheck.setSelected(preferences.isNsfw());
         Button saveButton = new Button("Enregistrer");
         Button cancelButton = new Button("Annuler");
 
@@ -54,11 +58,16 @@ public class PreferencesDialog extends Stage {
             System.out.println("Types sélectionnés: " + typeList.getSelectionModel().getSelectedItems());
             preferences.setDosBoxPath(cheminField.getText());
             preferences.setFullScreen(fullscreenCheck.isSelected());
+            preferences.setNsfw(nsfwCheck.isSelected());
             PreferencesIO.save(preferences, "prefs.json");
+            result = preferences;
             close();
         });
 
-        cancelButton.setOnAction(e -> close());
+        cancelButton.setOnAction(e -> {
+            result = null;
+            close();
+        });
 
         HBox buttonBox = new HBox(10, saveButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
@@ -66,15 +75,20 @@ public class PreferencesDialog extends Stage {
         VBox layout = new VBox(15,
                 new Label("Chemin vers DOSBox:"), cheminBox,
                 fullscreenCheck,
-                new Label("Type de DOSBox:"), typeList,
+                new Label("Type de DOSBox:"), typeList, nsfwCheck,
                 buttonBox
         );
         layout.setPadding(new Insets(20));
-        Scene scene=new Scene(layout);
+        Scene scene = new Scene(layout);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         setScene(scene);
 
 
+    }
+
+    public PreferencesBean showAndWaitForResult() {
+        showAndWait(); // bloque jusqu'à fermeture
+        return result;
     }
 }
 

@@ -11,9 +11,11 @@ import java.util.*;
 public class GameManager {
     private static final int MAX_GENRE = 3;
     private ApplicationDatabase applicationDatabase;
+    private PreferencesBean preferences;
 
-    public GameManager(ApplicationDatabase applicationDatabase) {
+    public GameManager(ApplicationDatabase applicationDatabase, PreferencesBean preferences) {
         this.applicationDatabase = applicationDatabase;
+        this.preferences=preferences;
     }
 
     public int deleteGame(GameApp gameApp) {
@@ -45,8 +47,6 @@ public class GameManager {
             GenreEntity gent = applicationDatabase.getGenre(genre.getId()).orElse(GameMapper.INSTANCE.toEntity(genre));
             gameEntity.getGenres().add(gent);
         }
-        //TODO: why in a dedcated class ?
-        gameEntity.setAdded(LocalDateTime.now());
         applicationDatabase.saveGame(gameEntity);
     }
 
@@ -99,13 +99,13 @@ public class GameManager {
     }
 
     public List<GameApp> loadAllButNot(Set<Long> gameIds) {
-        List<GameApp> games = GameMapper.INSTANCE.toGameApps(applicationDatabase.loadAllGamesButNot(gameIds));
+        List<GameApp> games = GameMapper.INSTANCE.toGameApps(applicationDatabase.loadAllGamesButNot(gameIds, preferences.isNsfw()));
         log.debug("Loaded {} games", games.size());
         return games;
     }
 
     public  List<GameApp> getMostPlayedGames(int maxResult) {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where game.timePlayed>60 order by game.timePlayed DESC",maxResult));
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where game.timePlayed>60 and (:nsfw is true OR game.ageRating < 1) order by game.timePlayed DESC",preferences.isNsfw(),maxResult));
     }
 
     public  List<GameApp> getFavoriteGames(int maxResult) {
@@ -113,10 +113,10 @@ public class GameManager {
     }
 
     public List<GameApp> getLastAdded(int maxResult) {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game order by game.added DESC",maxResult));
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)  order by game.added DESC", preferences.isNsfw(), maxResult));
     }
     public List<GameApp> getLastPlayed() {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game order by game.lastPlayed DESC",5));
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where (:nsfw is true OR game.ageRating < 1) order by game.lastPlayed DESC",preferences.isNsfw(),5));
     }
 
     public List<GameApp> getFromGenre(String genre, int limit) {

@@ -62,6 +62,8 @@ public class PreferencesBean implements Serializable {
     @JsonProperty("gamesCount")
     private int gamesCount = 0;
 
+    @JsonProperty("nsfw")
+    private boolean nsfw = false;
 
     // --- Keyboard mapping ---
     private static final Map<String, String> COUNTRY_TO_CODE = Map.ofEntries(

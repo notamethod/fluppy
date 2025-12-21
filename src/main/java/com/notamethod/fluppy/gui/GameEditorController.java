@@ -39,6 +39,8 @@ public class GameEditorController {
     @FXML private Slider cyclesSpinner;
     @FXML private TextField exeFile;
     @FXML private TextField coverPath;
+    @FXML private CheckBox nsfwField;
+    @FXML private CheckBox favoriteField;
     @FXML private ComboBox<String> comboMachines;
 
     private Path exePath;
@@ -72,6 +74,7 @@ public class GameEditorController {
         game.setCycles((int) cyclesSpinner.getValue());
         game.setMachine(comboMachines.getValue());
         String imagePath=coverPath.getText();
+        game.setAgeRating(nsfwField.isSelected()?1:0);
         if (imagePath.isEmpty()){
             imagePath=null;
         }
@@ -79,6 +82,7 @@ public class GameEditorController {
         //game.setRating(Double.parseDouble(ratingField.getText()));
         return game;
     }
+
     public void setGame(GameApp game){
         titleField.setText(game.getName());
         yearField.setText(game.getYear()!=null?String.valueOf(game.getYear()):"?");
@@ -93,6 +97,8 @@ public class GameEditorController {
             }
             coverPath.setText(game.getImagePath().toString());
         }
+        nsfwField.setSelected(game.getAgeRating()>0);
+        game.setAgeRating(nsfwField.isSelected()?1:0);
         cyclesSpinner.setValue(game.getCycles());
         String genres = game.getGenres().stream().map(x->x.getName()).collect(Collectors.joining(","));
         genreField.setText(genres);

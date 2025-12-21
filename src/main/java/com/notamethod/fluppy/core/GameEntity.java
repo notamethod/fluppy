@@ -49,6 +49,9 @@ public class GameEntity {
         if (timePlayed == null) {
             timePlayed=0L;
         }
+        if (added == null) {
+            added=LocalDateTime.now();
+        }
     }
 
     @ManyToMany(cascade = CascadeType.PERSIST)

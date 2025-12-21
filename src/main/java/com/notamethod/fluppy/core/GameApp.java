@@ -65,6 +65,9 @@ public class GameApp {
         if (genres.isEmpty() && !srcGame.genres.isEmpty()) {
             this.genres.addAll(srcGame.genres);
         }
+        this.setTimePlayed(srcGame.getTimePlayed()==null?0:srcGame.getTimePlayed());
+        this.setAdded(srcGame.getAdded());
+       // this.setAgeRating(srcGame.getAgeRating());
     }
 
 
