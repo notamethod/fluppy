@@ -7,9 +7,11 @@ import javafx.scene.*;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;
 import javafx.geometry.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 
+@Slf4j
 public class PreferencesDialog extends Stage {
 
     private TextField cheminField;
@@ -53,9 +55,9 @@ public class PreferencesDialog extends Stage {
         Button cancelButton = new Button("Annuler");
 
         saveButton.setOnAction(e -> {
-            System.out.println("Chemin DOSBox: " + cheminField.getText());
-            System.out.println("Plein écran: " + fullscreenCheck.isSelected());
-            System.out.println("Types sélectionnés: " + typeList.getSelectionModel().getSelectedItems());
+            log.debug("Chemin DOSBox: " + cheminField.getText());
+            log.debug("Plein écran: " + fullscreenCheck.isSelected());
+            log.debug("Types sélectionnés: " + typeList.getSelectionModel().getSelectedItems());
             preferences.setDosBoxPath(cheminField.getText());
             preferences.setFullScreen(fullscreenCheck.isSelected());
             preferences.setNsfw(nsfwCheck.isSelected());

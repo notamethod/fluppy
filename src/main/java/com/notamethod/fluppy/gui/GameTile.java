@@ -11,6 +11,7 @@ public class GameTile extends VBox {
 
     public GameTile(double spacing, GameApp gameApp, Node... children) {
         super(spacing, children);
+        getStyleClass().add("blockGame");
         this.game = gameApp;
     }
 }
