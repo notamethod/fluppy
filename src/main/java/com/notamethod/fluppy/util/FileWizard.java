@@ -18,7 +18,6 @@ public class FileWizard {
         assert  (Objects.requireNonNull(dirfiles).length==18);
         boolean found=false;
         while (!found) {
-            //  if ((dirfiles.length == 1 && dirfiles[0].isDirectory())|| (dirfiles.length == 2 && (dirfiles[0].isDirectory() || dirfiles[1].isDirectory()))) {
             if (dirfiles.length == 1 && dirfiles[0].isDirectory()) {
                 dirfiles = dirfiles[0].listFiles();
             } else {
