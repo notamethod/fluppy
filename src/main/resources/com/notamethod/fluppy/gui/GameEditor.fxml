@@ -10,6 +10,7 @@
         xmlns:fx="http://javafx.com/fxml"
         fx:controller="com.notamethod.fluppy.gui.GameEditorController">
     <content>
+        <VBox spacing="10">
         <TabPane>
         <tabs>
         <Tab text="Informations du jeu">
@@ -126,9 +127,12 @@
             </Tab>
         </tabs>
         </TabPane>
+        <!-- ✅ Barre de boutons personnalisée -->
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Button fx:id="okButton" text="OK" onAction="#handleOk"/>
+            <Button fx:id="cancelButton" text="Annuler" onAction="#handleCancel"/>
+        </HBox>
+    </VBox>
     </content>
-    <buttonTypes>
-        <ButtonType buttonData="OK_DONE" text="OK" />
-        <ButtonType buttonData="CANCEL_CLOSE" text="Annuler" />
-    </buttonTypes>
+
 </DialogPane>

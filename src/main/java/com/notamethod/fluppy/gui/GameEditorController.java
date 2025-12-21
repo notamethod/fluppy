@@ -8,13 +8,18 @@ import com.notamethod.fluppy.api.MappingException;
 import com.notamethod.fluppy.api.igdb.GameApiBean;
 import com.notamethod.fluppy.core.GameApp;
 
+import com.notamethod.fluppy.core.GameManager;
 import com.notamethod.fluppy.gui.common.GameActions;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -42,7 +47,28 @@ public class GameEditorController {
     @FXML private CheckBox nsfwField;
     @FXML private CheckBox favoriteField;
     @FXML private ComboBox<String> comboMachines;
+    @FXML
+    private Button okButton;
 
+    @FXML
+    private Button cancelButton;
+    private GameApp originalGame;
+    private GameManager gameManager;
+    private GameApp result;
+
+    @FXML
+    private void handleOk(ActionEvent event) {
+        System.out.println("OK cliqué");
+        saveGame();
+        closeDialogWithResult(true, event);
+    }
+
+    @FXML
+    private void handleCancel(ActionEvent event) {
+        System.out.println("Annuler cliqué");
+        result=null;
+        closeDialogWithResult(false, event);
+    }
     private Path exePath;
     @FXML
     public void initialize() {
@@ -62,28 +88,48 @@ public class GameEditorController {
         comboMachines.setValue("svga_s3"); // Valeur sélectionnée par défaut
     }
 
-    public GameApp getGame() {
-        GameApp game = new GameApp();
-        game.setName(titleField.getText());
+    private void closeDialogWithResult(boolean ok, ActionEvent event) {
+        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+    }
+
+    public GameApp getResult() {
+
+        return result;
+    }
+
+    public void saveGame(){
+        GameApp editedGame = new GameApp();
+        editedGame.setName(titleField.getText());
         //game.setGenre(genreField.getText());
         //game.setPlatform(platformField.getText());
-        game.setYear( Integer.parseInt(yearField.getText()));
-        game.setExePath(this.exePath);
-        game.setGameExe(exeFile.getText());
+        editedGame.setYear( Integer.parseInt(yearField.getText()));
+        editedGame.setExePath(this.exePath);
+        editedGame.setGameExe(exeFile.getText());
         //game.setGenre(genreField.getText());
-        game.setCycles((int) cyclesSpinner.getValue());
-        game.setMachine(comboMachines.getValue());
+        editedGame.setCycles((int) cyclesSpinner.getValue());
+        editedGame.setMachine(comboMachines.getValue());
         String imagePath=coverPath.getText();
-        game.setAgeRating(nsfwField.isSelected()?1:0);
+        editedGame.setAgeRating(nsfwField.isSelected()?1:0);
         if (imagePath.isEmpty()){
             imagePath=null;
         }
-        game.setImagePath(imagePath==null?null:Path.of(imagePath));
-        //game.setRating(Double.parseDouble(ratingField.getText()));
-        return game;
+        editedGame.setImagePath(imagePath==null?null:Path.of(imagePath));
+
+
+        editedGame.setId(originalGame.getId());
+        editedGame.merge(originalGame);
+        if (!editedGame.equals(originalGame)) {
+            gameManager.save(editedGame);
+            result=editedGame;
+        }else{
+            result=null;
+        }
+
     }
 
+
     public void setGame(GameApp game){
+        this.originalGame = game;
         titleField.setText(game.getName());
         yearField.setText(game.getYear()!=null?String.valueOf(game.getYear()):"?");
         exePath=game.getExePath();
@@ -115,6 +161,7 @@ public class GameEditorController {
         List<GameApiBean> games = null;
         try {
             games = apiCalls.findGame(titleField.getText());
+            updated=true;
         } catch (ApiException | MappingException e) {
             log.error("Internal Error", e);
             return updated;
@@ -169,5 +216,8 @@ public class GameEditorController {
         }
     }
 
+    public void setGameManager(GameManager gameManager) {
+        this.gameManager=gameManager;
+    }
 }
 

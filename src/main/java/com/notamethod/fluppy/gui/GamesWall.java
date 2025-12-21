@@ -143,6 +143,12 @@ public class GamesWall extends Application {
         StackPane topRibbon0 = new StackPane(topRibbon, dropLabel);
 
 
+
+        detailPane.setListener(new PanelListener() {
+            public void onUpdate() { updateList(); }
+            public void onClose() { detailPane.hide(); }
+            }
+        );
         midRoot = new StackPane();
         midRoot.setId("midRoot");
         midRoot.getChildren().addAll(scrollPane, detailPane);
@@ -305,6 +311,7 @@ public class GamesWall extends Application {
     }
 
     private void updateList() {
+        log.debug("update list");
         this.gamesBlocks.clear();
         content.getChildren().clear();
         Set<Long> gameIds = new HashSet<>();
@@ -357,7 +364,7 @@ public class GamesWall extends Application {
         TilePane tilePane = new TilePane();
         tilePane.setId("tilePane-" + category.getCategoryType());
         tilePane.setPadding(new Insets(20, 10, 10, 0)); // top, right, bottom, left
-        tilePane.setHgap(5);
+        tilePane.setHgap(10);
         tilePane.setVgap(10);
         tilePane.setPrefColumns(5);
         tilePane.setAlignment(Pos.TOP_LEFT);
@@ -398,13 +405,7 @@ public class GamesWall extends Application {
 
     private GameTile addGame(GameApp game) {
         StackPane imagePane = ImageFactory.getThumb(game);
-
-        // Panneau d'infos caché
-
         GameTile container;
-
-        // Empilement vertical : image puis panneau
-
 
         container = new GameTile(5, game, imagePane);
 
@@ -417,16 +418,13 @@ public class GamesWall extends Application {
         // Création du menu contextuel
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setStyle("-fx-background-color: #2c2c2c; -fx-text-fill: white;");
-        MenuItem openItem = new MenuItem(Messages.getString("game.action.launch"));
-        MenuItem infoItem = new MenuItem("Infos");
-        MenuItem editItem = new MenuItem(Messages.getString("game.action.edit"));
         MenuItem deleteItem = new MenuItem("Supprimer");
 
-        editItem.setOnAction(e -> actionEdit(game));
+        //editItem.setOnAction(e -> actionEdit(game));
         deleteItem.setOnAction(e -> actionDelete(game));
 
 // Ajout des items au menu
-        contextMenu.getItems().addAll(openItem, editItem, infoItem, deleteItem);
+        contextMenu.getItems().addAll( deleteItem);
 
         PauseTransition hoverDelay = new PauseTransition(Duration.millis(800));
         hoverDelay.setOnFinished(e -> {
@@ -447,8 +445,8 @@ public class GamesWall extends Application {
             fadeIn.setToValue(0.9);
             fadeIn.play();
             ScaleTransition zoomIn = new ScaleTransition(Duration.millis(300), container);
-            zoomIn.setToX(1.04);
-            zoomIn.setToY(1.04);
+            zoomIn.setToX(1.01);
+            zoomIn.setToY(1.01);
             zoomIn.play();
             hoverDelay.playFromStart();
 
@@ -508,7 +506,7 @@ public class GamesWall extends Application {
         int fixY = -270;
         int prevWidth = 600;
         Bounds bounds = container.localToScene(container.getBoundsInLocal());
-        System.out.println(width);
+        log.debug("width:"+width);
         Bounds screen = midRoot.localToScene(midRoot.getBoundsInLocal());
         Point2D point = container.getScene().getRoot().sceneToLocal(bounds.getMinX(), bounds.getMinY());
         Point2D fixedPoint = point.add(fixX, fixY);
@@ -539,7 +537,7 @@ public class GamesWall extends Application {
             Optional<ButtonType> result = dialog.showAndWait();
             if (result.isPresent() && result.get().getButtonData().equals(ButtonBar.ButtonData.OK_DONE)) {
                 // GameEditorController controller = loader.getController();
-                GameApp editedGame = controller.getGame();
+                GameApp editedGame = controller.getResult();
                 editedGame.setId(gameBean.getId());
                 editedGame.merge(gameBean);
                 if (!editedGame.equals(gameBean)) {

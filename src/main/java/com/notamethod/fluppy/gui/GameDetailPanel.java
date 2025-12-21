@@ -4,14 +4,16 @@ import com.notamethod.fluppy.core.*;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 @Slf4j
 public class GameDetailPanel extends StackPane {
@@ -25,6 +27,7 @@ public class GameDetailPanel extends StackPane {
     private final DosBoxManager dosBoxManager;
     private final GameManager gameManager;
     private GameApp game;
+    private PanelListener listener;
 
     public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
         this.dosBoxManager=dosBoxManager;
@@ -45,6 +48,7 @@ public class GameDetailPanel extends StackPane {
         name.setWrapText(true);
         launchButton = new Button("Lancer");
         editButton = new Button("Éditer");
+        editButton.setOnMouseClicked(event -> editAction());
         VBox leftContent = new VBox(10, name, genre, timePlayed, new VBox(5, launchButton, editButton));
         HBox content = new HBox(10, imageView, leftContent);
         setMaxSize(550, 200);
@@ -58,12 +62,36 @@ public class GameDetailPanel extends StackPane {
                     throw new RuntimeException(ex);
                 }
                 gameManager.updateTime(game, returne);
+                if (listener != null) listener.onClose();
             }
         });
         getChildren().add(content);
     }
 
+    private void editAction() {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("GameEditor.fxml"));
+                DialogPane dialogPane = loader.load();
+                Dialog<ButtonType> dialog = new Dialog<>();
+                dialog.setDialogPane(dialogPane);
+                dialog.setTitle("Éditer un jeu");
 
+                GameEditorController controller = loader.getController();
+                controller.setGameManager(gameManager);
+                controller.setGame(game);
+
+                dialog.showAndWait();
+                GameApp editedGame = controller.getResult();
+                if (editedGame!=null){
+                    if (listener != null) listener.onUpdate();
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+    }
 
 
     public void show(GameApp game, double x, double y) {
@@ -108,6 +136,11 @@ public class GameDetailPanel extends StackPane {
 
     public void hide() {
         setVisible(false);
+    }
+
+
+    public void setListener(PanelListener listener) {
+        this.listener = listener;
     }
 }
 
