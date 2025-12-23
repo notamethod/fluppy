@@ -505,15 +505,27 @@ public class GamesWall extends Application {
         int fixX = -200;
         int fixY = -270;
         int prevWidth = 600;
-        Bounds bounds = container.localToScene(container.getBoundsInLocal());
-        log.debug("width:"+width);
-        Bounds screen = midRoot.localToScene(midRoot.getBoundsInLocal());
-        Point2D point = container.getScene().getRoot().sceneToLocal(bounds.getMinX(), bounds.getMinY());
-        Point2D fixedPoint = point.add(fixX, fixY);
-        double diffx = (fixedPoint.getX() + prevWidth) - width/*screen.getMaxX()*/;
+        Bounds tileSceneBounds  = container.localToScene(container.getBoundsInLocal());
+        detailPane.applyCss();
+        detailPane.layout();
+        double fixWidth=midRoot.getWidth()-WIDTH>0?(midRoot.getWidth()-WIDTH)/2:0;
+        double fixHeight=fixWidth>0?(midRoot.getHeight()-HEIGHT)/2:0;
+
+        Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
+
+
+        Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
+        Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
+
+        Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX()-container.getWidth()-fixWidth-40, tileParentBounds.getMinY() - container.getHeight()-fixHeight);
+        double diffx = (fixedPoint2.getX() + prevWidth) - width/*screen.getMaxX()*/;
+        System.out.println("tile"+tileSceneBounds.getMinX()+prevWidth);
+        System.out.println("tile"+screenBounds.getMinX()+prevWidth);
+        System.out.println("diff:"+diffx);
+        double decalRatio=-1.1;
         if (diffx > 0)
-            fixedPoint = fixedPoint.add(-1.1 * diffx, 0);
-        return fixedPoint;
+            fixedPoint2 = fixedPoint2.add(decalRatio* diffx, 0);
+        return fixedPoint2;
     }
 
 

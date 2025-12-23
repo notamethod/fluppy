@@ -114,9 +114,10 @@ public class GameDetailPanel extends StackPane {
         }else{
             timePlayed.setText(Messages.getString("game.neverplayed"));
         }
-        setTranslateX(x);
-        setTranslateY(y);
+      setTranslateX(x);
+     setTranslateY(y);
 
+//        setTranslateY(y);
         setScaleX(0.8);
         setScaleY(0.8);
         setOpacity(0);
