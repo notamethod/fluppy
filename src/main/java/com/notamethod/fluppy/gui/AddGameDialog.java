@@ -38,7 +38,7 @@ public class AddGameDialog extends Stage {
 
     private ApiCalls apiCalls;
     private final ObservableList<GameApp> result = FXCollections.observableArrayList();
-    private static final String  FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
+
     private FileActions fileActions;
     private boolean haErrors=false;
     public AddGameDialog(List<File> metaGamesFiles,  ApiCalls apiCalls) {
@@ -252,11 +252,10 @@ public class AddGameDialog extends Stage {
                     metaGame.setYear(game.getYear() == null ? 1970 : Integer.valueOf(game.getYear()));
                     if (game.getCover() != null) {
                         try {
-                            String sanitizedName = game.getName().replaceAll(FORBIDDEN_CHARS_NAME, "");
-                            String coverFilename = "cover_" + sanitizedName.replace(" ", "").toLowerCase() + game.getYear();
+
+                            String coverFilename = "cover_" + HelperClass.sanitizeName(game.getName()) + game.getYear();
                             metaGame.setImagePath(Paths.get(apiCalls.getCover(Configuration.coverFolder, coverFilename, game.getCover(), 2)));
                         } catch (ApiException | MappingException e) {
-                           // throw new RuntimeException(e);
                             log.error("error",e);
                         }
                     }
@@ -266,12 +265,11 @@ public class AddGameDialog extends Stage {
 
                     log.debug("meta2 "+metaGame.getName()+"-"+metaGame.getGameExe());
                 } else {
-                  //  continue;
+                  // nothing special
                 }
 
               //  return Optional.of(metaGame);
             } catch (Exception e) {
-             //   da.showMessageDialog("Something wrong happened. You have to add the application the hard way.", "Sorry...");
                 log.error("error", e);
             }
            // return Optional.empty();

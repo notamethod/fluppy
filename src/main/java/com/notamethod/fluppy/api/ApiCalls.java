@@ -6,6 +6,7 @@ import com.notamethod.fluppy.api.igdb.Genre;
 import com.notamethod.fluppy.api.igdb.IgdbApi;
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.GameApp;
+import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -49,7 +50,7 @@ public class ApiCalls {
         GameApiBean game = foundGame;
         beanGame.setName(game.getName());
         beanGame.setYear(game.getYear()==null?null:Integer.valueOf(game.getYear()));
-        String coverFilename = "cover_" +size+ game.getName().replace(" ", "").toLowerCase() + game.getYear();
+        String coverFilename = "cover_" + HelperClass.sanitizeName(game.getName()) + game.getYear();
 
         String path=getCover(Configuration.coverFolder, coverFilename, game.getCover(), size);
         if (path!=null){

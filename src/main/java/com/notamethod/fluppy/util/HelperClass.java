@@ -25,7 +25,7 @@ public class HelperClass {
     public static final String REGEX_ABANDONWARE="jeu-[0-9]{5}-.*";
     //public static final String REGEX_SIMPLE="*._DOS_??.zip";
     public static final String REGEX_SIMPLE="(.*)_DOS_[A-Z][A-Z].*";
-
+    private static final String  FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
     /**
      * Determines the system's OS
      * @author Truben
@@ -245,5 +245,11 @@ public class HelperClass {
                 props.put(finito[i][1], finito[i][2]);
             }
         }
+    }
+
+    public static String sanitizeName(String name){
+        String sanitizedName = name.replaceAll(FORBIDDEN_CHARS_NAME, "");
+        return sanitizedName.replace(" ", "").toLowerCase();
+
     }
 }
