@@ -173,4 +173,14 @@ public class ApplicationDatabase {
         emf.close();
 
     }
+
+    public List<GameEntity> runGameQuery(String query, boolean nsfw, String paramFilter) {
+        entityManager.getTransaction().begin();
+        Query q = entityManager.createQuery(query, GameEntity.class);
+        q.setParameter ("nsfw", nsfw);
+        q.setParameter ("paramFilter", paramFilter);
+        entityManager.getTransaction().commit();
+
+        return q.getResultList ();
+    }
 }

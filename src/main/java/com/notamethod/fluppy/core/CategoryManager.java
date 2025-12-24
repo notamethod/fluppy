@@ -8,7 +8,7 @@ import java.util.*;
 
 public class CategoryManager {
     private static final int MAX_GENRE = 3;
-    private ApplicationDatabase applicationDatabase;
+    private final ApplicationDatabase applicationDatabase;
 
     public CategoryManager(ApplicationDatabase applicationDatabase) {
         this.applicationDatabase = applicationDatabase;
@@ -44,5 +44,12 @@ public class CategoryManager {
         cats.add(new Category(CategoryType.GENRE, "all", Messages.getString("category.allother")));
 
         return cats;
+    }
+
+    public Category searchCategory(String search) {
+        Category cat =  new Category(CategoryType.SEARCH, "search", Messages.getString("category.search",search));
+        cat.setFilter(search);
+        return cat;
+
     }
 }
