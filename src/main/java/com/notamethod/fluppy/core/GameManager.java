@@ -123,4 +123,8 @@ public class GameManager {
         return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByGenre(genre, limit));
 
     }
+
+    public List<GameApp> searchByName(String paramFilter) {
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where LOWER(game.name) LIKE LOWER(CONCAT('%', :paramFilter, '%')) AND (:nsfw is true OR game.ageRating < 1) order by game.lastPlayed DESC",preferences.isNsfw(), paramFilter));
+    }
 }
