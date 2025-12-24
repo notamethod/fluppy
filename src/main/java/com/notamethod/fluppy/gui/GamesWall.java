@@ -9,6 +9,7 @@ import com.notamethod.fluppy.util.HelperClass;
 import jakarta.persistence.EntityManagerFactory;
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.*;
 import javafx.scene.Scene;
@@ -17,6 +18,7 @@ import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
@@ -42,9 +44,9 @@ import java.util.*;
 @Slf4j
 public class GamesWall extends Application {
 
-    private static final int WIDTH=900;
-    private static final int HEIGHT=700;
-    private static final int ROW_SIZE=9;
+    private static final int WIDTH = 900;
+    private static final int HEIGHT = 700;
+    private static final int ROW_SIZE = 9;
     ApplicationDatabase applicationDatabase;
     PreferencesBean preferences;
     DosBoxManager dosBoxManager = new DosBoxManager();
@@ -61,7 +63,8 @@ public class GamesWall extends Application {
     Effects effects;
     private Category expandCategory = null;
     List<Category> gameCategories = new ArrayList<>();
-    private double width=WIDTH;
+    private double width = WIDTH;
+
     @Override
     public void init() throws Exception {
         super.init();
@@ -143,15 +146,23 @@ public class GamesWall extends Application {
         StackPane topRibbon0 = new StackPane(topRibbon, dropLabel);
 
 
-
         detailPane.setListener(new PanelListener() {
-            public void onUpdate() { updateList(); }
-            public void onClose() { detailPane.hide(); }
-            }
+                                   public void onUpdate() {
+                                       updateList();
+                                       detailPane.hide();
+                                   }
+
+                                   public void onClose() {
+                                       detailPane.hide();
+                                   }
+                               }
         );
         midRoot = new StackPane();
         midRoot.setId("midRoot");
-        midRoot.getChildren().addAll(scrollPane, detailPane);
+
+        SearchOverlay searchOverlay = new SearchOverlay();
+
+        midRoot.getChildren().addAll(scrollPane, detailPane, searchOverlay);
 
         root0.getChildren().addAll(/*titleBar, */topRibbon0, midRoot);
         midRoot.setId("realRoot");
@@ -198,12 +209,48 @@ public class GamesWall extends Application {
             topRibbon.getStyleClass().remove("ribbon-highlight");
             topRibbon.setStyle("-fx-border-color: transparent"); // Fond du ScrollPane
         });
+
+        scene.addEventFilter(KeyEvent.KEY_TYPED, e -> {
+            String c = e.getCharacter();
+            if (!searchOverlay.isVisible()) {
+                searchOverlay.show();
+                Platform.runLater(() -> {
+                    searchOverlay.requestFocusOnField();
+                    searchOverlay.appendToQuery(c);
+                });
+                //e.consume();
+            }
+
+        });
+        PauseTransition debounce = new PauseTransition(Duration.millis(200));
+        searchOverlay.queryProperty().addListener((obs, old, q) -> {
+            System.out.println(q+" listener");
+            if (q.length() > 2) {
+                debounce.stop(); // réarme le timer
+                debounce.setOnFinished(e -> applyFilter(q));
+                debounce.playFromStart();
+            }else{
+                if (q.length() ==0) {
+                    searchOverlay.hide();
+                    expandCategory = null;
+                    updateList();
+                }
+            }
+
+        });
         //Scene scene = new Scene(root, 700, 500);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         scrollPane.setStyle("-fx-background: #121212;"); // Fond du ScrollPane
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog.png")));
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void applyFilter(String q) {
+        Category cat = categoryManager.searchCategory(q);
+
+        expandCategory = cat;
+        updateList();
     }
 
 
@@ -237,7 +284,7 @@ public class GamesWall extends Application {
         gearButton.setOnAction(e -> {
             PreferencesDialog dialog = new PreferencesDialog(stage);
             PreferencesBean neawBean = dialog.showAndWaitForResult();
-            if (neawBean!=null) {
+            if (neawBean != null) {
                 if (preferences.isNsfw() != neawBean.isNsfw()) {
                     preferences.setNsfw(!preferences.isNsfw());
                     updateList();
@@ -254,18 +301,18 @@ public class GamesWall extends Application {
         plusButton.setGraphic(plusImage);
         plusButton.setStyle("-fx-background-color: transparent;");
         plusButton.setOnAction(e -> {
-           if(stage.isFullScreen()){
-               stage.setFullScreen(false);
-               stage.setMaximized(false);
-               stage.setWidth(WIDTH);
-               width=width;
-               stage.setHeight(HEIGHT);
-               stage.centerOnScreen();
-           }else {
-               stage.setFullScreen(true);
-               width=stage.getWidth();
-           }
-           // AddGameDialog dialog = new AddGameDialog(null, null);
+            if (stage.isFullScreen()) {
+                stage.setFullScreen(false);
+                stage.setMaximized(false);
+                stage.setWidth(WIDTH);
+                width = width;
+                stage.setHeight(HEIGHT);
+                stage.centerOnScreen();
+            } else {
+                stage.setFullScreen(true);
+                width = stage.getWidth();
+            }
+            // AddGameDialog dialog = new AddGameDialog(null, null);
             //dialog.showAndWait();
         });
 
@@ -334,6 +381,9 @@ public class GamesWall extends Application {
     private VBox createBlock(Category category, int count, Set<Long> gameIds) {
         List<GameApp> games;
         switch (category.getCategoryType()) {
+            case SEARCH:
+                games = gameManager.searchByName(category.getFilter());
+                break;
             case RECENTLY_ADDED:
                 games = gameManager.getLastAdded(count);
                 break;
@@ -353,7 +403,7 @@ public class GamesWall extends Application {
             default:
                 games = null;
         }
-        if (games != null && !games.isEmpty()) {
+        if (games != null/* && !games.isEmpty()*/) {
             return createBlock(category, games, gameIds);
         }
         return null;
@@ -363,7 +413,7 @@ public class GamesWall extends Application {
     private VBox createBlock(Category category, List<GameApp> games, Set<Long> gameIds) {
         TilePane tilePane = new TilePane();
         tilePane.setId("tilePane-" + category.getCategoryType());
-        tilePane.setPadding(new Insets(20, 10, 10, 0)); // top, right, bottom, left
+        tilePane.setPadding(new Insets(20, 10, 30, 0)); // top, right, bottom, left
         tilePane.setHgap(10);
         tilePane.setVgap(10);
         tilePane.setPrefColumns(5);
@@ -424,21 +474,29 @@ public class GamesWall extends Application {
         deleteItem.setOnAction(e -> actionDelete(game));
 
 // Ajout des items au menu
-        contextMenu.getItems().addAll( deleteItem);
+        contextMenu.getItems().addAll(deleteItem);
 
-        PauseTransition hoverDelay = new PauseTransition(Duration.millis(800));
+        PauseTransition hoverDelay = new PauseTransition(Duration.millis(600));
         hoverDelay.setOnFinished(e -> {
             Point2D point = caculatePosition(container);
             detailPane.show(game, point.getX(), point.getY());
         });
         PauseTransition hoverDelayExit = new PauseTransition(Duration.millis(50));
         hoverDelayExit.setOnFinished(e -> {
-            if (!detailPane.isHover())
+            if (!detailPane.isHover()) {
                 detailPane.hide();
+//           }else if (!detailPane.getCurrentGame().getId().equals(game.getId())){
+//               detailPane.hide();
+            } else {
+                System.out.println(detailPane.getCurrentGame().getId() + " " + detailPane.getCurrentGame().getName() + "<>" + game.getId() + " " + game.getName());
+            }
 
         });
 
         container.setOnMouseEntered(e -> {
+            System.out.println("ENTER");
+            if (detailPane.isVisible())
+                detailPane.hide();
             //imageView.setOpacity(0.0); // démarre transparent
             FadeTransition fadeIn = new FadeTransition(Duration.millis(600), container);
             fadeIn.setFromValue(1.0);
@@ -453,11 +511,12 @@ public class GamesWall extends Application {
         });
 
         container.setOnMouseExited(e -> {
-            FadeTransition hoverFade = new FadeTransition(Duration.millis(300), container);
+            System.out.println("EXIT");
+            FadeTransition hoverFade = new FadeTransition(Duration.millis(100), container);
             hoverFade.setFromValue(0.9);
             hoverFade.setToValue(1.0);
             hoverFade.play();
-            ScaleTransition zoomOut = new ScaleTransition(Duration.millis(200), container);
+            ScaleTransition zoomOut = new ScaleTransition(Duration.millis(100), container);
             zoomOut.setToX(1.0);
             zoomOut.setToY(1.0);
             zoomOut.play();
@@ -481,23 +540,22 @@ public class GamesWall extends Application {
                         throw new RuntimeException(ex);
                     }
                     gameManager.updateTime(game, returne);
-                    System.out.println(returne);
                 }
             }
         });
 
-//        // Netflix-style : cacher seulement si la souris quitte la tuile ET le panneau
+
 //        container.hoverProperty().addListener((obs, wasHover, isHover) -> {
 //            if (!isHover && !detailPane.isHover()) {
 //                detailPane.hide();
 //            }
 //        });
 //
-//        detailPane.hoverProperty().addListener((obs, wasHover, isHover) -> {
-//            if (!isHover && !container.isHover()) {
-//                detailPane.hide();
-//            }
-//        });
+        detailPane.hoverProperty().addListener((obs, wasHover, isHover) -> {
+            if (!isHover && !container.isHover()) {
+                detailPane.hide();
+            }
+        });
         return container;
     }
 
@@ -505,11 +563,11 @@ public class GamesWall extends Application {
         int fixX = -200;
         int fixY = -270;
         int prevWidth = 600;
-        Bounds tileSceneBounds  = container.localToScene(container.getBoundsInLocal());
+        Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
-        double fixWidth=midRoot.getWidth()-WIDTH>0?(midRoot.getWidth()-WIDTH)/2:0;
-        double fixHeight=fixWidth>0?(midRoot.getHeight()-HEIGHT)/2:0;
+        double fixWidth = midRoot.getWidth() - WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
+        double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - HEIGHT) / 2 : 0;
 
         Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
 
@@ -517,14 +575,14 @@ public class GamesWall extends Application {
         Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
         Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
 
-        Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX()-container.getWidth()-fixWidth-40, tileParentBounds.getMinY() - container.getHeight()-fixHeight);
+        Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
         double diffx = (fixedPoint2.getX() + prevWidth) - width/*screen.getMaxX()*/;
-        System.out.println("tile"+tileSceneBounds.getMinX()+prevWidth);
-        System.out.println("tile"+screenBounds.getMinX()+prevWidth);
-        System.out.println("diff:"+diffx);
-        double decalRatio=-1.1;
+        log.debug("tile" + tileSceneBounds.getMinX() + prevWidth);
+        log.debug("tile" + screenBounds.getMinX() + prevWidth);
+        log.debug("diff:" + diffx);
+        double decalRatio = -1.1;
         if (diffx > 0)
-            fixedPoint2 = fixedPoint2.add(decalRatio* diffx, 0);
+            fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
         return fixedPoint2;
     }
 
