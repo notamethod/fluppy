@@ -30,8 +30,8 @@ public class GameDetailPanel extends StackPane {
     private PanelListener listener;
 
     public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
-        this.dosBoxManager=dosBoxManager;
-        this.gameManager=gameManager;
+        this.dosBoxManager = dosBoxManager;
+        this.gameManager = gameManager;
         setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 10; -fx-background-radius: 8;");
         setVisible(false);
 
@@ -69,33 +69,33 @@ public class GameDetailPanel extends StackPane {
     }
 
     private void editAction() {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("GameEditor.fxml"));
-                DialogPane dialogPane = loader.load();
-                Dialog<ButtonType> dialog = new Dialog<>();
-                dialog.setDialogPane(dialogPane);
-                dialog.setTitle("Éditer un jeu");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("GameEditor.fxml"));
+            DialogPane dialogPane = loader.load();
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle("Éditer un jeu");
 
-                GameEditorController controller = loader.getController();
-                controller.setGameManager(gameManager);
-                controller.setGame(game);
+            GameEditorController controller = loader.getController();
+            controller.setGameManager(gameManager);
+            controller.setGame(game);
 
-                dialog.showAndWait();
-                GameApp editedGame = controller.getResult();
-                if (editedGame!=null){
-                    if (listener != null) listener.onUpdate();
+            dialog.showAndWait();
+            GameApp editedGame = controller.getResult();
+            if (editedGame != null) {
+                if (listener != null) listener.onUpdate();
 
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
 
     public void show(GameApp game, double x, double y) {
-        this.game=game;
+        this.game = game;
         imageView.getChildren().clear();
         imageView.getChildren().add(ImageFactory.getMedium(game));
         descriptionLabel.setText(game.getName());
@@ -104,20 +104,18 @@ public class GameDetailPanel extends StackPane {
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)
         );
         genre.setText(genres);
-        long played=game.getTimePlayed()/60;
-        if (played>60) {
-            timePlayed.setText(Messages.getString("game.timeplayed.hour",String.valueOf(played / 60)));
-        }
-            else if (played>1) {
-            timePlayed.setText(Messages.getString("game.timeplayed.min",String.valueOf(played)));
+        long played = game.getTimePlayed() / 60;
+        if (played > 60) {
+            timePlayed.setText(Messages.getString("game.timeplayed.hour", String.valueOf(played / 60)));
+        } else if (played > 1) {
+            timePlayed.setText(Messages.getString("game.timeplayed.min", String.valueOf(played)));
 
-        }else{
+        } else {
             timePlayed.setText(Messages.getString("game.neverplayed"));
         }
-      setTranslateX(x);
-     setTranslateY(y);
+        setTranslateX(x);
+        setTranslateY(y);
 
-//        setTranslateY(y);
         setScaleX(0.8);
         setScaleY(0.8);
         setOpacity(0);
@@ -142,6 +140,10 @@ public class GameDetailPanel extends StackPane {
 
     public void setListener(PanelListener listener) {
         this.listener = listener;
+    }
+
+    public GameApp getCurrentGame(){
+        return game;
     }
 }
 
