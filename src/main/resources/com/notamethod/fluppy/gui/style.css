@@ -8,16 +8,15 @@
 
 .root{
     -fx-background-color: #2D2D30;
-    -fx-font-family: "Retro Pixel Arcade Regular";
-    -fx-font-size: 10px;
-    background-color: #2D2D30;
+    -fx-font-family: "LucasArts SCUMM - Subtitle - Roman";
+    -fx-font-size: 14px;
 }
 
 
 /* Label */
 .label{
--fx-font-size:10 px;
-    -fx-text-fill: #AFB1B3;
+-fx-font-size:14 px;
+    -fx-text-fill: #d3761e;
 }
 
 .subtitle{
@@ -785,12 +784,7 @@
         transparent 3px);
 }
 
-.blockTitle {
 
-   -fx-font-family: "LucasArts SCUMM - Subtitle - Roman", "Courier New";
-    -fx-font-size: 28px;
-    -fx-text-fill: #b5a98f;
-}
 
 .game-title{
      -fx-text-fill: #b3b300;
@@ -801,6 +795,21 @@
     -fx-cursor: hand;
 }
 
+.blockTitle {
+
+   -fx-font-family: "Storybook", "Courier New";
+    -fx-font-size: 28px;
+    -fx-text-fill: #d3761e;
+    -fx-text-fill: linear-gradient(to right, #f2c76c, #d3761e);
+}
+
 .blockTitle:hover {
     -fx-cursor: hand;
 }
+
+.testcss{
+   -fx-font-family: "LucasArts SCUMM - Subtitle - Roman", "Courier New";
+    -fx-font-size: 28px;
+        -fx-text-fill: linear-gradient(to right, #f2c76c, #d3761e);
+    -fx-text-fill: #b5a98f;
+    }
