@@ -224,13 +224,12 @@ public class GamesWall extends Application {
         });
         PauseTransition debounce = new PauseTransition(Duration.millis(200));
         searchOverlay.queryProperty().addListener((obs, old, q) -> {
-            System.out.println(q+" listener");
             if (q.length() > 2) {
-                debounce.stop(); // réarme le timer
+                debounce.stop();
                 debounce.setOnFinished(e -> applyFilter(q));
                 debounce.playFromStart();
             }else{
-                if (q.length() ==0) {
+                if (q.isEmpty()) {
                     searchOverlay.hide();
                     expandCategory = null;
                     updateList();
@@ -238,18 +237,16 @@ public class GamesWall extends Application {
             }
 
         });
-        //Scene scene = new Scene(root, 700, 500);
+
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         scrollPane.setStyle("-fx-background: #121212;"); // Fond du ScrollPane
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog.png")));
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog2.png")));
         stage.setScene(scene);
         stage.show();
     }
 
     private void applyFilter(String q) {
-        Category cat = categoryManager.searchCategory(q);
-
-        expandCategory = cat;
+        expandCategory = categoryManager.searchCategory(q);
         updateList();
     }
 
@@ -270,13 +267,13 @@ public class GamesWall extends Application {
         Label info = new Label("(c) 2025");
         info.setTextFill(Color.WHITE);
         ClassLoader classLoader = GamesWall.class.getClassLoader();
-        URL logoUrl = classLoader.getResource("dosdog.png");
+        URL logoUrl = classLoader.getResource("dosdog2.png");
         Image logo = new Image(logoUrl.toString(), 60, 60, false, true);
         ImageView logoView = new ImageView(logo);
         URL titleUrl = classLoader.getResource("fluppy3.png");
         Image titleImage = new Image(titleUrl.toString(), 90, 50, true, true);
         ImageView titleView = new ImageView(titleImage);
-        Image gear = new Image(getClass().getResourceAsStream("/images/gear1.png"), 32, 32, false, false);
+        Image gear = new Image(getClass().getResourceAsStream("/images/gear2.png"), 32, 32, false, false);
         ImageView gearIcon = new ImageView(gear);
         Button gearButton = new Button();
         gearButton.setGraphic(gearIcon);
@@ -296,7 +293,7 @@ public class GamesWall extends Application {
             }
         });
         //plus
-        ImageView plusImage = new ImageView(new Image(getClass().getResourceAsStream("/images/add1.png"), 32, 32, false, false));
+        ImageView plusImage = new ImageView(new Image(getClass().getResourceAsStream("/images/sizing2.png"), 32, 32, false, false));
         Button plusButton = new Button();
         plusButton.setGraphic(plusImage);
         plusButton.setStyle("-fx-background-color: transparent;");
@@ -305,7 +302,6 @@ public class GamesWall extends Application {
                 stage.setFullScreen(false);
                 stage.setMaximized(false);
                 stage.setWidth(WIDTH);
-                width = width;
                 stage.setHeight(HEIGHT);
                 stage.centerOnScreen();
             } else {
@@ -317,7 +313,7 @@ public class GamesWall extends Application {
         });
 
         //quite
-        ImageView quitImg = new ImageView(new Image(getClass().getResourceAsStream("/images/quit1.png"), 32, 32, false, false));
+        ImageView quitImg = new ImageView(new Image(getClass().getResourceAsStream("/images/quit2.png"), 32, 32, false, false));
         Button quitButton = new Button();
         quitButton.setGraphic(quitImg);
         quitButton.setStyle("-fx-background-color: transparent;");
@@ -485,16 +481,14 @@ public class GamesWall extends Application {
         hoverDelayExit.setOnFinished(e -> {
             if (!detailPane.isHover()) {
                 detailPane.hide();
-//           }else if (!detailPane.getCurrentGame().getId().equals(game.getId())){
-//               detailPane.hide();
+
             } else {
-                System.out.println(detailPane.getCurrentGame().getId() + " " + detailPane.getCurrentGame().getName() + "<>" + game.getId() + " " + game.getName());
+                //nothing
             }
 
         });
 
         container.setOnMouseEntered(e -> {
-            System.out.println("ENTER");
             if (detailPane.isVisible())
                 detailPane.hide();
             //imageView.setOpacity(0.0); // démarre transparent
@@ -511,7 +505,6 @@ public class GamesWall extends Application {
         });
 
         container.setOnMouseExited(e -> {
-            System.out.println("EXIT");
             FadeTransition hoverFade = new FadeTransition(Duration.millis(100), container);
             hoverFade.setFromValue(0.9);
             hoverFade.setToValue(1.0);
@@ -544,13 +537,6 @@ public class GamesWall extends Application {
             }
         });
 
-
-//        container.hoverProperty().addListener((obs, wasHover, isHover) -> {
-//            if (!isHover && !detailPane.isHover()) {
-//                detailPane.hide();
-//            }
-//        });
-//
         detailPane.hoverProperty().addListener((obs, wasHover, isHover) -> {
             if (!isHover && !container.isHover()) {
                 detailPane.hide();
@@ -560,8 +546,6 @@ public class GamesWall extends Application {
     }
 
     private Point2D caculatePosition(GameTile container) {
-        int fixX = -200;
-        int fixY = -270;
         int prevWidth = 600;
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();

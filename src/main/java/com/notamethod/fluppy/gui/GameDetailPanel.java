@@ -74,7 +74,7 @@ public class GameDetailPanel extends StackPane {
             DialogPane dialogPane = loader.load();
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setDialogPane(dialogPane);
-            dialog.setTitle("Éditer un jeu");
+            dialog.setTitle(Messages.getString("title.edit"));
 
             GameEditorController controller = loader.getController();
             controller.setGameManager(gameManager);
