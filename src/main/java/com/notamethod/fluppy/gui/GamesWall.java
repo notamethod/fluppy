@@ -415,7 +415,7 @@ public class GamesWall extends Application {
             default:
                 games = null;
         }
-        if (games != null/* && !games.isEmpty()*/) {
+        if (games != null && (!category.getCategoryType().equals(CategoryType.FAVORITES) || category.getCategoryType().equals(CategoryType.FAVORITES)&& !games.isEmpty())/* && !games.isEmpty()*/) {
             return createBlock(category, games, gameIds);
         }
         return null;

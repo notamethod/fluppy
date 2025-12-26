@@ -35,9 +35,10 @@ public class CategoryManager {
 
     public List<Category> getShownCategories() {
         List<Category> cats = new ArrayList<>();
+        cats.add(new Category(CategoryType.FAVORITES, "favorites", Messages.getString("category.favorites")));
         cats.add(new Category(CategoryType.RECENTLY_ADDED, "lastAdded", Messages.getString("category.lastadded")));
         cats.add(new Category(CategoryType.MOST_PLAYED, "mostplayed", Messages.getString("category.mostplayed")));
-        cats.add(new Category(CategoryType.FAVORITES, "favorites", Messages.getString("category.favorites")));
+
         cats.addAll(getTopCategories());
         cats.add(new Category(CategoryType.GENRE, "all", Messages.getString("category.allother")));
 
