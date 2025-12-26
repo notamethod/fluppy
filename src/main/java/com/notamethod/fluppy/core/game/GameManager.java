@@ -1,5 +1,7 @@
-package com.notamethod.fluppy.core;
+package com.notamethod.fluppy.core.game;
 
+import com.notamethod.fluppy.core.ApplicationDatabase;
+import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 

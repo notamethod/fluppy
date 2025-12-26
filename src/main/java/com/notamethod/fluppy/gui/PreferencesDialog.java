@@ -1,6 +1,6 @@
 package com.notamethod.fluppy.gui;
 
-import com.notamethod.fluppy.core.PreferencesBean;
+import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.io.PreferencesIO;
 import javafx.stage.*;
 import javafx.scene.*;

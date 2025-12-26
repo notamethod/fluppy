@@ -2,6 +2,8 @@ package com.notamethod.fluppy.gui.common;
 
 
 import com.notamethod.fluppy.core.*;
+import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.FileWizard;
 import com.notamethod.fluppy.util.HelperClass;

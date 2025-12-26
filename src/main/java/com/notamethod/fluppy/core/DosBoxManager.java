@@ -1,5 +1,7 @@
 package com.notamethod.fluppy.core;
 
+import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.io.PreferencesIO;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
@@ -105,7 +107,7 @@ public class DosBoxManager {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                log.debug(line);
             }
 
 // Attendre la fin
@@ -113,7 +115,7 @@ public class DosBoxManager {
             long then = java.time.Instant.now().toEpochMilli();
              diff=(then-now)/1000;
             log.info("Time is "+diff);
-            System.out.println("Terminé avec code : " + exitCode);
+            log.debug("Terminé avec code : " + exitCode);
         } catch (IOException ex) {
             // What to do if no dosbox path is available
             if (preferences.getDosBoxPath().isEmpty()) {

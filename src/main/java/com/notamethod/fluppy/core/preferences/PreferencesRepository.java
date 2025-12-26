@@ -1,5 +1,6 @@
-package com.notamethod.fluppy.core;
+package com.notamethod.fluppy.core.preferences;
 
+import com.notamethod.fluppy.core.JpaUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.Getter;

@@ -2,8 +2,11 @@ package com.notamethod.fluppy.gui;
 
 
 import com.notamethod.fluppy.core.*;
+import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.GameManager;
+import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.gui.common.GameActions;
-import com.notamethod.fluppy.core.GameManagerException;
+import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.io.PreferencesIO;
 import com.notamethod.fluppy.util.HelperClass;
 import jakarta.persistence.EntityManagerFactory;

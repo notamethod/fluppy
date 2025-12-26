@@ -1,6 +1,6 @@
 package com.notamethod.fluppy.gui;
 
-import com.notamethod.fluppy.core.GameApp;
+import com.notamethod.fluppy.core.game.GameApp;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

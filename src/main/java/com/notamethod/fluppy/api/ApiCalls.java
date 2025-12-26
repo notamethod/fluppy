@@ -5,7 +5,7 @@ import com.notamethod.fluppy.api.igdb.GameApiBean;
 import com.notamethod.fluppy.api.igdb.Genre;
 import com.notamethod.fluppy.api.igdb.IgdbApi;
 import com.notamethod.fluppy.core.Configuration;
-import com.notamethod.fluppy.core.GameApp;
+import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 

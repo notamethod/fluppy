@@ -1,4 +1,4 @@
-package com.notamethod.fluppy.gui;
+package com.notamethod.fluppy.core;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

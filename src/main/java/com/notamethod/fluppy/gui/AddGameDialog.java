@@ -6,6 +6,9 @@ import com.notamethod.fluppy.api.MappingException;
 import com.notamethod.fluppy.api.igdb.GameApiBean;
 import com.notamethod.fluppy.api.igdb.Genre;
 import com.notamethod.fluppy.core.*;
+import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.GameManagerException;
+import com.notamethod.fluppy.core.game.GenreApp;
 import com.notamethod.fluppy.gui.common.FileActions;
 import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.HelperClass;
@@ -106,7 +109,6 @@ public class AddGameDialog extends Stage {
                     }
                 }
             });
-            Label orderLabel = new Label(String.valueOf(order));
             Label titleGame = new Label(searchString);
             titleGame.getStyleClass().add("subtitle");
             Label labelExe = new Label(Messages.getString("dialog.select_executable.header"));
@@ -357,7 +359,6 @@ public class AddGameDialog extends Stage {
         } catch (ApiException | MappingException e) {
             log.error("Internal Error", e);
         }
-        //TODO
         if (!games.isEmpty()) {
             return games;
         }

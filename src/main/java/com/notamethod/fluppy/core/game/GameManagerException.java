@@ -1,4 +1,4 @@
-package com.notamethod.fluppy.core;
+package com.notamethod.fluppy.core.game;
 
 import com.notamethod.fluppy.gui.Messages;
 

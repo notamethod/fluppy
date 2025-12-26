@@ -1,6 +1,9 @@
 package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.*;
+import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.GameManager;
+import com.notamethod.fluppy.core.game.GenreApp;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -13,7 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Optional;
+import java.io.IOException;
 
 @Slf4j
 public class GameDetailPanel extends StackPane {
@@ -21,6 +24,7 @@ public class GameDetailPanel extends StackPane {
     private final Label descriptionLabel;
     private final Label genre;
     private final Label timePlayed;
+    private final Label year;
     private final Label name;
     private final Button launchButton;
     private final Button editButton;
@@ -42,14 +46,20 @@ public class GameDetailPanel extends StackPane {
         genre = new Label();
         name = new Label();
         timePlayed = new Label();
-
+        year = new Label();
         descriptionLabel.setStyle("-fx-text-fill: white; -fx-wrap-text: true;");
         name.getStyleClass().add("game-title");
         name.setWrapText(true);
         launchButton = new Button("Lancer");
         editButton = new Button("Éditer");
-        editButton.setOnMouseClicked(event -> editAction());
-        VBox leftContent = new VBox(10, name, genre, timePlayed, new VBox(5, launchButton, editButton));
+        editButton.setOnMouseClicked(event -> {
+            try {
+                editAction();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        VBox leftContent = new VBox(10, name, year, genre, timePlayed, new VBox(5, launchButton, editButton));
         HBox content = new HBox(10, imageView, leftContent);
         setMaxSize(550, 200);
         launchButton.setOnMouseClicked(e -> {
@@ -68,27 +78,23 @@ public class GameDetailPanel extends StackPane {
         getChildren().add(content);
     }
 
-    private void editAction() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("GameEditor.fxml"));
-            DialogPane dialogPane = loader.load();
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setDialogPane(dialogPane);
-            dialog.setTitle(Messages.getString("title.edit"));
+    private void editAction() throws IOException {
 
-            GameEditorController controller = loader.getController();
-            controller.setGameManager(gameManager);
-            controller.setGame(game);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("GameEditor.fxml"));
+        DialogPane dialogPane = loader.load();
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setDialogPane(dialogPane);
+        dialog.setTitle(Messages.getString("title.edit"));
 
-            dialog.showAndWait();
-            GameApp editedGame = controller.getResult();
-            if (editedGame != null) {
-                if (listener != null) listener.onUpdate();
+        GameEditorController controller = loader.getController();
+        controller.setGameManager(gameManager);
+        controller.setGame(game);
 
-            }
+        dialog.showAndWait();
+        GameApp editedGame = controller.getResult();
+        if (editedGame != null && listener != null) {
+            listener.onUpdate();
 
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
     }
@@ -100,6 +106,7 @@ public class GameDetailPanel extends StackPane {
         imageView.getChildren().add(ImageFactory.getMedium(game));
         descriptionLabel.setText(game.getName());
         name.setText(game.getName());
+        year.setText(game.getYear()==null?"": String.valueOf(game.getYear()));
         String genres = String.join(" ■ ",
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)
         );
@@ -142,7 +149,7 @@ public class GameDetailPanel extends StackPane {
         this.listener = listener;
     }
 
-    public GameApp getCurrentGame(){
+    public GameApp getCurrentGame() {
         return game;
     }
 }

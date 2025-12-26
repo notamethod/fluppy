@@ -1,5 +1,7 @@
 package com.notamethod.fluppy.core;
 
+import com.notamethod.fluppy.core.game.GameEntity;
+import com.notamethod.fluppy.core.game.GenreEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;

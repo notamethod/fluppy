@@ -2,7 +2,7 @@
 package com.notamethod.fluppy.util;
 
 import com.notamethod.fluppy.core.Configuration;
-import com.notamethod.fluppy.core.GameApp;
+import com.notamethod.fluppy.core.game.GameApp;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;

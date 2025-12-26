@@ -6,13 +6,12 @@ import com.notamethod.fluppy.api.ApiCalls;
 import com.notamethod.fluppy.api.ApiException;
 import com.notamethod.fluppy.api.MappingException;
 import com.notamethod.fluppy.api.igdb.GameApiBean;
-import com.notamethod.fluppy.core.GameApp;
+import com.notamethod.fluppy.core.game.GameApp;
 
-import com.notamethod.fluppy.core.GameManager;
+import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.gui.common.GameActions;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;

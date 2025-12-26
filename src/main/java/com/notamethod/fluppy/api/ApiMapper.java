@@ -2,8 +2,8 @@ package com.notamethod.fluppy.api;
 
 import com.notamethod.fluppy.api.igdb.GameApiBean;
 import com.notamethod.fluppy.api.igdb.Genre;
-import com.notamethod.fluppy.core.GameApp;
-import com.notamethod.fluppy.core.GenreApp;
+import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.GenreApp;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

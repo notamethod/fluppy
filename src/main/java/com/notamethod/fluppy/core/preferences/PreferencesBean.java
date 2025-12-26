@@ -1,4 +1,4 @@
-package com.notamethod.fluppy.core;
+package com.notamethod.fluppy.core.preferences;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,8 +9,6 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Getter

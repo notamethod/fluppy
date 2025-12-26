@@ -1,5 +1,8 @@
 package com.notamethod.fluppy.core;
 
+import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.GameEntity;
+import com.notamethod.fluppy.core.game.GenreEntity;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterEach;

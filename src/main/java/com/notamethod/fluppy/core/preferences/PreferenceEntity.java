@@ -1,5 +1,5 @@
 
-package com.notamethod.fluppy.core;
+package com.notamethod.fluppy.core.preferences;
 
 import jakarta.persistence.*;
 import lombok.Data;

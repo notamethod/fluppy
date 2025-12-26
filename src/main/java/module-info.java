@@ -26,4 +26,8 @@ module com.notamethod.fluppy {
     exports com.notamethod.fluppy.api.igdb;
     opens com.notamethod.fluppy.gui to javafx.fxml;
     opens com.notamethod.fluppy.core to javafx.fxml, org.hibernate.orm.core;
+    exports com.notamethod.fluppy.core.preferences;
+    opens com.notamethod.fluppy.core.preferences to javafx.fxml, org.hibernate.orm.core;
+    opens com.notamethod.fluppy.core.game to javafx.fxml, org.hibernate.orm.core;
+    exports com.notamethod.fluppy.core.game;
 }

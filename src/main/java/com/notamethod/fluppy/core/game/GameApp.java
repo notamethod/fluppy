@@ -1,4 +1,4 @@
-package com.notamethod.fluppy.core;
+package com.notamethod.fluppy.core.game;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -67,7 +67,6 @@ public class GameApp {
         }
         this.setTimePlayed(srcGame.getTimePlayed()==null?0:srcGame.getTimePlayed());
         this.setAdded(srcGame.getAdded());
-       // this.setAgeRating(srcGame.getAgeRating());
     }
 
 

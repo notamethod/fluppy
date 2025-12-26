@@ -2,7 +2,7 @@
 package com.notamethod.fluppy.io;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.notamethod.fluppy.core.PreferencesBean;
+import com.notamethod.fluppy.core.preferences.PreferencesBean;
 
 
 import java.io.File;
