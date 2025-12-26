@@ -25,8 +25,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 
-import javafx.scene.text.Font;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -288,17 +286,21 @@ public class GamesWall extends Application {
                 }
                 if (preferences.isFullScreen() != neawBean.isFullScreen()) {
                     preferences.setFullScreen(!preferences.isFullScreen());
-                    //updateList();
+                   // updateList();
                 }
             }
         });
         //plus
-        ImageView plusImage = new ImageView(new Image(getClass().getResourceAsStream("/images/sizing2.png"), 32, 32, false, false));
+        ImageView plusImage = new ImageView();
+        updateSizingImage(plusImage, stage.isFullScreen());
+        //new Image(getClass().getResourceAsStream("/images/size_max.png"), 32, 32, false, false));
         Button plusButton = new Button();
         plusButton.setGraphic(plusImage);
         plusButton.setStyle("-fx-background-color: transparent;");
         plusButton.setOnAction(e -> {
+            updateSizingImage(plusImage, !stage.isFullScreen());
             if (stage.isFullScreen()) {
+
                 stage.setFullScreen(false);
                 stage.setMaximized(false);
                 stage.setWidth(WIDTH);
@@ -353,6 +355,15 @@ public class GamesWall extends Application {
         updateList();
     }
 
+    private void updateSizingImage(ImageView imageView, boolean isFullscreen){
+        if (isFullscreen){
+            imageView.setImage(new Image(getClass().getResourceAsStream("/images/size_min.png"), 32, 32, false, false));
+
+        }else{
+            imageView.setImage(new Image(getClass().getResourceAsStream("/images/size_max.png"), 32, 32, false, false));
+        }
+
+    }
     private void updateList() {
         log.debug("update list");
         this.gamesBlocks.clear();
@@ -424,25 +435,30 @@ public class GamesWall extends Application {
         }
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(20, 10, 10, 50)); // top, right, bottom, left
-        Label blockTitle = new Label(category.getLabel());
+        String expandedSymbol=category.isExpanded()?"<":">";
+        Label blockTitle = new Label(expandedSymbol+category.getLabel());
         blockTitle.getStyleClass().add("blockTitle");
         // Ajouter une action au clic
         blockTitle.setOnMouseClicked(event -> {
-            activateCategory(category);
+            activateCategory(category, blockTitle);
         });
         vBox.getChildren().addAll(blockTitle, tilePane);
         return vBox;
     }
 
-    private void activateCategory(Category category) {
+    private void activateCategory(Category category, Label blockTitle) {
 
         if (category.getCategoryType().equals(CategoryType.GENRE) && "all".equals(category.getId()))
             return;
         if (expandCategory != null && expandCategory.getCategoryType().equals(category.getCategoryType())
                 && category.getId().equals(expandCategory.getId())) {
+            category.setExpanded(false);
+            blockTitle.setText(category.getLabel()+">");
             expandCategory = null;
         } else if (expandCategory == null || (expandCategory != null && !category.getId().equals(expandCategory.getId()))) {
             expandCategory = category;
+            category.setExpanded(true);
+            blockTitle.setText(category.getLabel()+"<");
         } else {
             expandCategory = null;
         }

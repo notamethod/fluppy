@@ -25,3 +25,4 @@ target/
 /.idea/sonarlint/
 /.idea/sonarlint.xml
 /dependency-reduced-pom.xml
+/src/main/resources/images/*.xcf
