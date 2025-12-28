@@ -107,4 +107,8 @@ public class PreferencesBean implements Serializable {
         if (s == null || s.isEmpty()) return;
         this.genres = Arrays.stream(s.split(",")).map(String::trim).toArray(String[]::new);
     }
+
+    public String getViewFilter() {
+        return null;
+    }
 }

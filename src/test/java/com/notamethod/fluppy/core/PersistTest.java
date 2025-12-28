@@ -102,4 +102,29 @@ public class PersistTest {
         assertEquals(2, o.size());
 
     }
+
+    @Test
+    public void testGroupByYear(){
+
+        GameEntity gameEntity = new GameEntity();
+        gameEntity.setName("zzz");
+        gameEntity.setGameYear(1990);
+        GameEntity gameEntity2 = new GameEntity();
+        gameEntity2.setName("aaa");
+        gameEntity2.setGameYear(1990);
+        GameEntity gameEntity3 = new GameEntity();
+        gameEntity3.setName("bbb");
+        gameEntity3.setGameYear(1994);
+        GameEntity gameEntity4 = new GameEntity();
+        gameEntity4.setName("bbb");
+
+
+        applicationDatabase.saveGame(gameEntity);
+        applicationDatabase.saveGame(gameEntity2);
+        applicationDatabase.saveGame(gameEntity3);
+        applicationDatabase.saveGame(gameEntity4);
+        Map<Integer,Long> o = applicationDatabase.getTopYears(20);
+        assertEquals(2, o.size());
+
+    }
 }

@@ -86,7 +86,20 @@ public class ApplicationDatabase {
         entityManager.getTransaction().commit();
         return results;
     }
-
+    public List<GameEntity> findGameByYear(Integer year, boolean nsfw, int maxResult) {
+        entityManager.getTransaction().begin();
+        Query q = entityManager.createQuery ("""
+                SELECT game FROM GameEntity game WHERE game.gameYear=:year
+                AND (:nsfw is true OR game.ageRating < 1)
+                """);
+        q.setParameter ("year", year);
+        q.setParameter ("nsfw", nsfw);
+        if (maxResult>0)
+            q.setMaxResults(maxResult);
+        List<GameEntity> results = q.getResultList ();
+        entityManager.getTransaction().commit();
+        return results;
+    }
     public List<GameEntity> findGameByNameAndYear(String name, Integer year) {
         entityManager.getTransaction().begin();
         String queryString="SELECT p FROM GameEntity p where p.name=:name";
@@ -126,6 +139,21 @@ public class ApplicationDatabase {
         Map<String, Long> map = new LinkedHashMap<>();
         for (Object[] o : games){
             map.put((String) o[0], (Long) o[1]);
+            count++;
+            if (count>=limit)
+                return map;
+        }
+        return map;
+    }
+
+    public  Map<Integer, Long> getTopYears(int limit) {
+        entityManager.getTransaction().begin();
+        int count=0;
+        List<Object[]> games = entityManager.createQuery("SELECT game.gameYear, COUNT(game) FROM GameEntity game where game.gameYear>1970 GROUP BY game.gameYear ORDER BY game.gameYear").getResultList();
+        entityManager.getTransaction().commit();
+        Map<Integer, Long> map = new LinkedHashMap<>();
+        for (Object[] o : games){
+            map.put((Integer) o[0], (Long) o[1]);
             count++;
             if (count>=limit)
                 return map;
@@ -185,4 +213,6 @@ public class ApplicationDatabase {
 
         return q.getResultList ();
     }
+
+
 }

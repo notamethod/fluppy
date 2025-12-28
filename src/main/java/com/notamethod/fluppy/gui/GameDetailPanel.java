@@ -32,6 +32,9 @@ public class GameDetailPanel extends StackPane {
     private final GameManager gameManager;
     private GameApp game;
     private PanelListener listener;
+    private final VBox extraFiles;
+    VBox detailContent;
+    private  Label protection;
 
     public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
         this.dosBoxManager = dosBoxManager;
@@ -41,7 +44,7 @@ public class GameDetailPanel extends StackPane {
 
         imageView = new StackPane();
 
-
+        extraFiles = new VBox();
         descriptionLabel = new Label();
         genre = new Label();
         name = new Label();
@@ -59,8 +62,13 @@ public class GameDetailPanel extends StackPane {
                 throw new RuntimeException(e);
             }
         });
-        VBox leftContent = new VBox(10, name, year, genre, timePlayed, new VBox(5, launchButton, editButton));
-        HBox content = new HBox(10, imageView, leftContent);
+        detailContent = new VBox(10, name, year, genre, timePlayed, extraFiles);
+
+
+        VBox buttonBox = new VBox(5, launchButton, editButton);
+        VBox infoContent = new VBox(detailContent, buttonBox);
+
+        HBox content = new HBox(10, imageView, infoContent);
         setMaxSize(550, 200);
         launchButton.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 1) {
@@ -119,6 +127,10 @@ public class GameDetailPanel extends StackPane {
 
         } else {
             timePlayed.setText(Messages.getString("game.neverplayed"));
+        }
+        extraFiles.getChildren().clear();
+        if (game.getProtectionPath()!=null){
+            extraFiles.getChildren().add(LinkLabelFactory.createFileLink("protection",game.getProtectionPath().toFile() ));
         }
         setTranslateX(x);
         setTranslateY(y);
