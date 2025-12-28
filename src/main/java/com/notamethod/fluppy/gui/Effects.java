@@ -6,10 +6,13 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Node;
 import javafx.scene.effect.DisplacementMap;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Effect;
 import javafx.scene.effect.FloatMap;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public class Effects {
@@ -78,5 +81,23 @@ public class Effects {
         );
         bordureAnim.setCycleCount(Animation.INDEFINITE);
         return bordureAnim;
+    }
+
+
+    public static Effect getDropShadow1() {
+        DropShadow shadow = new DropShadow();
+        shadow.setOffsetX(2);
+        shadow.setOffsetY(2);
+        shadow.setColor(Color.web("#333"));
+        return shadow;
+    }
+
+    public static  Effect getDropShadow2() {
+        DropShadow shadow = new DropShadow();
+        shadow.setOffsetX(2);
+        shadow.setOffsetY(2);
+        shadow.setRadius(10);
+        shadow.setColor(Color.color(0.1, 0.1, 0.1, 0.7)); // ombre gris-noir transparente
+        return shadow;
     }
 }

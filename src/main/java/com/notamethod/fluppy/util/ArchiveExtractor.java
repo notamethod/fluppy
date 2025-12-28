@@ -107,9 +107,6 @@ public class ArchiveExtractor {
                     throw new IOException("Entry is outside of the target dir.");
                 }
 
-
-
-
                 if (entry.isDirectory()) {
                     Files.createDirectories(outputPath);
                 } else {

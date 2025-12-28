@@ -18,22 +18,24 @@ import java.util.regex.Pattern;
 @Slf4j
 public class HelperClass {
 
-    public static final int LINUX   = 0;
+    public static final int LINUX = 0;
     public static final int SOLARIS = 1;
     public static final int WINDOWS = 2;
-    public static final int MACOS   = 3;
-    public static final String REGEX_ABANDONWARE="jeu-[0-9]{5}-.*";
+    public static final int MACOS = 3;
+    public static final String REGEX_ABANDONWARE = "jeu-[0-9]{5}-.*";
     //public static final String REGEX_SIMPLE="*._DOS_??.zip";
-    public static final String REGEX_SIMPLE="(.*)_DOS_[A-Z][A-Z].*";
-    private static final String  FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
+    public static final String REGEX_SIMPLE = "(.*)_DOS_[A-Z][A-Z].*";
+    private static final String FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
+
     /**
      * Determines the system's OS
-     * @author Truben
+     *
      * @return the code for the current OS
+     * @author Truben
      */
     public static int getOS() {
         String sysName = System.getProperty("os.name").toLowerCase();
-        if(sysName.contains("linux"))
+        if (sysName.contains("linux"))
             return LINUX;
         else if (sysName.contains("windows"))
             return WINDOWS;
@@ -47,9 +49,10 @@ public class HelperClass {
 
     /**
      * Get and creates a app folder
-     * @author Truben
+     *
      * @param applicationName
      * @return the folder file
+     * @author Truben
      */
     public static File getWorkingDirectory(final String applicationName) {
 
@@ -77,34 +80,32 @@ public class HelperClass {
             if (!workingDirectory.mkdirs())
                 throw new RuntimeException("The working directory could not be created: " + workingDirectory);
 
-        log.debug("Working directory is "+workingDirectory.getAbsolutePath());
+        log.debug("Working directory is " + workingDirectory.getAbsolutePath());
         return workingDirectory;
     }
 
 
-
-
-
-
     public static String getGameDirectory(String appName) {
-        return  getDirectory(appName, "games");
+        return getDirectory(appName, "games");
     }
+
     public static String getTempDirectory(String appName) {
-        return  getDirectory(appName, "temp");
+        return getDirectory(appName, "temp");
     }
 
     public static String getDirectory(String appName, String dir) {
-        File subDirectory= new File(appName, dir);
+        File subDirectory = new File(appName, dir);
         if (!subDirectory.exists()) {
             if (!subDirectory.mkdirs()) {
                 throw new RuntimeException("The game directory could not be created: " + subDirectory);
             }
         }
-        return  subDirectory.getAbsolutePath();
+        return subDirectory.getAbsolutePath();
     }
 
     public static String getCoverDirectory(String appName) {
-        return  getDirectory(appName, "covers");
+
+        return getDirectory(appName, "covers");
     }
 
     public static boolean gameIsInTempDir(GameApp d) {
@@ -119,7 +120,7 @@ public class HelperClass {
         Path tempParent = Paths.get(Configuration.tempFolder);
         Path child = d.getGamePath();
         Path pathToMove = getDirToMove(tempParent, child);
-        String endTarget= pathToMove.getFileName().toString();
+        String endTarget = pathToMove.getFileName().toString();
         Path target = Paths.get(Configuration.gamesFolder).resolve(endTarget);
         moveDirectory(pathToMove, target);
 
@@ -129,14 +130,14 @@ public class HelperClass {
 
     private static Path getDirToMove(Path tempParent, Path child) {
         boolean sameName = tempParent.getFileName().equals(child.getParent().getFileName());
-        if (sameName){
+        if (sameName) {
             return child;
-        }else{
-            return getDirToMove( tempParent,  child.getParent());
+        } else {
+            return getDirToMove(tempParent, child.getParent());
         }
     }
 
-    public static void moveDirectory( Path sourceDir, Path targetDir) throws IOException {
+    public static void moveDirectory(Path sourceDir, Path targetDir) throws IOException {
 
         Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
             @Override
@@ -168,23 +169,23 @@ public class HelperClass {
                 .forEach(File::delete);
     }
 
-    public static  String guessTitleFromFilename(String name){
-        if (name==null){
+    public static String guessTitleFromFilename(String name) {
+        if (name == null) {
             return null;
         }
-        String title=regexArchive(name);
-        if (title==null){
-            title=regexGroup(name, REGEX_SIMPLE, 1);
+        String title = regexArchive(name);
+        if (title == null) {
+            title = regexGroup(name, REGEX_SIMPLE, 1);
         }
-        if (title==null){
+        if (title == null) {
             int pos = name.lastIndexOf(".");
-            title=pos>0?name.substring(0, pos):name;
+            title = pos > 0 ? name.substring(0, pos) : name;
         }
         return toTitleGame(title);
 
     }
 
-    public static String fromCamelCase(String nameWithCamelCase){
+    public static String fromCamelCase(String nameWithCamelCase) {
         String converted = nameWithCamelCase.replaceAll("([a-z])([A-Z])", "$1 $2");
 
         // Mettre la première lettre en majuscule si nécessaire
@@ -194,24 +195,26 @@ public class HelperClass {
         return converted;
     }
 
-    public static  String regexArchive(String name){
+    public static String regexArchive(String name) {
         Pattern pattern = Pattern.compile(REGEX_ABANDONWARE);
         Matcher matcher = pattern.matcher(name);
-        if (matcher.find()){
-            String[] data=name.split("-");
+        if (matcher.find()) {
+            String[] data = name.split("-");
             return data[2];
         }
         return null;
 
     }
-    public static  String regexGroup(String name, String regx, int group){
+
+    public static String regexGroup(String name, String regx, int group) {
         Pattern pattern = Pattern.compile(regx);
         Matcher matcher = pattern.matcher(name);
-        if (matcher.find()){
+        if (matcher.find()) {
             return matcher.group(group);
         }
         return null;
     }
+
     public static String toTitleGame(String name) {
         return name.substring(0, 1).toUpperCase() + name.substring(1).replace("_", " ");
     }
@@ -236,7 +239,7 @@ public class HelperClass {
     }
 
     public static String getCaptureDirectory(GameApp di) {
-        return Configuration.appFolder + "captures" + File.separator + di.getId()+ File.separator;
+        return Configuration.appFolder + "captures" + File.separator + di.getId() + File.separator;
     }
 
     public static void addOtherSettings(String[][] finito, String section, HashMap<String, String> props) {
@@ -247,9 +250,21 @@ public class HelperClass {
         }
     }
 
-    public static String sanitizeName(String name){
+    public static String sanitizeName(String name) {
         String sanitizedName = name.replaceAll(FORBIDDEN_CHARS_NAME, "");
         return sanitizedName.replace(" ", "").toLowerCase();
 
+    }
+
+    public static String getExtraDirectory(String appName) {
+
+        return getDirectory(appName, "extras");
+    }
+
+    public static String getExtension(File file) {
+        String name = file.getName();
+        int dot = name.lastIndexOf('.');
+        if (dot <= 0 || dot == name.length() - 1) return "";
+        return name.substring(dot + 1).toLowerCase();
     }
 }
