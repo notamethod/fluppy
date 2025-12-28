@@ -27,7 +27,7 @@ public class IgdbApi {
         log.info("searching game ->{}<-", name);
         ObjectMapper mapper = new ObjectMapper();
         String endpoint="https://api.igdb.com/v4/games";
-        String body="fields *, genres.*;\n" +
+        String body="fields *, genres.*,involved_companies.*;\n" +
                 "search \""+name+"\";";
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
@@ -99,6 +99,46 @@ public class IgdbApi {
         }
         log.debug("found {} covers ", covers.size());
         return covers;
+
+    }
+
+    public List<Company> getCompanies(Long id) throws ApiException, MappingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        String endpoint="https://api.igdb.com/v4/companies";
+        //TODO :waiting for string templates
+        String body="""
+            fields description,name,parent,slug,logo.url;
+            where id=${id};""".replace("${id}", String.valueOf(id));
+        HttpResponse<String> response;
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(endpoint))
+                    .header("Authorization", "Bearer " + token)
+                    .header("Client-ID", user)
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        }
+        catch (InterruptedException e){
+            Thread.currentThread().interrupt();
+            throw new ApiException("getCompanies Error "+id, e);
+        }
+        catch (Exception e){
+            throw new ApiException("getCompanies Error "+id, e);
+        }
+
+        List<Company> companies;
+        try {
+            companies = mapper.readValue(
+                    response.body(),
+                    new TypeReference<>() {}
+            );
+        } catch (JsonProcessingException e) {
+            throw new MappingException(e);
+        }
+        log.debug("found {} companies ", companies.size());
+        return companies;
 
     }
 

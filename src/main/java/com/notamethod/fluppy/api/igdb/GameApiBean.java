@@ -19,6 +19,8 @@ public class GameApiBean {
     Long cover;
     Long first_release_date;
     List<Genre> genres;
+    List<involvedCompany> involved_companies;
+
 
     public GameApiBean(String name) {
         this.name=name.substring(0,1).toUpperCase()+name.substring(1,name.length() );
