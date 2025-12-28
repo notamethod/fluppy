@@ -119,9 +119,12 @@
                         <Label text="Cover:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                         <TextField fx:id="coverPath" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Button  text="..."  onAction="#selectCover" GridPane.columnIndex="2" GridPane.rowIndex="1" ></Button>
-
+                        <Label text="protection:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <TextField fx:id="protectionPathField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="manual:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                        <TextField fx:id="manualPathField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                     </GridPane>
-
+                        <VBox fx:id="dropZone"  styleClass="dropZone"></VBox>
                     </children>
                 </VBox>
             </Tab>

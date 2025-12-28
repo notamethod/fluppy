@@ -42,11 +42,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static java.awt.image.ImageObserver.WIDTH;
+
 @Slf4j
 public class GamesWall extends Application {
 
-    private static final int WIDTH = 900;
-    private static final int HEIGHT = 700;
+    public enum TILES_VIEW {
+        DEFAULT, YEARS;
+    }
+    private static final int ORIGINAL_WIDTH = 900;
+    private static final int ORIGINAL_HEIGHT = 700;
     private static final int ROW_SIZE = 9;
     ApplicationDatabase applicationDatabase;
     PreferencesBean preferences;
@@ -64,7 +69,8 @@ public class GamesWall extends Application {
     Effects effects;
     private Category expandCategory = null;
     List<Category> gameCategories = new ArrayList<>();
-    private double width = WIDTH;
+    private double width = ORIGINAL_WIDTH;
+    private TILES_VIEW view= TILES_VIEW.DEFAULT;
 
     @Override
     public void init() throws Exception {
@@ -86,10 +92,8 @@ public class GamesWall extends Application {
         gameManager = new GameManager(applicationDatabase, preferences);
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(dosBoxManager, gameManager);
-        gameCategories = categoryManager.getShownCategories();
-        //FIXME:remove locale test
-        // Locale locale = Locale.getDefault();//new Locale("fr"); // ou "en", "de", etc.
-        Locale locale = new Locale("fr"); // ou "en", "de", etc.
+        gameCategories = categoryManager.getShownCategories(preferences.getViewFilter());
+
         FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
         FontUtils.loadCustomFont("MonkeyIsland-1991.ttf", 16);
         FontUtils.loadCustomFont("MonkeyIsland-1990.ttf", 16);
@@ -123,6 +127,7 @@ public class GamesWall extends Application {
         ScrollPane scrollPane = new ScrollPane(content);
 
         scrollPane.setPannable(true); // active le drag à la souris
+        scrollPane.setFitToWidth(true);
         //speed scrollpane
         scrollPane.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
             double deltaY = e.getDeltaY();
@@ -169,7 +174,7 @@ public class GamesWall extends Application {
 
         root0.getChildren().addAll(/*titleBar, */topRibbon0, midRoot);
         midRoot.setId("realRoot");
-        Scene scene = new Scene(root0, WIDTH, HEIGHT);
+        Scene scene = new Scene(root0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
 
         /*  drag&drop on top ribbon */
         topRibbon.setOnDragOver(event -> {
@@ -231,7 +236,7 @@ public class GamesWall extends Application {
                 debounce.stop();
                 debounce.setOnFinished(e -> applyFilter(q));
                 debounce.playFromStart();
-            }else{
+            } else {
                 if (q.isEmpty()) {
                     searchOverlay.hide();
                     expandCategory = null;
@@ -245,6 +250,7 @@ public class GamesWall extends Application {
         scrollPane.setStyle("-fx-background: #121212;"); // Fond du ScrollPane
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog2.png")));
         stage.setScene(scene);
+
         stage.show();
     }
 
@@ -276,11 +282,7 @@ public class GamesWall extends Application {
         URL titleUrl = classLoader.getResource("fluppy3.png");
         Image titleImage = new Image(titleUrl.toString(), 90, 50, true, true);
         ImageView titleView = new ImageView(titleImage);
-        Image gear = new Image(getClass().getResourceAsStream("/images/gear2.png"), 32, 32, false, false);
-        ImageView gearIcon = new ImageView(gear);
-        Button gearButton = new Button();
-        gearButton.setGraphic(gearIcon);
-        gearButton.setStyle("-fx-background-color: transparent;");
+        Button gearButton = createRibbonButton("/images/gear2.png");
         gearButton.setOnAction(e -> {
             PreferencesDialog dialog = new PreferencesDialog(stage);
             PreferencesBean neawBean = dialog.showAndWaitForResult();
@@ -291,7 +293,7 @@ public class GamesWall extends Application {
                 }
                 if (preferences.isFullScreen() != neawBean.isFullScreen()) {
                     preferences.setFullScreen(!preferences.isFullScreen());
-                   // updateList();
+                    // updateList();
                 }
             }
         });
@@ -308,8 +310,8 @@ public class GamesWall extends Application {
 
                 stage.setFullScreen(false);
                 stage.setMaximized(false);
-                stage.setWidth(WIDTH);
-                stage.setHeight(HEIGHT);
+                stage.setWidth(ORIGINAL_WIDTH);
+                stage.setHeight(ORIGINAL_HEIGHT);
                 stage.centerOnScreen();
             } else {
                 stage.setFullScreen(true);
@@ -320,15 +322,15 @@ public class GamesWall extends Application {
         });
 
         //quite
-        ImageView quitImg = new ImageView(new Image(getClass().getResourceAsStream("/images/quit2.png"), 32, 32, false, false));
-        Button quitButton = new Button();
-        quitButton.setGraphic(quitImg);
-        quitButton.setStyle("-fx-background-color: transparent;");
+        Button quitButton = createRibbonButton("/images/quit2.png");
         quitButton.setOnAction(e -> stage.close());
+
+        Button calendarButton = createRibbonButton("/images/calendar1.png");
+        calendarButton.setOnAction(e -> changeView());
         Region spacerRibbon = new Region();
         HBox.setHgrow(spacerRibbon, Priority.ALWAYS);
         topRibbon.setAlignment(Pos.CENTER_LEFT);
-        topRibbon.getChildren().addAll(logoView, titleView, info, spacerRibbon, gearButton, plusButton, quitButton);
+        topRibbon.getChildren().addAll(logoView, titleView, info, spacerRibbon, calendarButton, gearButton, plusButton, quitButton);
 
         topRibbon.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
@@ -338,8 +340,16 @@ public class GamesWall extends Application {
             stage.setX(event.getScreenX() - xOffset);
             stage.setY(event.getScreenY() - yOffset);
         });
-
         return topRibbon;
+    }
+
+    private Button createRibbonButton(String imagePath) {
+        Image img = new Image(getClass().getResourceAsStream(imagePath), 32, 32, false, false);
+        ImageView imgView = new ImageView(img);
+        Button button = new Button();
+        button.setGraphic(imgView);
+        button.setStyle("-fx-background-color: transparent;");
+        return button;
     }
 
     private void importFiles(List<File> files) {
@@ -360,15 +370,16 @@ public class GamesWall extends Application {
         updateList();
     }
 
-    private void updateSizingImage(ImageView imageView, boolean isFullscreen){
-        if (isFullscreen){
+    private void updateSizingImage(ImageView imageView, boolean isFullscreen) {
+        if (isFullscreen) {
             imageView.setImage(new Image(getClass().getResourceAsStream("/images/size_min.png"), 32, 32, false, false));
 
-        }else{
+        } else {
             imageView.setImage(new Image(getClass().getResourceAsStream("/images/size_max.png"), 32, 32, false, false));
         }
 
     }
+
     private void updateList() {
         log.debug("update list");
         this.gamesBlocks.clear();
@@ -412,10 +423,13 @@ public class GamesWall extends Application {
                     games = gameManager.getFromGenre(category.getId(), count);
                 }
                 break;
+            case YEAR:
+                games = gameManager.getFromYear(Integer.valueOf(category.getId()), count);
+                break;
             default:
                 games = null;
         }
-        if (games != null && (!category.getCategoryType().equals(CategoryType.FAVORITES) || category.getCategoryType().equals(CategoryType.FAVORITES)&& !games.isEmpty())/* && !games.isEmpty()*/) {
+        if (games != null && (!category.getCategoryType().equals(CategoryType.FAVORITES) || category.getCategoryType().equals(CategoryType.FAVORITES) && !games.isEmpty())/* && !games.isEmpty()*/) {
             return createBlock(category, games, gameIds);
         }
         return null;
@@ -428,8 +442,12 @@ public class GamesWall extends Application {
         tilePane.setPadding(new Insets(20, 10, 30, 0)); // top, right, bottom, left
         tilePane.setHgap(10);
         tilePane.setVgap(10);
-        tilePane.setPrefColumns(5);
+        //tilePane.setPrefColumns(5);
+        tilePane.setPrefColumns(-1);
         tilePane.setAlignment(Pos.TOP_LEFT);
+        tilePane.widthProperty().addListener((obs, oldW, newW) -> {
+            tilePane.requestLayout();
+        });
         for (GameApp gameStr : games) {
             if (!gameIds.contains(gameStr.getId())) {
                 gameIds.add(gameStr.getId());
@@ -440,8 +458,8 @@ public class GamesWall extends Application {
         }
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(20, 10, 10, 50)); // top, right, bottom, left
-        String expandedSymbol=category.isExpanded()?"<":">";
-        Label blockTitle = new Label(expandedSymbol+category.getLabel());
+        String expandedSymbol = category.isExpanded() ? "<" : ">";
+        Label blockTitle = new Label(expandedSymbol + category.getLabel());
         blockTitle.getStyleClass().add("blockTitle");
         // Ajouter une action au clic
         blockTitle.setOnMouseClicked(event -> {
@@ -458,12 +476,12 @@ public class GamesWall extends Application {
         if (expandCategory != null && expandCategory.getCategoryType().equals(category.getCategoryType())
                 && category.getId().equals(expandCategory.getId())) {
             category.setExpanded(false);
-            blockTitle.setText(category.getLabel()+">");
+            blockTitle.setText(category.getLabel() + ">");
             expandCategory = null;
         } else if (expandCategory == null || (expandCategory != null && !category.getId().equals(expandCategory.getId()))) {
             expandCategory = category;
             category.setExpanded(true);
-            blockTitle.setText(category.getLabel()+"<");
+            blockTitle.setText(category.getLabel() + "<");
         } else {
             expandCategory = null;
         }
@@ -473,14 +491,12 @@ public class GamesWall extends Application {
     private GameTile addGame(GameApp game) {
         StackPane imagePane = ImageFactory.getThumb(game);
         GameTile container;
-
         container = new GameTile(5, game, imagePane);
-
         container.setId("container-" + game.getName());
 
         //*****************************************
 
-        container.setEffect(getDropShadow2());
+        container.setEffect(Effects.getDropShadow2());
 
         // Création du menu contextuel
         ContextMenu contextMenu = new ContextMenu();
@@ -536,8 +552,6 @@ public class GamesWall extends Application {
             zoomOut.play();
             hoverDelay.stop();
             hoverDelayExit.playFromStart();
-
-
         });
 
 
@@ -571,8 +585,8 @@ public class GamesWall extends Application {
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
-        double fixWidth = midRoot.getWidth() - WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
-        double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - HEIGHT) / 2 : 0;
+        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
+        double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
         Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
 
@@ -626,27 +640,20 @@ public class GamesWall extends Application {
         }
     }
 
-    private Effect getDropShadow1() {
-        DropShadow shadow = new DropShadow();
-        shadow.setOffsetX(2);
-        shadow.setOffsetY(2);
-        shadow.setColor(Color.web("#333"));
-        return shadow;
-    }
-
-    private Effect getDropShadow2() {
-        DropShadow shadow = new DropShadow();
-        shadow.setOffsetX(2);
-        shadow.setOffsetY(2);
-        shadow.setRadius(10);
-        shadow.setColor(Color.color(0.1, 0.1, 0.1, 0.7)); // ombre gris-noir transparente
-
-
-        return shadow;
-    }
 
     public static void main(String[] args) {
         launch();
+    }
+
+    public void changeView(){
+        if (view==TILES_VIEW.DEFAULT){
+            view=TILES_VIEW.YEARS;
+            gameCategories=categoryManager.getShownCategories("years");
+        }else{
+            view=TILES_VIEW.DEFAULT;
+            gameCategories=categoryManager.getShownCategories(null);
+        }
+        updateList();
     }
 }
 

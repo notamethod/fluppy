@@ -11,5 +11,6 @@ public class Configuration {
     public static final String appFolder = HelperClass.getWorkingDirectory(APP_NAME).getAbsolutePath() + File.separator;
     public static final String tempFolder = HelperClass.getTempDirectory(appFolder);
     public static final String coverFolder = HelperClass.getCoverDirectory(appFolder);
+    public static final String extraFolder = HelperClass.getExtraDirectory(appFolder);
     public static final String gamesFolder = HelperClass.getGameDirectory(appFolder);
 }

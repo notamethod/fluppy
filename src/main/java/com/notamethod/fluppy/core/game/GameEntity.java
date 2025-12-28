@@ -22,6 +22,8 @@ public class GameEntity {
     private String gamePath;
     private String imagePath;
     private String exePath;
+    private String protectionPath;
+    private String manualPath;
 
     private String installer;
     private String extra;

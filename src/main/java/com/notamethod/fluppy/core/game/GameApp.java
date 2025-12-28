@@ -23,6 +23,8 @@ public class GameApp {
     private boolean favorite;
     private Path gamePath;
     private Path exePath;
+    private Path protectionPath;
+    private Path manualPath;
     private String extra;
     private int frameskip=0;
     private String cdrom;
@@ -38,10 +40,12 @@ public class GameApp {
     private LocalDateTime lastPlayed;
     private Long timePlayed;
 
+
     /**
      * Update game info
      * @param srcGame
      */
+    //FIXME: remove method
     public void merge(GameApp srcGame) {
         if (name == null && srcGame.name != null) {
             this.name = srcGame.name;
@@ -58,6 +62,9 @@ public class GameApp {
         }
         if (gamePath == null && srcGame.gamePath != null) {
             this.gamePath = srcGame.gamePath;
+        }
+        if (exePath == null && srcGame.exePath != null) {
+            this.exePath = srcGame.exePath;
         }
         if (exePath == null && srcGame.exePath != null) {
             this.exePath = srcGame.exePath;
