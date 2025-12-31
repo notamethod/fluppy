@@ -1,6 +1,5 @@
-package com.notamethod.fluppy.gui;
+package com.notamethod.fluppy.gui.common;
 
-import com.notamethod.fluppy.gui.common.DialogActions;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ public class DialogActionsJfx implements DialogActions {
     public Optional<String> showInputDialog(String title, String content, String defaultValue) {
         TextInputDialog dialog = new TextInputDialog(defaultValue);
         DialogPane dialogPane = dialog.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
         dialogPane.getStyleClass().add("custom-dialog");
         dialog.setTitle("Old Dos Games Launcher");
         dialog.setHeaderText(null);
@@ -43,7 +42,7 @@ public class DialogActionsJfx implements DialogActions {
 
         ChoiceDialog<String> dialog = new ChoiceDialog<>(option, options);
         DialogPane dialogPane = dialog.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
         dialogPane.getStyleClass().add("custom-dialog");
         dialog.setTitle(TITLE);
         dialog.setHeaderText(null);
@@ -75,7 +74,7 @@ public class DialogActionsJfx implements DialogActions {
     public boolean showConfirmDialog(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
       dialogPane.getStyleClass().add("custom-dialog");
 
         alert.setTitle(TITLE);
@@ -97,7 +96,7 @@ public class DialogActionsJfx implements DialogActions {
     public void showMessageDialog(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
         dialogPane.getStyleClass().add("custom-dialog");
         alert.setTitle(title);
         alert.getDialogPane().setPrefSize(500, 220);
@@ -111,7 +110,7 @@ public class DialogActionsJfx implements DialogActions {
     public void showErrorDialog(List<String> content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
         dialogPane.getStyleClass().add("custom-dialog");
         alert.setTitle(TITLE);
         alert.getDialogPane().setPrefSize(500, 220);

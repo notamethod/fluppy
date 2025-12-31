@@ -2,12 +2,18 @@ package com.notamethod.fluppy.gui;
 
 
 import com.notamethod.fluppy.core.*;
+import com.notamethod.fluppy.core.category.Category;
+import com.notamethod.fluppy.core.category.CategoryManager;
+import com.notamethod.fluppy.core.category.CategoryType;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
+import com.notamethod.fluppy.dosbox.DosBoxException;
+import com.notamethod.fluppy.dosbox.DosBoxManager;
+import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.GameActions;
 import com.notamethod.fluppy.core.game.GameManagerException;
-import com.notamethod.fluppy.io.PreferencesIO;
+import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.util.HelperClass;
 import jakarta.persistence.EntityManagerFactory;
 import javafx.animation.*;
@@ -15,9 +21,9 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.*;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
@@ -26,8 +32,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.effect.DropShadow;
 
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -53,6 +59,7 @@ public class GamesWall extends Application {
     private static final int ORIGINAL_WIDTH = 900;
     private static final int ORIGINAL_HEIGHT = 700;
     private static final int ROW_SIZE = 9;
+    double midWidth;
     ApplicationDatabase applicationDatabase;
     PreferencesBean preferences;
     DosBoxManager dosBoxManager = new DosBoxManager();
@@ -62,7 +69,7 @@ public class GamesWall extends Application {
 
     StackPane midRoot;
     GameDetailPanel detailPane;
-    List<VBox> gamesBlocks = new ArrayList<>();
+    List<Node> gamesBlocks = new ArrayList<>();
     VBox content;
     private double xOffset = 0;
     private double yOffset = 0;
@@ -123,20 +130,17 @@ public class GamesWall extends Application {
         content = new VBox();
         updateList();
 
-
-        ScrollPane scrollPane = new ScrollPane(content);
-
-        scrollPane.setPannable(true); // active le drag à la souris
-        scrollPane.setFitToWidth(true);
-        //speed scrollpane
-        scrollPane.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
-            double deltaY = e.getDeltaY();
-            double height = scrollPane.getContent().getBoundsInLocal().getHeight();
-            double vValue = scrollPane.getVvalue();
-            // facteur de vitesse (ici x3)
-            scrollPane.setVvalue(vValue - deltaY / height * 3);
-            e.consume();
-        });
+        detailPane.setListener(new PanelListener() {
+                                   public void onUpdate() {
+                                       updateList();
+                                       detailPane.hide();
+                                   }
+                                   public void onClose() {
+                                       detailPane.hide();
+                                   }
+                               }
+        );
+        ScrollPane scrollPane = createScrollPane();
 
         // Label overlay
         Label dropLabel = new Label(Messages.getString("drop.here"));
@@ -144,9 +148,6 @@ public class GamesWall extends Application {
         dropLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         dropLabel.setVisible(false); // caché par défaut
 
-        scrollPane.setFitToWidth(true); // Pour que le contenu prenne toute la largeur
-        scrollPane.setStyle("-fx-background: transparent;");
-        scrollPane.setId("scrollpane-tiles");
 
         VBox root0 = new VBox();
         // Cette ligne est cruciale
@@ -154,17 +155,7 @@ public class GamesWall extends Application {
         StackPane topRibbon0 = new StackPane(topRibbon, dropLabel);
 
 
-        detailPane.setListener(new PanelListener() {
-                                   public void onUpdate() {
-                                       updateList();
-                                       detailPane.hide();
-                                   }
 
-                                   public void onClose() {
-                                       detailPane.hide();
-                                   }
-                               }
-        );
         midRoot = new StackPane();
         midRoot.setId("midRoot");
 
@@ -175,7 +166,7 @@ public class GamesWall extends Application {
         root0.getChildren().addAll(/*titleBar, */topRibbon0, midRoot);
         midRoot.setId("realRoot");
         Scene scene = new Scene(root0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
-
+        //midRoot.prefWidthProperty().bind(scene.widthProperty());
         /*  drag&drop on top ribbon */
         topRibbon0.setOnDragOver(event -> {
             if (event.getGestureSource() != scrollPane && event.getDragboard().hasFiles()) {
@@ -200,6 +191,22 @@ public class GamesWall extends Application {
             event.setDropCompleted(success);
             event.consume();
         });
+        scene.widthProperty().addListener((obs, oldV, newV) -> {
+                    System.out.println("Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
+            midWidth=newV.doubleValue();
+            midRoot.setPrefWidth(midWidth);
+            midRoot.setMaxWidth(midWidth);
+            midRoot.setMinWidth(midWidth);
+            System.out.println("after: Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
+                 midRoot.requestLayout();
+                }
+
+        );
+
+        scene.heightProperty().addListener((obs, oldV, newV) ->
+                System.out.println("Height = " + newV)
+        );
+
         scene.setOnDragExited(event -> {
         });
         // Écoute globale du drag
@@ -246,12 +253,30 @@ public class GamesWall extends Application {
 
         });
 
-        scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
         scrollPane.setStyle("-fx-background: #121212;"); // Fond du ScrollPane
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog2.png")));
         stage.setScene(scene);
 
         stage.show();
+    }
+
+    private ScrollPane createScrollPane() {
+        ScrollPane scrollPane = new ScrollPane(content);
+        scrollPane.setPannable(true); // active le drag à la souris
+        //FIXME: problem with fullscreen
+        scrollPane.setFitToWidth(false);
+        scrollPane.setId("scrollpane-tiles");
+        //speed scrollpane
+        scrollPane.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
+            double deltaY = e.getDeltaY();
+            double height = scrollPane.getContent().getBoundsInLocal().getHeight();
+            double vValue = scrollPane.getVvalue();
+            // facteur de vitesse (ici x3)
+            scrollPane.setVvalue(vValue - deltaY / height * 3);
+            e.consume();
+        });
+        return scrollPane;
     }
 
     private void applyFilter(String q) {
@@ -300,7 +325,6 @@ public class GamesWall extends Application {
         //plus
         ImageView plusImage = new ImageView();
         updateSizingImage(plusImage, stage.isFullScreen());
-        //new Image(getClass().getResourceAsStream("/images/size_max.png"), 32, 32, false, false));
         Button plusButton = new Button();
         plusButton.setGraphic(plusImage);
         plusButton.setStyle("-fx-background-color: transparent;");
@@ -309,16 +333,22 @@ public class GamesWall extends Application {
             if (stage.isFullScreen()) {
 
                 stage.setFullScreen(false);
-                stage.setMaximized(false);
+                //stage.setMaximized(false);
                 stage.setWidth(ORIGINAL_WIDTH);
                 stage.setHeight(ORIGINAL_HEIGHT);
                 stage.centerOnScreen();
+                System.out.println("reduce");
+
+                //midRoot.setPrefWidth(800);
+
+
+                //e.cons
+
             } else {
                 stage.setFullScreen(true);
-                width = stage.getWidth();
+             //   width = stage.getWidth();
             }
-            // AddGameDialog dialog = new AddGameDialog(null, null);
-            //dialog.showAndWait();
+         //   width = stage.getWidth();
         });
 
         //quite
@@ -386,12 +416,12 @@ public class GamesWall extends Application {
         content.getChildren().clear();
         Set<Long> gameIds = new HashSet<>();
         if (expandCategory != null) {
-            VBox box = createBlock(expandCategory, 25, gameIds);
+            Node box = createBlock(expandCategory, 25, gameIds);
             gamesBlocks.add(box);
 
         } else {
             for (int i = 0; i < gameCategories.size(); i++) {
-                VBox box = createBlock(gameCategories.get(i), ROW_SIZE, gameIds);
+                Node box = createBlock(gameCategories.get(i), ROW_SIZE, gameIds);
                 if (box != null) {
                     gamesBlocks.add(box);
                 }
@@ -401,7 +431,7 @@ public class GamesWall extends Application {
         content.getChildren().addAll(this.gamesBlocks);
     }
 
-    private VBox createBlock(Category category, int count, Set<Long> gameIds) {
+    private Node createBlock(Category category, int count, Set<Long> gameIds) {
         List<GameApp> games;
         switch (category.getCategoryType()) {
             case SEARCH:
@@ -436,17 +466,27 @@ public class GamesWall extends Application {
     }
 
 
-    private VBox createBlock(Category category, List<GameApp> games, Set<Long> gameIds) {
+    private Node createBlock(Category category, List<GameApp> games, Set<Long> gameIds) {
         TilePane tilePane = new TilePane();
         tilePane.setId("tilePane-" + category.getCategoryType());
         tilePane.setPadding(new Insets(20, 10, 30, 0)); // top, right, bottom, left
         tilePane.setHgap(10);
         tilePane.setVgap(10);
         //tilePane.setPrefColumns(5);
-        tilePane.setPrefColumns(-1);
+        if (midWidth>ORIGINAL_WIDTH){
+            tilePane.setPrefColumns(9);
+        }else{
+            tilePane.setPrefColumns(5);
+        }
+        //tilePane.setPrefColumns(-1);
         tilePane.setAlignment(Pos.TOP_LEFT);
         tilePane.widthProperty().addListener((obs, oldW, newW) -> {
-            tilePane.requestLayout();
+            System.out.println(tilePane.getWidth());
+            if (midWidth==0){
+                midWidth=midRoot.getWidth();
+            }
+
+
         });
         for (GameApp gameStr : games) {
             if (!gameIds.contains(gameStr.getId())) {
@@ -465,6 +505,7 @@ public class GamesWall extends Application {
         blockTitle.setOnMouseClicked(event -> {
             activateCategory(category, blockTitle);
         });
+
         vBox.getChildren().addAll(blockTitle, tilePane);
         return vBox;
     }
@@ -503,7 +544,6 @@ public class GamesWall extends Application {
         contextMenu.setStyle("-fx-background-color: #2c2c2c; -fx-text-fill: white;");
         MenuItem deleteItem = new MenuItem("Supprimer");
 
-        //editItem.setOnAction(e -> actionEdit(game));
         deleteItem.setOnAction(e -> actionDelete(game));
 
 // Ajout des items au menu
@@ -581,7 +621,8 @@ public class GamesWall extends Application {
     }
 
     private Point2D caculatePosition(GameTile container) {
-        int prevWidth = 600;
+        int detailPanelEstimatedWidth = 550;
+        int detailPanelEstimatedHeight = 200;
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
@@ -593,15 +634,27 @@ public class GamesWall extends Application {
 
         Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
         Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
-
+        //TODO recalculate midroot size
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
-        double diffx = (fixedPoint2.getX() + prevWidth) - width/*screen.getMaxX()*/;
-        log.debug("tile" + tileSceneBounds.getMinX() + prevWidth);
-        log.debug("tile" + screenBounds.getMinX() + prevWidth);
+        point = point.add(-container.getWidth(), -container.getHeight());
+        double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - width/*screen.getMaxX()*/;
+        double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
+        double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
+        log.debug("tile " + "point "+point.getX()+" / "+point.getY());
+        log.debug("tile pt2 " + "point "+fixedPoint2.getX()+" / "+fixedPoint2.getY());
+        log.debug("midroot " + +midRoot.getWidth()+" / "+midRoot.getHeight());
+        log.debug("tileSceneBounds " + tileSceneBounds.getMinX() );
+
         log.debug("diff:" + diffx);
-        double decalRatio = -1.1;
+        log.debug("diffy:" + diffy);
+        double decalRatio = -(Screen.getPrimary().getDpi()/100);
+
         if (diffx > 0)
             fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
+
+        if (diffy> 0)
+            fixedPoint2 = fixedPoint2.add(0, decalRatio*diffy);
+       // return fixedPoint2;
         return fixedPoint2;
     }
 
@@ -625,7 +678,6 @@ public class GamesWall extends Application {
 
             Optional<ButtonType> result = dialog.showAndWait();
             if (result.isPresent() && result.get().getButtonData().equals(ButtonBar.ButtonData.OK_DONE)) {
-                // GameEditorController controller = loader.getController();
                 GameApp editedGame = controller.getResult();
                 editedGame.setId(gameBean.getId());
                 editedGame.merge(gameBean);

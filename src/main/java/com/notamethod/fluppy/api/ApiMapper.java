@@ -36,7 +36,7 @@ public interface ApiMapper {
             return null;
         try {
             return Integer.valueOf(year);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return null;
         }
     }

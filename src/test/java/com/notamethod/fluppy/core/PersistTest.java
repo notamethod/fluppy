@@ -18,10 +18,12 @@ public class PersistTest {
 
     private EntityManagerFactory emf;
     private ApplicationDatabase applicationDatabase;
+
     @BeforeEach
     void setup() {
         emf = Persistence.createEntityManagerFactory("ebox2_pu");
         applicationDatabase = new ApplicationDatabase(emf);
+        System.out.println("adb: "+applicationDatabase);
     }
 
     @AfterEach

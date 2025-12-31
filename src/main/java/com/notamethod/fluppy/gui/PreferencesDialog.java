@@ -1,7 +1,7 @@
 package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
-import com.notamethod.fluppy.io.PreferencesIO;
+import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.layout.*;
@@ -25,7 +25,7 @@ public class PreferencesDialog extends Stage {
         initModality(Modality.APPLICATION_MODAL);
         initOwner(owner);
         setTitle("Préférences");
-        preferences = PreferencesIO.load("prefs.json");
+        preferences = PreferencesIO.load();
         cheminField = new TextField();
         cheminField.setPrefWidth(250);
         cheminField.setText(preferences.getDosBoxPath());
@@ -82,7 +82,7 @@ public class PreferencesDialog extends Stage {
         );
         layout.setPadding(new Insets(20));
         Scene scene = new Scene(layout);
-        scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
         setScene(scene);
 
 

@@ -10,6 +10,7 @@ import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.core.game.GenreApp;
 import com.notamethod.fluppy.gui.common.FileActions;
+import com.notamethod.fluppy.gui.common.OperationCanceledException;
 import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.HelperClass;
 import javafx.beans.binding.Bindings;
@@ -220,7 +221,7 @@ public class AddGameDialog extends Stage {
 
         layout.setPadding(new Insets(20));
         Scene scene=new Scene(layout);
-        scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
         setScene(scene);
 
     }

@@ -17,7 +17,7 @@ module com.notamethod.fluppy {
     requires org.tukaani.xz;
     requires org.hibernate.orm.core;
     requires javafx.graphics;
-
+    requires com.fasterxml.jackson.annotation;
 
 
 
@@ -25,9 +25,15 @@ module com.notamethod.fluppy {
     exports com.notamethod.fluppy.core;
     exports com.notamethod.fluppy.api.igdb;
     opens com.notamethod.fluppy.gui to javafx.fxml;
-    opens com.notamethod.fluppy.core to javafx.fxml, org.hibernate.orm.core;
+    opens com.notamethod.fluppy.core to org.hibernate.orm.core;
     exports com.notamethod.fluppy.core.preferences;
-    opens com.notamethod.fluppy.core.preferences to javafx.fxml, org.hibernate.orm.core;
-    opens com.notamethod.fluppy.core.game to javafx.fxml, org.hibernate.orm.core;
+    opens com.notamethod.fluppy.core.preferences to  org.hibernate.orm.core;
+    opens com.notamethod.fluppy.core.game to  org.hibernate.orm.core;
     exports com.notamethod.fluppy.core.game;
+    exports com.notamethod.fluppy.core.category;
+    opens com.notamethod.fluppy.core.category to org.hibernate.orm.core;
+    exports com.notamethod.fluppy.dosbox;
+    opens com.notamethod.fluppy.dosbox to org.hibernate.orm.core;
+    exports com.notamethod.fluppy.gui.common;
+    opens com.notamethod.fluppy.gui.common to javafx.fxml, org.hibernate.orm.core;
 }

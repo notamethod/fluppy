@@ -1,9 +1,10 @@
 package com.notamethod.fluppy.gui;
 
-import com.notamethod.fluppy.core.*;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.game.GenreApp;
+import com.notamethod.fluppy.dosbox.DosBoxException;
+import com.notamethod.fluppy.dosbox.DosBoxManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -34,8 +35,6 @@ public class GameDetailPanel extends StackPane {
     private PanelListener listener;
     private final VBox extraFiles;
     VBox detailContent;
-    private  Label protection;
-
     public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
         this.dosBoxManager = dosBoxManager;
         this.gameManager = gameManager;
@@ -129,9 +128,13 @@ public class GameDetailPanel extends StackPane {
             timePlayed.setText(Messages.getString("game.neverplayed"));
         }
         extraFiles.getChildren().clear();
+        if (game.getManualPath()!=null){
+            extraFiles.getChildren().add(LinkLabelFactory.createFileLink("Manual",game.getManualPath().toFile() ));
+        }
         if (game.getProtectionPath()!=null){
             extraFiles.getChildren().add(LinkLabelFactory.createFileLink("protection",game.getProtectionPath().toFile() ));
         }
+
         setTranslateX(x);
         setTranslateY(y);
 

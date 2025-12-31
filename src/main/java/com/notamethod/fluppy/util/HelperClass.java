@@ -80,7 +80,7 @@ public class HelperClass {
             if (!workingDirectory.mkdirs())
                 throw new RuntimeException("The working directory could not be created: " + workingDirectory);
 
-        log.debug("Working directory is " + workingDirectory.getAbsolutePath());
+        log.info("Working directory is " + workingDirectory.getAbsolutePath());
         return workingDirectory;
     }
 
@@ -220,7 +220,7 @@ public class HelperClass {
     }
 
     public static void cleanDirectory(Path dir) throws IOException {
-        log.info("cleaning {}", dir);
+        log.debug("cleaning {}", dir);
         Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {

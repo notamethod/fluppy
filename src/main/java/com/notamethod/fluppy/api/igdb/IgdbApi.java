@@ -31,12 +31,7 @@ public class IgdbApi {
                 "search \""+name+"\";";
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(endpoint))
-                    .header("Authorization", "Bearer " + token)
-                    .header("Client-ID", user)
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .build();
+            HttpRequest request = igdbRequest(endpoint, body);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
         catch (InterruptedException e){
@@ -65,6 +60,15 @@ public class IgdbApi {
         return games;
     }
 
+    private HttpRequest igdbRequest(String endpoint, String body) {
+       return HttpRequest.newBuilder()
+                .uri(URI.create(endpoint))
+                .header("Authorization", "Bearer " + token)
+                .header("Client-ID", user)
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+    }
+
     public List<Cover> getCoverInfo(Long id) throws ApiException, MappingException {
         ObjectMapper mapper = new ObjectMapper();
         String endpoint="https://api.igdb.com/v4/covers";
@@ -72,12 +76,7 @@ public class IgdbApi {
                 "where id="+id+";";
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(endpoint))
-                    .header("Authorization", "Bearer " + token)
-                    .header("Client-ID", user)
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .build();
+            HttpRequest request = igdbRequest(endpoint, body);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
         catch (InterruptedException e){
@@ -106,18 +105,13 @@ public class IgdbApi {
         ObjectMapper mapper = new ObjectMapper();
 
         String endpoint="https://api.igdb.com/v4/companies";
-        //TODO :waiting for string templates
+        //TODO :waiting for string templates, JEP 430, 459
         String body="""
             fields description,name,parent,slug,logo.url;
             where id=${id};""".replace("${id}", String.valueOf(id));
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(endpoint))
-                    .header("Authorization", "Bearer " + token)
-                    .header("Client-ID", user)
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .build();
+            HttpRequest request = igdbRequest(endpoint, body);
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
         catch (InterruptedException e){

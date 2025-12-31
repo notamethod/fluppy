@@ -1,8 +1,9 @@
-package com.notamethod.fluppy.core;
+package com.notamethod.fluppy.dosbox;
 
+import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
-import com.notamethod.fluppy.io.PreferencesIO;
+import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 

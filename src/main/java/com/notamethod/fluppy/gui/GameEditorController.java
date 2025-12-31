@@ -9,6 +9,7 @@ import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 
 import com.notamethod.fluppy.core.game.GameManager;
+import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.GameActions;
 import com.notamethod.fluppy.util.HelperClass;
 import javafx.collections.FXCollections;
@@ -151,7 +152,7 @@ public class GameEditorController {
 
             if (db.hasFiles()) {
                 File file = db.getFiles().get(0);
-                System.out.println("Fichier déposé : " + file.getAbsolutePath());
+                log.debug("Dropped file : " + file.getAbsolutePath());
                 label.setText("Fichier : " + file.getName());
                 try {
                     Path p = addExtra(file, originalGame.getName());
@@ -294,7 +295,6 @@ public class GameEditorController {
 
     public boolean updateAPI() {
         boolean updated = false;
-        System.out.println("updateAPI()");
         ApiCalls apiCalls = new ApiCalls();
         GameActions gameActions = new GameActions(new DialogActionsJfx());
         List<GameApiBean> games = null;
@@ -333,7 +333,6 @@ public class GameEditorController {
     }
 
     public void selectExe() {
-        System.out.println("updateAPI()");
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(exePath.toFile());
         fileChooser.setTitle("Choisir un fichier");

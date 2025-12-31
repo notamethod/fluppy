@@ -1,5 +1,6 @@
-package com.notamethod.fluppy.core;
+package com.notamethod.fluppy.core.category;
 
+import com.notamethod.fluppy.core.ApplicationDatabase;
 import com.notamethod.fluppy.gui.Messages;
 
 import java.util.*;
