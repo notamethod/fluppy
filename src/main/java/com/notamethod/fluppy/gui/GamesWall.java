@@ -177,20 +177,20 @@ public class GamesWall extends Application {
         Scene scene = new Scene(root0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
 
         /*  drag&drop on top ribbon */
-        topRibbon.setOnDragOver(event -> {
+        topRibbon0.setOnDragOver(event -> {
             if (event.getGestureSource() != scrollPane && event.getDragboard().hasFiles()) {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
             event.consume();
         });
-        topRibbon.setOnDragEntered(e -> {
+        topRibbon0.setOnDragEntered(e -> {
             topRibbon.setStyle("-fx-background-color: green;");
             // topRibbon.s
         });
-        topRibbon.setOnDragExited(e -> topRibbon.setStyle("-fx-background-color: #141414;"));
+        topRibbon0.setOnDragExited(e -> topRibbon.setStyle("-fx-background-color: #141414;"));
 
         // Gérer le drop
-        topRibbon.setOnDragDropped(event -> {
+        topRibbon0.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
             if (db.hasFiles()) {
