@@ -253,7 +253,7 @@ public class GamesWall extends Application {
 
         });
 
-        scene.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
         scrollPane.setStyle("-fx-background: #121212;"); // Fond du ScrollPane
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog2.png")));
         stage.setScene(scene);

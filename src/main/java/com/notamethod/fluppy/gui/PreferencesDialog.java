@@ -82,7 +82,7 @@ public class PreferencesDialog extends Stage {
         );
         layout.setPadding(new Insets(20));
         Scene scene = new Scene(layout);
-        scene.getStylesheets().add(getClass().getResource("/style/style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("dialog.css").toExternalForm());
         setScene(scene);
 
 

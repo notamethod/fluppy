@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 
 <DialogPane
-        stylesheets="@style.css"
+        stylesheets="@dialog.css"
         xmlns:fx="http://javafx.com/fxml"
         fx:controller="com.notamethod.fluppy.gui.GameEditorController">
     <content>

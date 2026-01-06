@@ -89,7 +89,6 @@ public class GameEditorController {
 
     @FXML
     private void handleOk(ActionEvent event) {
-        System.out.println("OK cliqué");
         saveGame();
         closeDialogWithResult(true, event);
     }
@@ -334,6 +333,7 @@ public class GameEditorController {
 
     public void selectExe() {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Executable", "*.exe","*.bat","*.com"));
         fileChooser.setInitialDirectory(exePath.toFile());
         fileChooser.setTitle("Choisir un fichier");
         File selectedFile = fileChooser.showOpenDialog(null);

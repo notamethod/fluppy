@@ -6,6 +6,9 @@
 *
 */
 
+
+
+
 .root{
     -fx-background-color: #2D2D30;
     -fx-font-family: "LucasArts SCUMM - Subtitle - Roman";
@@ -15,8 +18,8 @@
 
 /* Label */
 .label{
--fx-font-size:14 px;
-    -fx-text-fill: #d3761e;
+-fx-font-size:10 px;
+
 }
 
 .subtitle{
@@ -796,7 +799,6 @@
 }
 
 .blockTitle {
-
    -fx-font-family: "Storybook", "Courier New";
     -fx-font-size: 28px;
     -fx-text-fill: #d3761e;
