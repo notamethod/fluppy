@@ -620,7 +620,7 @@ public class GamesWall extends Application {
         return container;
     }
 
-    private Point2D caculatePosition(GameTile container) {
+    private Point2D caculatePosition1(GameTile container) {
         int detailPanelEstimatedWidth = 550;
         int detailPanelEstimatedHeight = 200;
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
@@ -658,7 +658,41 @@ public class GamesWall extends Application {
         return fixedPoint2;
     }
 
+    private Point2D caculatePosition(GameTile container) {
+        int detailPanelEstimatedWidth = 550;
+        int detailPanelEstimatedHeight = 200;
+        Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
+        detailPane.applyCss();
+        detailPane.layout();
+        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
+        double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
+        Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
+
+
+        Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
+        Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
+        //TODO recalculate midroot size
+        Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
+        double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - width/*screen.getMaxX()*/;
+        double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
+        log.debug("tile " + "point "+point.getX()+"-"+point.getY());
+        log.debug("midroot " + +midRoot.getWidth()+"-"+midRoot.getHeight());
+        double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
+        log.debug("tile " + "point "+point.getX()+" / "+point.getY());
+        log.debug("midroot " + +midRoot.getWidth()+" / "+midRoot.getHeight());
+        log.debug("tileSceneBounds " + tileSceneBounds.getMinX() );
+
+        log.debug("diff:" + diffx);
+        log.debug("diffy:" + diffy);
+        double decalRatio = -(Screen.getPrimary().getDpi()/100);
+        System.out.println(Screen.getPrimary().getDpi());
+        if (diffx > 0)
+            fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
+        if (diffy> 0)
+            fixedPoint2 = fixedPoint2.add(0, decalRatio*diffy);
+        return fixedPoint2;
+    }
     private void actionDelete(GameApp game) {
         if (gameManager.deleteGame(game) > 0) {
             updateList();

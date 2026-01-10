@@ -326,7 +326,7 @@ public class GameEditorController {
             }
 
         } else {
-            System.out.println("game not found");
+            log.warn("game not found");
         }
         return updated;
     }

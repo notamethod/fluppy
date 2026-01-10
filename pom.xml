@@ -6,7 +6,7 @@
 
     <groupId>com.notamethod</groupId>
     <artifactId>fluppy</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1</version>
     <name>fluppy-box</name>
 
     <properties>
@@ -187,6 +187,13 @@
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
                                         <exclude>com/sun/glass/**</exclude>
+                                    </excludes>
+
+                                </filter>
+                                <filter>
+                                    <artifact>org.openjfx:*</artifact>
+                                    <excludes>
+                                        <exclude>**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
