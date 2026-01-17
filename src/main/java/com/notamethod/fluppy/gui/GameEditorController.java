@@ -9,6 +9,7 @@ import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 
 import com.notamethod.fluppy.core.game.GameManager;
+import com.notamethod.fluppy.core.game.GameMapper;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.GameActions;
 import com.notamethod.fluppy.util.HelperClass;
@@ -77,7 +78,8 @@ public class GameEditorController {
     private TextField protectionPathField;
     @FXML
     private TextField manualPathField;
-    ;
+    @FXML
+    private TextArea commentField;
     private DialogActionsJfx da;
     @FXML
     private VBox dropZone;
@@ -229,7 +231,7 @@ public class GameEditorController {
     }
 
     public void saveGame() {
-        GameApp editedGame = new GameApp();
+        GameApp editedGame = GameMapper.INSTANCE.copyGameApp(originalGame);
         editedGame.setName(titleField.getText());
 
         //game.setPlatform(platformField.getText());
@@ -248,9 +250,9 @@ public class GameEditorController {
             imagePath = null;
         }
         editedGame.setImagePath(imagePath == null ? null : Path.of(imagePath));
-
+        editedGame.setComment(commentField.getText());
         editedGame.setId(originalGame.getId());
-        editedGame.merge(originalGame);
+      //  editedGame.merge(originalGame);
         if (!editedGame.equals(originalGame)) {
             gameManager.save(editedGame);
             result = editedGame;
@@ -263,6 +265,8 @@ public class GameEditorController {
 
     public void setGame(GameApp game) {
         this.originalGame = game;
+        commentField.setWrapText(true);
+        commentField.setText(game.getComment());
         titleField.setText(game.getName());
         yearField.setText(game.getYear() != null ? String.valueOf(game.getYear()) : "?");
         exePath = game.getExePath();

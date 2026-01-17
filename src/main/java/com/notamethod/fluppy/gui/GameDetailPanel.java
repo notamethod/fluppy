@@ -9,6 +9,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
@@ -16,6 +17,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import lombok.extern.slf4j.Slf4j;
+import org.controlsfx.control.Rating;
 
 import java.io.IOException;
 
@@ -34,7 +36,9 @@ public class GameDetailPanel extends StackPane {
     private GameApp game;
     private PanelListener listener;
     private final VBox extraFiles;
+    private final Rating rating;
     VBox detailContent;
+
     public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
         this.dosBoxManager = dosBoxManager;
         this.gameManager = gameManager;
@@ -61,7 +65,22 @@ public class GameDetailPanel extends StackPane {
                 throw new RuntimeException(e);
             }
         });
-        detailContent = new VBox(10, name, year, genre, timePlayed, extraFiles);
+
+        rating = new Rating();
+        rating.setMax(5); // 5 étoiles
+        rating.setPartialRating(true);
+
+        rating.setRating(0); // valeur initiale
+        rating.setScaleX(0.6);
+        rating.setScaleY(0.6);
+        rating.setPadding(new Insets(10));
+
+        rating.ratingProperty().addListener((obs, oldV, newV) -> {
+            System.out.println("Note modifiée : " + newV);
+        });
+        HBox ratbox = new HBox(rating);
+        ratbox.setPadding(new Insets(10));
+        detailContent = new VBox(10, name, year, genre, ratbox,timePlayed,  extraFiles);
 
 
         VBox buttonBox = new VBox(5, launchButton, editButton);
@@ -113,7 +132,7 @@ public class GameDetailPanel extends StackPane {
         imageView.getChildren().add(ImageFactory.getMedium(game));
         descriptionLabel.setText(game.getName());
         name.setText(game.getName());
-        year.setText(game.getYear()==null?"": String.valueOf(game.getYear()));
+        year.setText(game.getYear() == null ? "" : String.valueOf(game.getYear()));
         String genres = String.join(" ■ ",
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)
         );
@@ -128,13 +147,13 @@ public class GameDetailPanel extends StackPane {
             timePlayed.setText(Messages.getString("game.neverplayed"));
         }
         extraFiles.getChildren().clear();
-        if (game.getManualPath()!=null){
-            extraFiles.getChildren().add(LinkLabelFactory.createFileLink("Manual",game.getManualPath().toFile() ));
+        if (game.getManualPath() != null) {
+            extraFiles.getChildren().add(LinkLabelFactory.createFileLink("Manual", game.getManualPath().toFile()));
         }
-        if (game.getProtectionPath()!=null){
-            extraFiles.getChildren().add(LinkLabelFactory.createFileLink("protection",game.getProtectionPath().toFile() ));
+        if (game.getProtectionPath() != null) {
+            extraFiles.getChildren().add(LinkLabelFactory.createFileLink("protection", game.getProtectionPath().toFile()));
         }
-
+        rating.setRating(2.5); // valeur initiale
         setTranslateX(x);
         setTranslateY(y);
 

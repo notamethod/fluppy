@@ -36,6 +36,8 @@
                       <CheckBox fx:id="favoriteField" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                       <Label text="NSFW:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
                       <CheckBox fx:id="nsfwField" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                      <Label text="Comment:" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                      <TextArea  fx:id="commentField" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                   <columnConstraints>
                      <ColumnConstraints />
                      <ColumnConstraints />

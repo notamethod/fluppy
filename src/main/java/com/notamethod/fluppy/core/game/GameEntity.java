@@ -44,7 +44,7 @@ public class GameEntity {
     @Column(nullable = false)
     private Long timePlayed= 0L;
     private int ageRating;
-
+    private String comment;
 
     @PrePersist
     public void prePersist() {

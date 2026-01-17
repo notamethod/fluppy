@@ -21,6 +21,7 @@ public interface GameMapper {
     @Mapping(source = "gameYear", target = "year")
     GameApp toGameApp(GameEntity gameEntity);
 
+    GameApp copyGameApp(GameApp a);
     GenreEntity toEntity(GenreApp genre);
 
     List<GameApp> toGameApps(List<GameEntity> entityList);
@@ -50,5 +51,5 @@ public interface GameMapper {
         return Paths.get(path);
     }
 
-
+    GameApp toGameApp(GameApp a);
 }

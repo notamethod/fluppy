@@ -39,6 +39,7 @@ public class GameApp {
     private LocalDateTime added;
     private LocalDateTime lastPlayed;
     private Long timePlayed;
+    private String comment;
 
 
     /**
