@@ -107,7 +107,9 @@ public class ApplicationDatabase {
     public List<GameEntity> findGameByYear(Integer year, boolean nsfw, int maxResult) {
         return sessionFactory.fromSession(session -> {
             Query<GameEntity> q = session.createQuery("""
-                    SELECT game FROM GameEntity game WHERE game.gameYear=:year
+                    SELECT game FROM GameEntity game 
+                    left join fetch game.genres
+                    WHERE game.gameYear=:year
                     AND (:nsfw is true OR game.ageRating < 1)
                     """, GameEntity.class);
             q.setParameter("year", year);

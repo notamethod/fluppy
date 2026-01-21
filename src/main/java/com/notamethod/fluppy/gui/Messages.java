@@ -14,7 +14,7 @@ public class Messages {
     public static String getString(String key) {
         try {
             return RESOURCE_BUNDLE.getString(key);
-        } catch (MissingResourceException _) {
+        } catch (MissingResourceException e) {
             return '!' + key + '!';
         }
     }
@@ -22,7 +22,7 @@ public class Messages {
     public static String getLabel(String key, String defaultValue) {
         try {
             return RESOURCE_BUNDLE.getString(key);
-        } catch (MissingResourceException _) {
+        } catch (MissingResourceException e) {
             return defaultValue;
         }
     }
@@ -43,7 +43,7 @@ public class Messages {
                 strParams[i++] = Messages.getString(whatever);
             }
             return MessageFormat.format(RESOURCE_BUNDLE.getString(key), (Object[]) strParams);
-        } catch (MissingResourceException _) {
+        } catch (MissingResourceException e) {
             return '!' + key + '!';
         }
     }

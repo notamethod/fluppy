@@ -1,0 +1,21 @@
+{
+  "resources": {
+    "includes": [
+      { "pattern": "org/hibernate/xsd/.*" },
+      { "pattern": "org/hibernate/orm/.*" },
+      { "pattern": "org/hibernate/.*\\.xsd" },
+      { "pattern": "org/hibernate/.*\\.dtd" },
+      { "pattern": ".*\\.png$"},
+      { "pattern": ".*\\.jpg"},
+      { "pattern": "fonts/.*\\.ttf$" },
+      { "pattern": "fonts/.*\\.otf$" },
+      { "pattern": ".*language.*\\.properties$" },
+      { "pattern": "org/controlsfx/control/.*\\.css$" },
+      { "pattern": "org/controlsfx/.*\\.css$"},
+      { "pattern": "com/notamethod/fluppy/gui/.*\\.css$" },
+      { "pattern": "com/notamethod/fluppy/gui/.*\\.fxml" },
+      { "pattern": "styles/.*\\.css" }
+
+    ]
+  }
+}

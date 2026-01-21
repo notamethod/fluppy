@@ -5,7 +5,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
+
 
 public class HibernateUtil {
 
@@ -21,13 +21,12 @@ public class HibernateUtil {
                     .applySetting("hibernate.hbm2ddl.auto", "update")
                     .applySetting("hibernate.show_sql", "false")
                     .applySetting("hibernate.connection.pool_size", "1")
+                    .applySetting("hibernate.boot.allow_jpa_metadata_access", "true")
+                    .applySetting("hibernate.implicit_naming_strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl")
+                    .applySetting("hibernate.bytecode.provider", "none")
                     .build();
 
-            sessionFactory = new MetadataSources(registry)
-                    .addAnnotatedClass(com.notamethod.fluppy.core.game.GameEntity.class)
-                    .addAnnotatedClass(com.notamethod.fluppy.core.game.GenreEntity.class)
-                    .buildMetadata()
-                    .buildSessionFactory();
+            sessionFactory = new MetadataSources(registry).addAnnotatedClass(com.notamethod.fluppy.core.game.GameEntity.class).addAnnotatedClass(com.notamethod.fluppy.core.game.GenreEntity.class).buildMetadata().buildSessionFactory();
         }
         return sessionFactory;
     }

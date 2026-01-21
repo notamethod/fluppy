@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Setter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
+//@RegisterForReflection
 public class PreferencesBean implements Serializable {
 
     @JsonProperty("dosBoxPath")

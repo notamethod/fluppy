@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "includes": [
+      { "pattern": "org/hibernate/xsd/.*" },
+      { "pattern": "org/hibernate/orm/.*" },
+      { "pattern": "META-INF/persistence.xml" }
+    ]
+  }
+}

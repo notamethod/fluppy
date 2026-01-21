@@ -85,7 +85,6 @@ public class GamesWall extends Application {
 
         effects = new Effects();
 
-
         applicationDatabase = new ApplicationDatabase();
         preferences = PreferencesIO.load();
         try {
@@ -108,7 +107,7 @@ public class GamesWall extends Application {
         FontUtils.loadCustomFont("lucasarts-scumm-outline.otf", 16);
         FontUtils.loadCustomFont("lucasarts-scumm-credits.otf", 16);
         FontUtils.loadCustomFont("lucasarts-scumm-subtitle-roman.otf", 16);
-        FontUtils.loadCustomFont("Storyboo.TTF", 16);
+        FontUtils.loadCustomFont("Storyboo.ttf", 16);
 
     }
 

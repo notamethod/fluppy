@@ -17,9 +17,11 @@ public class CoordinatesTest {
         x=-50;
          y=-50;
         Point2D p4d =p2d.add(x,y);
-        System.out.println(p2d);
         Point2D p3d = new Point2D(p2d.getX()-10,p2d.getY()-10);
+
+       /* System.out.println(p2d);
+
         System.out.println(p3d);
-        System.out.println(p4d);
+        System.out.println(p4d);*/
     }
 }
