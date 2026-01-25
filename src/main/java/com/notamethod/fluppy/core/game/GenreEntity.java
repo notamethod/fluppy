@@ -20,4 +20,9 @@ public class GenreEntity {
 
     @ManyToMany(mappedBy = "genres")
     Set<GameEntity> games = new HashSet<>();
+
+    public void addGame(GameEntity game) {
+        this.games.add(game);
+        game.getGenres().add(this);
+    }
 }

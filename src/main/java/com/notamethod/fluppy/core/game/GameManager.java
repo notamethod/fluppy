@@ -107,18 +107,18 @@ public class GameManager {
     }
 
     public  List<GameApp> getMostPlayedGames(int maxResult) {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where game.timePlayed>60 and (:nsfw is true OR game.ageRating < 1) order by game.timePlayed DESC",preferences.isNsfw(),maxResult));
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game left join fetch game.genres where game.timePlayed>60 and (:nsfw is true OR game.ageRating < 1) order by game.timePlayed DESC",preferences.isNsfw(),maxResult));
     }
 
     public  List<GameApp> getFavoriteGames(int maxResult) {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where game.favorite=true order by game.name",maxResult));
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game left join fetch game.genres where game.favorite=true order by game.name",maxResult));
     }
 
     public List<GameApp> getLastAdded(int maxResult) {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)  order by game.added DESC", preferences.isNsfw(), maxResult));
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game left join fetch game.genres where (:nsfw is true OR game.ageRating < 1)  order by game.added DESC", preferences.isNsfw(), maxResult));
     }
     public List<GameApp> getLastPlayed() {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game where (:nsfw is true OR game.ageRating < 1) order by game.lastPlayed DESC",preferences.isNsfw(),5));
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game left join fetch game.genres where (:nsfw is true OR game.ageRating < 1) order by game.lastPlayed DESC",preferences.isNsfw(),5));
     }
 
     public List<GameApp> getFromGenre(String genre, int limit) {

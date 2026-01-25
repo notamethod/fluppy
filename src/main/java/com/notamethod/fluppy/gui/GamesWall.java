@@ -15,7 +15,6 @@ import com.notamethod.fluppy.gui.common.GameActions;
 import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.util.HelperClass;
-import jakarta.persistence.EntityManagerFactory;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -85,9 +84,9 @@ public class GamesWall extends Application {
         //DTP
 
         effects = new Effects();
-        EntityManagerFactory emf = JpaUtil.getEntityManagerFactory();
 
-        applicationDatabase = new ApplicationDatabase(emf);
+
+        applicationDatabase = new ApplicationDatabase();
         preferences = PreferencesIO.load();
         try {
             Path directory = Paths.get(Configuration.tempFolder);
@@ -99,7 +98,7 @@ public class GamesWall extends Application {
         gameManager = new GameManager(applicationDatabase, preferences);
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(dosBoxManager, gameManager);
-        gameCategories = categoryManager.getShownCategories(preferences.getViewFilter());
+        gameCategories  = categoryManager.getShownCategories(preferences.getViewFilter());
 
         FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
         FontUtils.loadCustomFont("MonkeyIsland-1991.ttf", 16);

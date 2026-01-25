@@ -3,11 +3,8 @@ package com.notamethod.fluppy.core;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameEntity;
 import com.notamethod.fluppy.core.game.GenreEntity;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.hibernate.SessionFactory;
+import org.junit.jupiter.api.*;
 
 import java.util.List;
 import java.util.Map;
@@ -16,19 +13,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PersistTest {
 
-    private EntityManagerFactory emf;
+
     private ApplicationDatabase applicationDatabase;
+    private static SessionFactory sessionFactory;
+
+    @BeforeAll
+    static void setupHibernate() {
+        sessionFactory = HibernateTestUtil.getSessionFactory();
+    }
 
     @BeforeEach
     void setup() {
-        emf = Persistence.createEntityManagerFactory("ebox2_pu");
-        applicationDatabase = new ApplicationDatabase(emf);
-        System.out.println("adb: "+applicationDatabase);
+
+        applicationDatabase = new ApplicationDatabase(sessionFactory);
+        System.out.println("adb: " + applicationDatabase);
     }
 
     @AfterEach
     void tearDown() {
-        applicationDatabase.close();
+       applicationDatabase.clean();
+    }
+
+    @AfterAll
+    static void shutdownHibernate() {
+        sessionFactory.close();
     }
 
     @Test
@@ -52,6 +60,7 @@ public class PersistTest {
         GenreEntity gent = new GenreEntity();
         gent.setId("puzzle");
         gent.setName("Puzzle");
+        applicationDatabase.saveGenre(gent);
         gameEntity.getGenres().add(gent);
         applicationDatabase.saveGame(gameEntity);
         games = applicationDatabase.findGameByName("zzz");
@@ -63,19 +72,19 @@ public class PersistTest {
         gameApp.addGenre("puzzle", "Puzzle");
         gameEntity = new GameEntity();
         gameEntity.setName("qqq");
-        GenreEntity genreEntityTmp=new GenreEntity();
+        GenreEntity genreEntityTmp = new GenreEntity();
         genreEntityTmp.setId("puzzle");
         genreEntityTmp.setName("Puzzle");
         gent = applicationDatabase.getGenre("puzzle").orElse(genreEntityTmp);
 
-        gameEntity.getGenres().add(gent);
+        gameEntity.addGenre(gent);
         applicationDatabase.saveGame(gameEntity);
         games = applicationDatabase.findGameByName("zzz");
         assertEquals(1, games.getFirst().getGenres().size(), "list with two element");
     }
 
     @Test
-    public void testGroupByGenre(){
+    public void testGroupByGenre() {
 
         GameEntity gameEntity = new GameEntity();
         gameEntity.setName("zzz");
@@ -87,26 +96,28 @@ public class PersistTest {
         gent2.setName("action");
         gameEntity.getGenres().add(gent);
         gameEntity.getGenres().add(gent2);
+        applicationDatabase.saveGenre(gent);
+        applicationDatabase.saveGenre(gent2);
         applicationDatabase.saveGame(gameEntity);
         GameApp gameApp = new GameApp();
         gameApp.setName("qqq");
         gameApp.addGenre("puzzle", "Puzzle");
         gameEntity = new GameEntity();
         gameEntity.setName("qqq");
-        GenreEntity genreEntityTmp=new GenreEntity();
+        GenreEntity genreEntityTmp = new GenreEntity();
         genreEntityTmp.setId("puzzle");
         genreEntityTmp.setName("Puzzle");
         gent = applicationDatabase.getGenre("puzzle").orElse(genreEntityTmp);
 
         gameEntity.getGenres().add(gent);
         applicationDatabase.saveGame(gameEntity);
-        Map<String,Long> o = applicationDatabase.getTopGenres(2);
+        Map<String, Long> o = applicationDatabase.getTopGenres(2);
         assertEquals(2, o.size());
 
     }
 
     @Test
-    public void testGroupByYear(){
+    public void testGroupByYear() {
 
         GameEntity gameEntity = new GameEntity();
         gameEntity.setName("zzz");
@@ -125,7 +136,7 @@ public class PersistTest {
         applicationDatabase.saveGame(gameEntity2);
         applicationDatabase.saveGame(gameEntity3);
         applicationDatabase.saveGame(gameEntity4);
-        Map<Integer,Long> o = applicationDatabase.getTopYears(20);
+        Map<Integer, Long> o = applicationDatabase.getTopYears(20);
         assertEquals(2, o.size());
 
     }

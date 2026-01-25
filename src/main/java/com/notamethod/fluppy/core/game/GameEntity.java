@@ -42,24 +42,29 @@ public class GameEntity {
     private LocalDateTime added;
     private LocalDateTime lastPlayed;
     @Column(nullable = false)
-    private Long timePlayed= 0L;
+    private Long timePlayed = 0L;
     private int ageRating;
     private String comment;
 
     @PrePersist
     public void prePersist() {
         if (timePlayed == null) {
-            timePlayed=0L;
+            timePlayed = 0L;
         }
         if (added == null) {
-            added=LocalDateTime.now();
+            added = LocalDateTime.now();
         }
     }
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = CascadeType.MERGE )
     @JoinTable(
             name = "game_genre",
             joinColumns = @JoinColumn(name = "game_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-    private Set<GenreEntity> genres= new HashSet<>();
+    private Set<GenreEntity> genres = new HashSet<>();
+
+    public void addGenre(GenreEntity genre) {
+        this.genres.add(genre);
+
+    }
 }
