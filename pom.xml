@@ -134,7 +134,13 @@
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-graalvm</artifactId>
             <version>7.1.0.Final</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hibernate.orm</groupId>
+                    <artifactId>hibernate-bytecode-bytebuddy</artifactId>
+                </exclusion>
 
+            </exclusions>
         </dependency>
         <!-- H2 Database -->
         <dependency>
@@ -153,7 +159,26 @@
         <!--        </dependency>-->
 
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <!--
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-bom</artifactId>
+                <version>7.1.0.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate.orm</groupId>
+                        <artifactId>hibernate-bytecode-bytebuddy</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
+            -->
+        </dependencies>
+    </dependencyManagement>
     <build>
         <plugins>
             <plugin>
@@ -230,6 +255,7 @@
                         </executions>
                     </plugin>
                 </plugins>
+
             </build>
         </profile>
 
