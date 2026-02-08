@@ -4,10 +4,12 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.Cursor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Desktop;
 import java.io.File;
 
+@Slf4j
 public class LinkLabelFactory {
 
     public static Label createFileLink(String text, File file) {
@@ -24,7 +26,7 @@ public class LinkLabelFactory {
                     Desktop.getDesktop().open(file);
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                log.error("error", e);
             }
         });
 

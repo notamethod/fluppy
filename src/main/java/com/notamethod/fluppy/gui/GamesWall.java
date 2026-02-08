@@ -190,19 +190,19 @@ public class GamesWall extends Application {
             event.consume();
         });
         scene.widthProperty().addListener((obs, oldV, newV) -> {
-                    System.out.println("Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
+                    log.debug("Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
             midWidth=newV.doubleValue();
             midRoot.setPrefWidth(midWidth);
             midRoot.setMaxWidth(midWidth);
             midRoot.setMinWidth(midWidth);
-            System.out.println("after: Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
+            log.debug("after: Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
                  midRoot.requestLayout();
                 }
 
         );
 
         scene.heightProperty().addListener((obs, oldV, newV) ->
-                System.out.println("Height = " + newV)
+                log.debug("Height = " + newV)
         );
 
         scene.setOnDragExited(event -> {
@@ -335,7 +335,7 @@ public class GamesWall extends Application {
                 stage.setWidth(ORIGINAL_WIDTH);
                 stage.setHeight(ORIGINAL_HEIGHT);
                 stage.centerOnScreen();
-                System.out.println("reduce");
+                log.debug("reduce");
 
                 //midRoot.setPrefWidth(800);
 
@@ -479,7 +479,7 @@ public class GamesWall extends Application {
         //tilePane.setPrefColumns(-1);
         tilePane.setAlignment(Pos.TOP_LEFT);
         tilePane.widthProperty().addListener((obs, oldW, newW) -> {
-            System.out.println(tilePane.getWidth());
+            log.debug("width"+tilePane.getWidth());
             if (midWidth==0){
                 midWidth=midRoot.getWidth();
             }
@@ -684,7 +684,7 @@ public class GamesWall extends Application {
         log.debug("diff:" + diffx);
         log.debug("diffy:" + diffy);
         double decalRatio = -(Screen.getPrimary().getDpi()/100);
-        System.out.println(Screen.getPrimary().getDpi());
+        log.debug("dpi:"+Screen.getPrimary().getDpi());
         if (diffx > 0)
             fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
         if (diffy> 0)
@@ -720,7 +720,7 @@ public class GamesWall extends Application {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+           log.error("error", e);
         }
     }
 

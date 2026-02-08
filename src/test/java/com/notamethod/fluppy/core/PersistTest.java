@@ -26,7 +26,7 @@ public class PersistTest {
     void setup() {
 
         applicationDatabase = new ApplicationDatabase(sessionFactory);
-        System.out.println("adb: " + applicationDatabase);
+
     }
 
     @AfterEach

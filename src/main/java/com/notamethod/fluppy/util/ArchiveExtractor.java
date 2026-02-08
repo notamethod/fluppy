@@ -83,7 +83,7 @@ public class ArchiveExtractor {
             throw e;
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.error("error", e);
         }
         return fileOutputDirectory;
     }
@@ -119,7 +119,7 @@ public class ArchiveExtractor {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
         }
         return fileOutputDirectory;
     }

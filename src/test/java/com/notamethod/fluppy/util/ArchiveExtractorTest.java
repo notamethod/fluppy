@@ -1,5 +1,6 @@
 package com.notamethod.fluppy.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
+@Slf4j
 class ArchiveExtractorTest {
 
 
@@ -35,7 +37,7 @@ class ArchiveExtractorTest {
             assertTrue(out.exists());
             //assertTrue(out.getAbsolutePath().contains(TEST_DIR));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
             fail();
         }
 
@@ -56,7 +58,7 @@ class ArchiveExtractorTest {
             File out=extractor.extractFile(file, true);
             assertTrue(out.exists());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
             fail();
 
         }

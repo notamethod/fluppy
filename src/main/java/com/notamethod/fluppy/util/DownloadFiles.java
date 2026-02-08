@@ -1,8 +1,11 @@
 package com.notamethod.fluppy.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.net.*;
 
+@Slf4j
 public class DownloadFiles {
 
     public static void download(String urlFichier, String cheminDestination) throws IOException {
@@ -28,7 +31,7 @@ public class DownloadFiles {
             String destination = "C:/Users/Christophe/Téléchargements/fichier.zip";
             download(url, destination);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
         }
     }
 }

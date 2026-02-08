@@ -76,7 +76,7 @@ public class GameDetailPanel extends StackPane {
         rating.setPadding(new Insets(10));
 
         rating.ratingProperty().addListener((obs, oldV, newV) -> {
-            System.out.println("Note modifiée : " + newV);
+            log.debug("Note modifiée : " + newV);
         });
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
