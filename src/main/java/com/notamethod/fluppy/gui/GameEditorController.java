@@ -296,7 +296,7 @@ public class GameEditorController {
 
     }
 
-    public boolean updateAPI() {
+    public boolean updateAPI()  {
         boolean updated = false;
         ApiCalls apiCalls = new ApiCalls();
         GameActions gameActions = new GameActions(new DialogActionsJfx());
@@ -304,8 +304,12 @@ public class GameEditorController {
         try {
             games = apiCalls.findGame(titleField.getText());
             updated = true;
-        } catch (ApiException | MappingException e) {
+        } catch (MappingException e) {
             log.error("Internal Error", e);
+            return updated;
+        } catch (ApiException e) {
+            log.error("Internal Error", e);
+            DialogActionsJfx.showErrorDialog(e.getLocalizedMessage());
             return updated;
         }
 

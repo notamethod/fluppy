@@ -119,4 +119,16 @@ public class DialogActionsJfx implements DialogActions {
         alert.setContentText(String.join("\n", content));
         alert.showAndWait();
     }
+    public static void showErrorDialog(String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(DialogActionsJfx.class.getResource("/styles/style.css").toExternalForm());
+        dialogPane.getStyleClass().add("custom-dialog");
+        alert.setTitle(TITLE);
+        alert.getDialogPane().setPrefSize(500, 220);
+
+        alert.setHeaderText("multiple errors on import");
+        alert.setContentText(String.join("\n", content));
+        alert.showAndWait();
+    }
 }
