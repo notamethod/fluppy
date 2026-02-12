@@ -305,6 +305,10 @@ public class GamesWall extends Application {
         URL titleUrl = classLoader.getResource("fluppy3.png");
         Image titleImage = new Image(titleUrl.toString(), 90, 50, true, true);
         ImageView titleView = new ImageView(titleImage);
+        titleView.setOnMouseClicked(event ->{
+            AboutDialog dialog = new AboutDialog(stage);
+            dialog.showAndWait();
+        });
         Button gearButton = createRibbonButton("/images/gear2.png");
         gearButton.setOnAction(e -> {
             PreferencesDialog dialog = new PreferencesDialog(stage);
