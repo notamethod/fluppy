@@ -2,6 +2,8 @@ package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
+import com.notamethod.fluppy.dosbox.DosBoxManager;
+import com.notamethod.fluppy.dosbox.DosboxType;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.layout.*;
@@ -10,6 +12,7 @@ import javafx.geometry.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.nio.file.Path;
 
 @Slf4j
 public class PreferencesDialog extends Stage {
@@ -59,6 +62,8 @@ public class PreferencesDialog extends Stage {
             log.debug("Plein écran: " + fullscreenCheck.isSelected());
             log.debug("Types sélectionnés: " + typeList.getSelectionModel().getSelectedItems());
             preferences.setDosBoxPath(cheminField.getText());
+            DosboxType dosboxType =  DosBoxManager.detectDosboxType(Path.of(preferences.getDosBoxPath()));
+            preferences.setDosBoxType(dosboxType.toString());
             preferences.setFullScreen(fullscreenCheck.isSelected());
             preferences.setNsfw(nsfwCheck.isSelected());
             PreferencesIO.save(preferences, "prefs.json");

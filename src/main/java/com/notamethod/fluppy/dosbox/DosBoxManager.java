@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,13 +22,13 @@ public class DosBoxManager {
     private PreferencesBean preferences;
 
     public DosBoxManager() {
-        preferences= PreferencesIO.load();
+        preferences = PreferencesIO.load();
     }
 
     /**
      * Writes a DosBOX configuration file to a specific file
      *
-     * @param filename     The name of the config file
+     * @param filename The name of the config file
      */
     public void writeConfig(String filename, HashMap<String, HashMap<String, String>> pref, ArrayList<String> autoexec) {
 
@@ -53,7 +54,7 @@ public class DosBoxManager {
             bw.close();
             fw.close();
         } catch (IOException ex) {
-           log.error("error writing configuration file", ex);
+            log.error("error writing configuration file", ex);
         }
     }
 
@@ -61,9 +62,9 @@ public class DosBoxManager {
     public long runApplication(String program, GameApp gameApp) throws DosBoxException {
 
         log.info("running {}", program);
-        int returnOK=0;
+        int returnOK = 0;
 
-       generateConfiguration(program, gameApp);
+        generateConfiguration(program, gameApp);
 
         // Build execute command
         String[] par = new String[6];
@@ -98,10 +99,10 @@ public class DosBoxManager {
         long now = java.time.Instant.now().toEpochMilli();
         Process process = null;
         long exitCode = 0;
-        long diff=0;
+        long diff = 0;
         try {
             log.info("executing dosbox with params");
-             process =  Runtime.getRuntime().exec(par);
+            process = Runtime.getRuntime().exec(par);
             // Lire la sortie standard
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream()));
@@ -112,15 +113,15 @@ public class DosBoxManager {
             }
 
 // Attendre la fin
-             exitCode = process.waitFor();
+            exitCode = process.waitFor();
             long then = java.time.Instant.now().toEpochMilli();
-             diff=(then-now)/1000;
-            log.info("Time is "+diff);
+            diff = (then - now) / 1000;
+            log.info("Time is " + diff);
             log.debug("Terminé avec code : " + exitCode);
         } catch (IOException ex) {
             // What to do if no dosbox path is available
             if (preferences.getDosBoxPath().isEmpty()) {
-               throw new DosBoxException(DOSBOX_NOTFOUND);
+                throw new DosBoxException(DOSBOX_NOTFOUND);
             } else {
                 log.error("error", ex);
                 throw new DosBoxException(DOSBOX_NOTFOUND);
@@ -129,8 +130,8 @@ public class DosBoxManager {
             throw new RuntimeException(e);
         }
 
-        if (exitCode!=0){
-            return 1000-exitCode;
+        if (exitCode != 0) {
+            return 1000 - exitCode;
         }
         return diff;
     }
@@ -166,7 +167,7 @@ public class DosBoxManager {
         // Split the extras string
         String[] properties = new String[0];
         String[][] finito = new String[0][0];
-        if (gameApp.getExtra()!=null && !gameApp.getExtra().isEmpty()) {
+        if (gameApp.getExtra() != null && !gameApp.getExtra().isEmpty()) {
             //   Parse
             properties = gameApp.getExtra().substring(0, gameApp.getExtra().length() - 1).split(";");
             finito = new String[properties.length][3];
@@ -190,7 +191,7 @@ public class DosBoxManager {
         }
 
         // Add settings to the configuration file
-        if (gameApp.getCycles()>0){
+        if (gameApp.getCycles() > 0) {
             cpu.put("cycles", gameApp.getCycles() + "");
         }
 
@@ -201,7 +202,20 @@ public class DosBoxManager {
         HelperClass.addOtherSettings(finito, "renderer", renderer);
         allProps.put("RENDER", renderer);
 
-        sdl.put("fullscreen", preferences.isFullScreen() + "");
+
+        if (preferences.isFullScreen()) {
+            if (DosboxType.fromString(preferences.getDosBoxType()).equals(DosboxType.CLASSIC)){
+                sdl.put("fullscreen", "true");
+            }else {
+                sdl.put("fullscreen", "false");
+                sdl.put("windowresolution", "desktop");
+                sdl.put("windowborderless", "true");
+                sdl.put("output", "opengl");
+                sdl.put("aspect", "true");
+                sdl.put("scaler", "none");
+            }
+        }
+
         HelperClass.addOtherSettings(finito, "sdl", sdl);
         allProps.put("SDL", sdl);
 
@@ -227,13 +241,13 @@ public class DosBoxManager {
         HelperClass.addOtherSettings(finito, "midi", midi);
         allProps.put("MIDI", midi);
 
-        if (gameApp.getMachine()!=null) {
+        if (gameApp.getMachine() != null) {
             dosbox.put("machine", gameApp.getMachine() + "");
             HelperClass.addOtherSettings(finito, "dosbox", dosbox);
             allProps.put("DOSBOX", dosbox);
         }
         int number = 0;
-        if (gameApp.getCdrom()!=null && !gameApp.getCdrom().isEmpty()) { // If we should mount a CD ROM
+        if (gameApp.getCdrom() != null && !gameApp.getCdrom().isEmpty()) { // If we should mount a CD ROM
             String cd = "mount " + gameApp.getCdromLetter() + " \"" + gameApp.getCdrom() + "\" -t cdrom ";
             if (!gameApp.getCdromLabel().isEmpty()) {
                 cd += "-label " + gameApp.getCdromLabel();
@@ -255,5 +269,23 @@ public class DosBoxManager {
         }
         writeConfig(Configuration.appFolder + "dosbox.conf",
                 allProps, autoexec);
+    }
+
+    public boolean isDosboxPresent() {
+        return !preferences.getDosBoxPath().isEmpty();
+    }
+
+    public static DosboxType detectDosboxType(Path exe) {
+        try {
+            Process process = new ProcessBuilder(exe.toString(), "--version").redirectErrorStream(true).start();
+            String output = new String(process.getInputStream().readAllBytes());
+            if (output.contains("DOSBox-X")) return DosboxType.X;
+            if (output.contains("dosbox-staging")) return DosboxType.STAGING;
+            if (output.contains("ECE")) return DosboxType.ECE;
+            if (output.contains("DOSBox version")) return DosboxType.CLASSIC;
+            return DosboxType.UNKNOWN;
+        } catch (Exception e) {
+            return DosboxType.UNKNOWN;
+        }
     }
 }

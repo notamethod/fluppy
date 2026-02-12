@@ -20,6 +20,8 @@ public class PreferencesBean implements Serializable {
 
     @JsonProperty("dosBoxPath")
     private String dosBoxPath = "";
+    @JsonProperty("dosBoxType")
+    private String dosBoxType = "";
 
     @JsonProperty("genres")
     private String[] genres = PreferencesDefaults.DEFAULT_GENRES;
