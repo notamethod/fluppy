@@ -75,7 +75,7 @@ public class PersistTest {
         GenreEntity genreEntityTmp = new GenreEntity();
         genreEntityTmp.setId("puzzle");
         genreEntityTmp.setName("Puzzle");
-        gent = applicationDatabase.getGenre("puzzle").orElse(genreEntityTmp);
+        gent = applicationDatabase.findGenreByID("puzzle").orElse(genreEntityTmp);
 
         gameEntity.addGenre(gent);
         applicationDatabase.saveGame(gameEntity);
@@ -107,7 +107,7 @@ public class PersistTest {
         GenreEntity genreEntityTmp = new GenreEntity();
         genreEntityTmp.setId("puzzle");
         genreEntityTmp.setName("Puzzle");
-        gent = applicationDatabase.getGenre("puzzle").orElse(genreEntityTmp);
+        gent = applicationDatabase.findGenreByID("puzzle").orElse(genreEntityTmp);
 
         gameEntity.getGenres().add(gent);
         applicationDatabase.saveGame(gameEntity);

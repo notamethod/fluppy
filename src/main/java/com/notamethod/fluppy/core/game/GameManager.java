@@ -44,12 +44,12 @@ public class GameManager {
     }
 
     public void save(GameApp gameApp) {
-        GameEntity gameEntity = GameMapper.INSTANCE.toEntity(gameApp);
-        for (GenreApp genre : gameApp.getGenres()) {
-            GenreEntity gent = applicationDatabase.getGenre(genre.getId()).orElse(GameMapper.INSTANCE.toEntity(genre));
-            gameEntity.getGenres().add(gent);
-        }
-        applicationDatabase.saveGame(gameEntity);
+//        GameEntity gameEntity = GameMapper.INSTANCE.toEntity(gameApp);
+//        for (GenreApp genre : gameApp.getGenres()) {
+//            GenreEntity gent = applicationDatabase.findGenreByID(genre.getId()).orElse(GameMapper.INSTANCE.toEntity(genre));
+//            gameEntity.getGenres().add(gent);
+//        }
+        applicationDatabase.saveGame(gameApp);
     }
 
     public GameApp getGame(String name) {
@@ -94,7 +94,7 @@ public class GameManager {
 
     public void updateTime(GameApp game, Long time) {
         GameEntity entiity= applicationDatabase.findGameById(game.getId());
-
+//FIXME
         entiity.setTimePlayed(entiity.getTimePlayed()==null?time:entiity.getTimePlayed()+time);
         entiity.setLastPlayed(LocalDateTime.now());
         applicationDatabase.saveGame(entiity);

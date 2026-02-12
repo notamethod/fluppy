@@ -56,7 +56,7 @@ public class GameEntity {
         }
     }
 
-    @ManyToMany(cascade = CascadeType.MERGE )
+    @ManyToMany()
     @JoinTable(
             name = "game_genre",
             joinColumns = @JoinColumn(name = "game_id"),

@@ -1,9 +1,9 @@
 package com.notamethod.fluppy.core;
 
-import com.notamethod.fluppy.core.game.GameEntity;
-import com.notamethod.fluppy.core.game.GenreEntity;
+import com.notamethod.fluppy.core.game.*;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
@@ -29,14 +29,48 @@ public class ApplicationDatabase {
      *
      */
     public void saveGame(GameEntity entity) {
-        for (GenreEntity genreEntity : entity.getGenres()) {
+     //   for (GenreEntity genreEntity : entity.getGenres()) {
             //genreEntity.getGames().add(entity);
-        }
+       // }
         sessionFactory.inTransaction(session -> {
+
             if (entity.getId() == null || entity.getId() == 0) {
                 session.persist(entity);
             } else {
                 session.merge(entity);
+            }
+
+        });
+
+    }
+
+    public void saveGame(GameApp gameApp) {
+        //   for (GenreEntity genreEntity : entity.getGenres()) {
+        //genreEntity.getGames().add(entity);
+        // }
+        GameEntity gameEntity = GameMapper.INSTANCE.toEntity(gameApp);
+
+        sessionFactory.inTransaction(session -> {
+            for (GenreApp genre : gameApp.getGenres()) {
+//                GenreEntity gent = findGenreByID(session, genre.getId()).(GameMapper.INSTANCE.toEntity(genre));
+   Optional<GenreEntity> gent = findGenreByID(session, genre.getId());
+                if (gent.isPresent()) {
+                    gameEntity.getGenres().add(gent.get());
+
+                }else{
+                    GenreEntity getn2=GameMapper.INSTANCE.toEntity(genre);
+                    session.persist(getn2);
+                    gameEntity.getGenres().add(getn2);
+                }
+                //gameEntity.getGenres().add(gent);
+            }
+            for (GenreEntity genreEntity : gameEntity.getGenres()) {
+                genreEntity.getGames().add(gameEntity);
+            }
+            if (gameEntity.getId() == null || gameEntity.getId() == 0) {
+                session.persist(gameEntity);
+            } else {
+                session.merge(gameEntity);
             }
 
         });
@@ -189,13 +223,21 @@ public class ApplicationDatabase {
         });
     }
 
-    public Optional<GenreEntity> getGenre(String id) {
+    public Optional<GenreEntity> findGenreByID(String id) {
         return sessionFactory.fromSession(session -> {
             Query<GenreEntity> q = session.createQuery("SELECT p FROM GenreEntity p where p.id=:id", GenreEntity.class);
             q.setParameter("id", id);
 
             return q.uniqueResultOptional();
         });
+    }
+    public Optional<GenreEntity> findGenreByID(Session session, String id) {
+
+            Query<GenreEntity> q = session.createQuery("SELECT p FROM GenreEntity p where p.id=:id", GenreEntity.class);
+            q.setParameter("id", id);
+
+            return q.uniqueResultOptional();
+
     }
 
     public List<GameEntity> loadAllGamesButNot(Set<Long> gameIds, boolean nsfw) {
