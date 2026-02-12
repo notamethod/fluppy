@@ -66,7 +66,7 @@ public class HelperClass {
             case WINDOWS:
                 final String applicationData = System.getenv("APPDATA");
                 if (applicationData != null)
-                    workingDirectory = new File(applicationData, "." + applicationName + '/');
+                    workingDirectory = new File(applicationData,  applicationName + '/');
                 else
                     workingDirectory = new File(userHome, '.' + applicationName + '/');
                 break;
@@ -87,6 +87,10 @@ public class HelperClass {
 
     public static String getGameDirectory(String appName) {
         return getDirectory(appName, "games");
+    }
+
+    public static String getDataDirectory(String appName) {
+        return getDirectory(appName, "data");
     }
 
     public static String getTempDirectory(String appName) {
