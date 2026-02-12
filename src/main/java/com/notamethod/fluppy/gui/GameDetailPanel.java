@@ -82,7 +82,7 @@ public class GameDetailPanel extends StackPane {
         ratbox.setPadding(new Insets(10));
         detailContent = new VBox(10, name, year, genre, ratbox,timePlayed,  extraFiles);
 
-
+        launchButton.setDisable(!dosBoxManager.isDosboxPresent());
         VBox buttonBox = new VBox(5, launchButton, editButton);
         VBox infoContent = new VBox(detailContent, buttonBox);
 
