@@ -13,4 +13,5 @@ public class Configuration {
     public static final String coverFolder = HelperClass.getCoverDirectory(appFolder);
     public static final String extraFolder = HelperClass.getExtraDirectory(appFolder);
     public static final String gamesFolder = HelperClass.getGameDirectory(appFolder);
+    public static final String dataFolder = HelperClass.getDataDirectory(appFolder);
 }
