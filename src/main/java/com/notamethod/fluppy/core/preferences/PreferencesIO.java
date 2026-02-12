@@ -12,6 +12,7 @@ import java.io.IOException;
 @Slf4j
 public class PreferencesIO {
 
+    private static String PREFERENCE_FILE=Configuration.appFolder+"prefs.json";
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static PreferencesBean load(String path) {
@@ -30,12 +31,12 @@ public class PreferencesIO {
 
     public static PreferencesBean load() {
 
-        return load(Configuration.appFolder+"prefs.json");
+        return load(PREFERENCE_FILE);
     }
 
     public static void save(PreferencesBean prefs, String path) {
         try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(path), prefs);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(PREFERENCE_FILE), prefs);
         } catch (IOException e) {
             log.error("Failed to save config: " + e.getMessage());
         }
