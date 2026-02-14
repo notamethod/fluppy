@@ -47,7 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static java.awt.image.ImageObserver.WIDTH;
+
 
 @Slf4j
 public class GamesWall extends Application {
@@ -77,7 +77,7 @@ public class GamesWall extends Application {
     List<Category> gameCategories = new ArrayList<>();
     private double width = ORIGINAL_WIDTH;
     private TILES_VIEW view= TILES_VIEW.DEFAULT;
-
+    private boolean isFullScreen=false;
     @Override
     public void init() throws Exception {
         super.init();
@@ -196,14 +196,15 @@ public class GamesWall extends Application {
             midRoot.setMaxWidth(midWidth);
             midRoot.setMinWidth(midWidth);
             log.debug("after: Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
+            //try request layuout on reduce
                  midRoot.requestLayout();
                 }
 
         );
-
-        scene.heightProperty().addListener((obs, oldV, newV) ->
-                log.debug("Height = " + newV)
-        );
+//
+//        scene.heightProperty().addListener((obs, oldV, newV) ->
+//                log.debug("Height = " + newV)
+//        );
 
         scene.setOnDragExited(event -> {
         });
@@ -326,31 +327,34 @@ public class GamesWall extends Application {
         });
         //plus
         ImageView plusImage = new ImageView();
-        updateSizingImage(plusImage, stage.isFullScreen());
+        updateSizingImage(plusImage);
         Button plusButton = new Button();
         plusButton.setGraphic(plusImage);
         plusButton.setStyle("-fx-background-color: transparent;");
         plusButton.setOnAction(e -> {
-            updateSizingImage(plusImage, !stage.isFullScreen());
-            if (stage.isFullScreen()) {
+            updateSizingImage(plusImage);
+            if (isFullScreen) {
 
-                stage.setFullScreen(false);
-                //stage.setMaximized(false);
+                stage.setMaximized(false);
                 stage.setWidth(ORIGINAL_WIDTH);
                 stage.setHeight(ORIGINAL_HEIGHT);
                 stage.centerOnScreen();
                 log.debug("reduce");
-
+                isFullScreen=false;
                 //midRoot.setPrefWidth(800);
-
+              //  midRoot.requestLayout();
 
                 //e.cons
 
             } else {
-                stage.setFullScreen(true);
-             //   width = stage.getWidth();
+                isFullScreen=true;
+                stage.setMaximized(true);
+                midRoot.requestLayout();
+
             }
-         //   width = stage.getWidth();
+            updateSizingImage(plusImage);
+            updateList();
+
         });
 
         //quite
@@ -402,8 +406,8 @@ public class GamesWall extends Application {
         updateList();
     }
 
-    private void updateSizingImage(ImageView imageView, boolean isFullscreen) {
-        if (isFullscreen) {
+    private void updateSizingImage(ImageView imageView) {
+        if (isFullScreen) {
             imageView.setImage(new Image(getClass().getResourceAsStream("/images/size_min.png"), 32, 32, false, false));
 
         } else {
@@ -470,17 +474,23 @@ public class GamesWall extends Application {
 
     private Node createBlock(Category category, List<GameApp> games, Set<Long> gameIds) {
         TilePane tilePane = new TilePane();
+        //TODO: maps of tilespane
         tilePane.setId("tilePane-" + category.getCategoryType());
         tilePane.setPadding(new Insets(20, 10, 30, 0)); // top, right, bottom, left
         tilePane.setHgap(10);
         tilePane.setVgap(10);
         //tilePane.setPrefColumns(5);
-        if (midWidth>ORIGINAL_WIDTH){
+        if (isFullScreen){
             tilePane.setPrefColumns(9);
         }else{
             tilePane.setPrefColumns(5);
         }
-        //tilePane.setPrefColumns(-1);
+//        if (midWidth>ORIGINAL_WIDTH){
+//            tilePane.setPrefColumns(9);
+//        }else{
+//            tilePane.setPrefColumns(5);
+//        }
+   //     tilePane.setPrefColumns(-1);
         tilePane.setAlignment(Pos.TOP_LEFT);
         tilePane.widthProperty().addListener((obs, oldW, newW) -> {
             log.debug("width"+tilePane.getWidth());
@@ -628,7 +638,7 @@ public class GamesWall extends Application {
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
-        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
+        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - 1) / 2 : 0;
         double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
         Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
@@ -639,16 +649,16 @@ public class GamesWall extends Application {
         //TODO recalculate midroot size
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
         point = point.add(-container.getWidth(), -container.getHeight());
-        double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - width/*screen.getMaxX()*/;
+        double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
         double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
         double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
         log.debug("tile " + "point "+point.getX()+" / "+point.getY());
         log.debug("tile pt2 " + "point "+fixedPoint2.getX()+" / "+fixedPoint2.getY());
         log.debug("midroot " + +midRoot.getWidth()+" / "+midRoot.getHeight());
         log.debug("tileSceneBounds " + tileSceneBounds.getMinX() );
-
-        log.debug("diff:" + diffx);
-        log.debug("diffy:" + diffy);
+//
+//        log.debug("diff:" + diffx);
+//        log.debug("diffy:" + diffy);
         double decalRatio = -(Screen.getPrimary().getDpi()/100);
 
         if (diffx > 0)
@@ -661,12 +671,15 @@ public class GamesWall extends Application {
     }
 
     private Point2D caculatePosition(GameTile container) {
+
+        if (isFullScreen)
+            return caculatePositionMax(container);
         int detailPanelEstimatedWidth = 550;
         int detailPanelEstimatedHeight = 200;
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
-        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
+        double fixWidth = 0;//midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
         double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
         Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
@@ -682,19 +695,51 @@ public class GamesWall extends Application {
         log.debug("midroot " + +midRoot.getWidth()+"-"+midRoot.getHeight());
         double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
         log.debug("tile " + "point "+point.getX()+" / "+point.getY());
-        log.debug("midroot " + +midRoot.getWidth()+" / "+midRoot.getHeight());
-        log.debug("tileSceneBounds " + tileSceneBounds.getMinX() );
-
-        log.debug("diff:" + diffx);
-        log.debug("diffy:" + diffy);
+        log.debug("tile " + "fixedpoint2 "+fixedPoint2.getX()+" / "+fixedPoint2.getY());
+        log.debug("tile " + "container "+container.getWidth()+" / "+container.getHeight());
+        log.debug("tileSceneBounds min " + tileSceneBounds.getMinX() );
+        log.debug("tileParentBounds min  " + tileSceneBounds.getMinX() );
+//        log.debug("diff:" + diffx);
+//        log.debug("diffy:" + diffy);
         double decalRatio = -(Screen.getPrimary().getDpi()/100);
         log.debug("dpi:"+Screen.getPrimary().getDpi());
-        if (diffx > 0)
+        if (diffx > 0) {
+            log.debug("decal x");
             fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
+        }
         if (diffy> 0)
             fixedPoint2 = fixedPoint2.add(0, decalRatio*diffy);
         return fixedPoint2;
     }
+
+    private Point2D caculatePositionMax(GameTile container) {
+
+        int detailPanelEstimatedWidth = 550;
+        int detailPanelEstimatedHeight = 200;
+        Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
+        detailPane.applyCss();
+        detailPane.layout();
+        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - ORIGINAL_WIDTH ) / 2 : 0;
+        System.out.println("xx" + midRoot.getWidth() + " "+ORIGINAL_WIDTH);
+        double fixHeight = midRoot.getHeight() - ORIGINAL_HEIGHT > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
+
+        Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
+        Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
+        //TODO recalculate midroot size
+        Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
+
+        double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
+        double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
+
+        double decalRatio = -(Screen.getPrimary().getDpi()/100);
+        if (diffx > 0) {
+            fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
+        }
+        if (diffy> 0)
+            fixedPoint2 = fixedPoint2.add(0, decalRatio*diffy);
+        return fixedPoint2;
+    }
+
     private void actionDelete(GameApp game) {
         if (gameManager.deleteGame(game) > 0) {
             updateList();
