@@ -12,3 +12,6 @@ https://api-docs.igdb.com/#account-creation
 Add games based on last played games
 tell if game is protected or not
 add link to manual
+
+## build from sources
+generate native executable: mvn clean -Pnative package

@@ -57,7 +57,7 @@ public class GameEntity {
     }
 
     @ManyToMany()
-    @JoinTable(
+    @JoinTable( 
             name = "game_genre",
             joinColumns = @JoinColumn(name = "game_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
