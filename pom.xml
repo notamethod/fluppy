@@ -246,11 +246,12 @@
                                         <buildArg>--no-fallback</buildArg>
                                         <buildArg>--enable-url-protocols=http,https</buildArg>
                                         <buildArg>--enable-native-access=ALL-UNNAMED</buildArg>
-
-                                        <!-- Windows GUI -->
-
-                                        <buildArg>-H:NativeLinkerOption=/SUBSYSTEM:WINDOWS</buildArg>
-                                        <buildArg>-H:NativeLinkerOption=/ENTRY:MainCRTStartup</buildArg>
+                                        <buildArg>-H:NativeLinkerOption=/DEFAULTLIB:Shlwapi.lib</buildArg>
+<!-- reduce file size
+                                        <buildArg>-H:GenerateDebugInfo=0</buildArg>
+                                        <buildArg>-H:+RemoveUnusedSymbols</buildArg>
+                                        <buildArg>-H:Optimize=2</buildArg>
+                                        -->
                                     </buildArgs>
 
                                 </configuration>

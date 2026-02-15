@@ -34,6 +34,79 @@
     "allPublicMethods": true,
     "allDeclaredFields": true,
     "allPublicFields": true
+  },
+  {
+    "name": "com.notamethod.fluppy.gui.GameEditorController",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "javafx.scene.control.DialogPane",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.layout.VBox",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.layout.HBox",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.layout.GridPane",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.layout.ColumnConstraints",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.layout.RowConstraints",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.TabPane",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.Tab",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.Label",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.TextField",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.TextArea",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.CheckBox",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.Button",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.ComboBox",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.control.Slider",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.scene.image.ImageView",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javafx.geometry.Insets",
+    "allDeclaredConstructors": true
   }
-
 ]

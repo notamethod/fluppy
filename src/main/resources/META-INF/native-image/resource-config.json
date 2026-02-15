@@ -13,8 +13,8 @@
       { "pattern": "org/controlsfx/control/.*\\.css$" },
       { "pattern": "org/controlsfx/.*\\.css$"},
       { "pattern": "com/notamethod/fluppy/gui/.*\\.css$" },
-      { "pattern": "com/notamethod/fluppy/gui/.*\\.fxml" },
-      { "pattern": "styles/.*\\.css" }
+      { "pattern": "com/notamethod/fluppy/gui/.*\\.fxml$" },
+      { "pattern": "styles/.*\\.css$" }
 
     ]
   }
