@@ -190,21 +190,18 @@ public class GamesWall extends Application {
             event.consume();
         });
         scene.widthProperty().addListener((obs, oldV, newV) -> {
-                    log.debug("Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
             midWidth=newV.doubleValue();
             midRoot.setPrefWidth(midWidth);
             midRoot.setMaxWidth(midWidth);
             midRoot.setMinWidth(midWidth);
-            log.debug("after: Width = " + newV+"-"+midWidth+'-'+midRoot.getWidth());
+
             //try request layuout on reduce
                  midRoot.requestLayout();
-                }
-
-        );
+                });
 //
-//        scene.heightProperty().addListener((obs, oldV, newV) ->
-//                log.debug("Height = " + newV)
-//        );
+        scene.heightProperty().addListener((obs, oldV, newV) ->
+                log.debug("Height = " + newV)
+        );
 
         scene.setOnDragExited(event -> {
         });
@@ -507,6 +504,7 @@ public class GamesWall extends Application {
 
                 tilePane.getChildren().add(container);
             }
+            //explain
         }
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(20, 10, 10, 50)); // top, right, bottom, left
@@ -682,29 +680,23 @@ public class GamesWall extends Application {
         double fixWidth = 0;//midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
         double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
-        Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
-
-
         Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
         Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
         //TODO recalculate midroot size
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
         double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - width/*screen.getMaxX()*/;
         double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
-        log.debug("tile " + "point "+point.getX()+"-"+point.getY());
         log.debug("midroot " + +midRoot.getWidth()+"-"+midRoot.getHeight());
         double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
         log.debug("tile " + "point "+point.getX()+" / "+point.getY());
         log.debug("tile " + "fixedpoint2 "+fixedPoint2.getX()+" / "+fixedPoint2.getY());
         log.debug("tile " + "container "+container.getWidth()+" / "+container.getHeight());
         log.debug("tileSceneBounds min " + tileSceneBounds.getMinX() );
-        log.debug("tileParentBounds min  " + tileSceneBounds.getMinX() );
-//        log.debug("diff:" + diffx);
-//        log.debug("diffy:" + diffy);
+
         double decalRatio = -(Screen.getPrimary().getDpi()/100);
         log.debug("dpi:"+Screen.getPrimary().getDpi());
         if (diffx > 0) {
-            log.debug("decal x");
+
             fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
         }
         if (diffy> 0)
@@ -720,7 +712,7 @@ public class GamesWall extends Application {
         detailPane.applyCss();
         detailPane.layout();
         double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - ORIGINAL_WIDTH ) / 2 : 0;
-        System.out.println("xx" + midRoot.getWidth() + " "+ORIGINAL_WIDTH);
+
         double fixHeight = midRoot.getHeight() - ORIGINAL_HEIGHT > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
         Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
@@ -772,7 +764,6 @@ public class GamesWall extends Application {
            log.error("error", e);
         }
     }
-
 
     public static void main(String[] args) {
         launch();
