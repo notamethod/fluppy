@@ -282,6 +282,15 @@ public class ApplicationDatabase {
             return q.getResultList();
         });
     }
+    public List<GameApp> runGameQuerySelect(String query, boolean nsfw, String paramFilter) {
+        return sessionFactory.fromSession(session -> {
+            Query<GameEntity> q = session.createQuery(query, GameEntity.class);
+            q.setParameter("nsfw", nsfw);
+            q.setParameter("paramFilter", paramFilter);
+
+            return GameMapper.INSTANCE.toGameApps(q.getResultList());
+        });
+    }
 
 
     public void clean() {
