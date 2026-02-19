@@ -44,11 +44,7 @@ public class GameManager {
     }
 
     public void save(GameApp gameApp) {
-//        GameEntity gameEntity = GameMapper.INSTANCE.toEntity(gameApp);
-//        for (GenreApp genre : gameApp.getGenres()) {
-//            GenreEntity gent = applicationDatabase.findGenreByID(genre.getId()).orElse(GameMapper.INSTANCE.toEntity(genre));
-//            gameEntity.getGenres().add(gent);
-//        }
+
         applicationDatabase.saveGame(gameApp);
     }
 
@@ -121,8 +117,8 @@ public class GameManager {
         return GameMapper.INSTANCE.toGameApps(applicationDatabase.runGameQuery("SELECT game FROM GameEntity game left join fetch game.genres where (:nsfw is true OR game.ageRating < 1) order by game.lastPlayed DESC",preferences.isNsfw(),5));
     }
 
-    public List<GameApp> getFromGenre(String genre, int limit) {
-        return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByGenre(genre, limit));
+    public List<GameApp> getFromGenre(String genre, int limit, Set<Long> gameIds) {
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByGenre(genre, limit, gameIds));
 
     }
 

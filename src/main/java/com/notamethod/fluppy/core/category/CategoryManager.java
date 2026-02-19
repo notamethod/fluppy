@@ -6,7 +6,7 @@ import com.notamethod.fluppy.gui.Messages;
 import java.util.*;
 
 public class CategoryManager {
-    private static final int MAX_GENRE = 3;
+    private static final int MAX_GENRE = 4;
     private static final int MAX_YEAR = 20;
     private final ApplicationDatabase applicationDatabase;
 

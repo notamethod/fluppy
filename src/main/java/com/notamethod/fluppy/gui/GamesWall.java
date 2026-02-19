@@ -117,7 +117,6 @@ public class GamesWall extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
 
         HBox topRibbon = createTopRibbon(stage);
-        //StackPane topRibbon = effects.noiseEffectWrapper(topRibbon0);
         Animation bordureAnim = effects.getBordureAnim(topRibbon);
 
         try {
@@ -164,7 +163,7 @@ public class GamesWall extends Application {
         root0.getChildren().addAll(/*titleBar, */topRibbon0, midRoot);
         midRoot.setId("realRoot");
         Scene scene = new Scene(root0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
-        //midRoot.prefWidthProperty().bind(scene.widthProperty());
+
         /*  drag&drop on top ribbon */
         topRibbon0.setOnDragOver(event -> {
             if (event.getGestureSource() != scrollPane && event.getDragboard().hasFiles()) {
@@ -260,7 +259,6 @@ public class GamesWall extends Application {
     private ScrollPane createScrollPane() {
         ScrollPane scrollPane = new ScrollPane(content);
         scrollPane.setPannable(true); // active le drag à la souris
-        //FIXME: problem with fullscreen
         scrollPane.setFitToWidth(false);
         scrollPane.setId("scrollpane-tiles");
         //speed scrollpane
@@ -453,7 +451,7 @@ public class GamesWall extends Application {
                 if ("all".equals(category.getId())) {
                     games = gameManager.loadAllButNot(gameIds);
                 } else {
-                    games = gameManager.getFromGenre(category.getId(), count);
+                    games = gameManager.getFromGenre(category.getId(), count, gameIds);
                 }
                 break;
             case YEAR:
@@ -476,18 +474,12 @@ public class GamesWall extends Application {
         tilePane.setPadding(new Insets(20, 10, 30, 0)); // top, right, bottom, left
         tilePane.setHgap(10);
         tilePane.setVgap(10);
-        //tilePane.setPrefColumns(5);
         if (isFullScreen){
             tilePane.setPrefColumns(9);
         }else{
             tilePane.setPrefColumns(5);
         }
-//        if (midWidth>ORIGINAL_WIDTH){
-//            tilePane.setPrefColumns(9);
-//        }else{
-//            tilePane.setPrefColumns(5);
-//        }
-   //     tilePane.setPrefColumns(-1);
+
         tilePane.setAlignment(Pos.TOP_LEFT);
         tilePane.widthProperty().addListener((obs, oldW, newW) -> {
             log.debug("width"+tilePane.getWidth());
@@ -654,9 +646,7 @@ public class GamesWall extends Application {
         log.debug("tile pt2 " + "point "+fixedPoint2.getX()+" / "+fixedPoint2.getY());
         log.debug("midroot " + +midRoot.getWidth()+" / "+midRoot.getHeight());
         log.debug("tileSceneBounds " + tileSceneBounds.getMinX() );
-//
-//        log.debug("diff:" + diffx);
-//        log.debug("diffy:" + diffy);
+
         double decalRatio = -(Screen.getPrimary().getDpi()/100);
 
         if (diffx > 0)
@@ -677,7 +667,7 @@ public class GamesWall extends Application {
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
-        double fixWidth = 0;//midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - WIDTH) / 2 : 0;
+        double fixWidth = 0;
         double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
         Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);

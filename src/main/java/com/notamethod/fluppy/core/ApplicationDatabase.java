@@ -29,9 +29,7 @@ public class ApplicationDatabase {
      *
      */
     public void saveGame(GameEntity entity) {
-     //   for (GenreEntity genreEntity : entity.getGenres()) {
-            //genreEntity.getGames().add(entity);
-       // }
+
         sessionFactory.inTransaction(session -> {
 
             if (entity.getId() == null || entity.getId() == 0) {
@@ -45,24 +43,19 @@ public class ApplicationDatabase {
     }
 
     public void saveGame(GameApp gameApp) {
-        //   for (GenreEntity genreEntity : entity.getGenres()) {
-        //genreEntity.getGames().add(entity);
-        // }
         GameEntity gameEntity = GameMapper.INSTANCE.toEntity(gameApp);
 
         sessionFactory.inTransaction(session -> {
             for (GenreApp genre : gameApp.getGenres()) {
-//                GenreEntity gent = findGenreByID(session, genre.getId()).(GameMapper.INSTANCE.toEntity(genre));
-   Optional<GenreEntity> gent = findGenreByID(session, genre.getId());
+                Optional<GenreEntity> gent = findGenreByID(session, genre.getId());
                 if (gent.isPresent()) {
                     gameEntity.getGenres().add(gent.get());
 
-                }else{
-                    GenreEntity getn2=GameMapper.INSTANCE.toEntity(genre);
+                } else {
+                    GenreEntity getn2 = GameMapper.INSTANCE.toEntity(genre);
                     session.persist(getn2);
                     gameEntity.getGenres().add(getn2);
                 }
-                //gameEntity.getGenres().add(gent);
             }
             for (GenreEntity genreEntity : gameEntity.getGenres()) {
                 genreEntity.getGames().add(gameEntity);
@@ -121,16 +114,27 @@ public class ApplicationDatabase {
     }
 
     public List<GameEntity> findGameByGenre(String genreId) {
-        return findGameByGenre(genreId, -1);
+        return findGameByGenre(genreId, -1, null);
     }
 
-    public List<GameEntity> findGameByGenre(String genreId, int maxResult) {
+    public List<GameEntity> findGameByGenre(String genreId, int maxResult, Set<Long> gameIds) {
+
         return sessionFactory.fromSession(session -> {
-            Query<GameEntity> q = session.createQuery("""
-                    SELECT game FROM GameEntity game JOIN FETCH game.genres genre
-                    WHERE genre.id = :genreId
-                  
-                    """, GameEntity.class);
+            Query<GameEntity> q;
+
+            if (gameIds == null || gameIds.isEmpty()) {
+                q = session.createQuery("""
+                                 SELECT game FROM GameEntity game JOIN FETCH game.genres genre
+                             WHERE genre.id = :genreId
+                        """, GameEntity.class);
+            } else {
+                q = session.createQuery("""
+                                 SELECT game FROM GameEntity game JOIN FETCH game.genres genre
+                             WHERE genre.id = :genreId
+                         AND game.id not in :ids
+                        """, GameEntity.class);
+                q.setParameterList("ids", gameIds);
+            }
             q.setParameter("genreId", genreId);
             if (maxResult > 0)
                 q.setMaxResults(maxResult);
@@ -231,12 +235,13 @@ public class ApplicationDatabase {
             return q.uniqueResultOptional();
         });
     }
+
     public Optional<GenreEntity> findGenreByID(Session session, String id) {
 
-            Query<GenreEntity> q = session.createQuery("SELECT p FROM GenreEntity p where p.id=:id", GenreEntity.class);
-            q.setParameter("id", id);
+        Query<GenreEntity> q = session.createQuery("SELECT p FROM GenreEntity p where p.id=:id", GenreEntity.class);
+        q.setParameter("id", id);
 
-            return q.uniqueResultOptional();
+        return q.uniqueResultOptional();
 
     }
 
@@ -282,6 +287,7 @@ public class ApplicationDatabase {
             return q.getResultList();
         });
     }
+
     public List<GameApp> runGameQuerySelect(String query, boolean nsfw, String paramFilter) {
         return sessionFactory.fromSession(session -> {
             Query<GameEntity> q = session.createQuery(query, GameEntity.class);
