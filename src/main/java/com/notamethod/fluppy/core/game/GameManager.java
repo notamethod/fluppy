@@ -2,22 +2,27 @@ package com.notamethod.fluppy.core.game;
 
 import com.notamethod.fluppy.core.ApplicationDatabase;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
+import com.notamethod.fluppy.dosbox.DosBoxException;
+import com.notamethod.fluppy.dosbox.DosBoxManager;
+import com.notamethod.fluppy.gui.PanelListener;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class GameManager {
     private static final int MAX_GENRE = 3;
     private ApplicationDatabase applicationDatabase;
     private PreferencesBean preferences;
-
-    public GameManager(ApplicationDatabase applicationDatabase, PreferencesBean preferences) {
+    private DosBoxManager dosBoxManager;
+    public GameManager(ApplicationDatabase applicationDatabase, PreferencesBean preferences, DosBoxManager dosBoxManager) {
         this.applicationDatabase = applicationDatabase;
         this.preferences=preferences;
+        this.dosBoxManager=dosBoxManager;
     }
 
     public int deleteGame(GameApp gameApp) {
@@ -90,7 +95,6 @@ public class GameManager {
 
     public void updateTime(GameApp game, Long time) {
         GameEntity entiity= applicationDatabase.findGameById(game.getId());
-//FIXME
         entiity.setTimePlayed(entiity.getTimePlayed()==null?time:entiity.getTimePlayed()+time);
         entiity.setLastPlayed(LocalDateTime.now());
         applicationDatabase.saveGame(entiity);
@@ -128,5 +132,38 @@ public class GameManager {
 
     public List<GameApp> getFromYear(Integer year , int count) {
         return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByYear(year, preferences.isNsfw(), count));
+    }
+
+    public long runGame(GameApp game, PanelListener listener) throws DosBoxException {
+
+        AtomicReference<Long> duration= new AtomicReference<>(0L);
+        dosBoxManager.runApplication(
+                game.getGameExe(),
+                game,
+                listener,
+                line -> log.info("[DOSBOX] "+line),
+                err -> log.error("[DOSBOX] " + err ),
+                result -> {
+
+                    if (listener != null) {
+
+                        listener.onExitGame();
+                    }
+                    if (result.success) {
+                        System.out.println("DOSBox OK");
+                    } else {
+                        System.out.println("Erreur : " + result.error);
+                    }
+
+                    System.out.println("Durée : " + result.durationMillis + " ms");
+                    duration.set(result.durationMillis);
+                    if (duration.get()>0){
+                        updateTime(game, duration.get()/1000);
+                    }
+                    System.out.println("Exit code : " + result.exitCode);
+                }
+        );
+        return duration.get();
+
     }
 }

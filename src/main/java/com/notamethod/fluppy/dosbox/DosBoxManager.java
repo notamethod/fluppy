@@ -4,7 +4,9 @@ import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
+import com.notamethod.fluppy.gui.PanelListener;
 import com.notamethod.fluppy.util.HelperClass;
+import javafx.application.Platform;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -14,6 +16,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 @Slf4j
 public class DosBoxManager {
@@ -59,7 +62,10 @@ public class DosBoxManager {
     }
 
 
-    public long runApplication(String program, GameApp gameApp) throws DosBoxException {
+    public long runApplication(String program, GameApp gameApp, PanelListener listener,
+                               Consumer<String> onStdout,
+                               Consumer<String> onStderr,
+                                Consumer<DosBoxResult> onFinish) throws DosBoxException {
 
         log.info("running {}", program);
         int returnOK = 0;
@@ -67,6 +73,72 @@ public class DosBoxManager {
         generateConfiguration(program, gameApp);
 
         // Build execute command
+        String[] par = generateDosBoxParams();
+
+        // Try to execute
+        long now = java.time.Instant.now().toEpochMilli();
+        Process process = null;
+        long diff = 0;
+        if (listener!=null)
+            listener.onLaunchGame();
+        Thread t = new Thread(() -> {
+            long start = System.currentTimeMillis();
+            int exitCode = -1;
+            Exception error = null;
+            try {
+                Process p = new ProcessBuilder(par).start();
+
+                Thread outThread = new Thread(() -> {
+                    try (BufferedReader br = new BufferedReader(
+                            new InputStreamReader(p.getInputStream()))) {
+
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            String finalLine = line;
+                            Platform.runLater(() -> onStdout.accept(finalLine));
+                        }
+                    } catch (Exception e) {
+                        log.error("error reading process output", e);
+                    }
+                });
+
+                Thread errThread = new Thread(() -> {
+                    try (BufferedReader br = new BufferedReader(
+                            new InputStreamReader(p.getErrorStream()))) {
+
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            String finalLine = line;
+                            Platform.runLater(() -> onStderr.accept(finalLine));
+                        }
+                    } catch (Exception e) {
+                       log.error("error reading process output", e);
+                    }
+                });
+
+                outThread.start();
+                errThread.start();
+
+                exitCode=p.waitFor();
+
+                outThread.join();
+                errThread.join();
+            } catch (Exception e) {
+               error=e;
+            }
+            long duration = System.currentTimeMillis() - start;
+            DosBoxResult result = new DosBoxResult( error == null && exitCode == 0, duration, exitCode, error );
+            Platform.runLater(() -> onFinish.accept(result));
+        });
+
+
+        t.setDaemon(true); // propre : le thread ne bloque pas la fermeture de l’app
+        t.start();
+
+        return diff;
+    }
+
+    private String[] generateDosBoxParams() {
         String[] par = new String[6];
         par[0] = preferences.getDosBoxPath();
 
@@ -94,46 +166,7 @@ public class DosBoxManager {
         if (preferences.getDosBoxPath().isEmpty()) {
             par[0] = "dosbox";
         }
-
-        // Try to execute
-        long now = java.time.Instant.now().toEpochMilli();
-        Process process = null;
-        long exitCode = 0;
-        long diff = 0;
-        try {
-            log.info("executing dosbox with params");
-            process = Runtime.getRuntime().exec(par);
-            // Lire la sortie standard
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                log.debug(line);
-            }
-
-// Attendre la fin
-            exitCode = process.waitFor();
-            long then = java.time.Instant.now().toEpochMilli();
-            diff = (then - now) / 1000;
-            log.info("Time is " + diff);
-            log.debug("Terminé avec code : " + exitCode);
-        } catch (IOException ex) {
-            // What to do if no dosbox path is available
-            if (preferences.getDosBoxPath().isEmpty()) {
-                throw new DosBoxException(DOSBOX_NOTFOUND);
-            } else {
-                log.error("error", ex);
-                throw new DosBoxException(DOSBOX_NOTFOUND);
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (exitCode != 0) {
-            return 1000 - exitCode;
-        }
-        return diff;
+        return par;
     }
 
     private void generateConfiguration(String program, GameApp gameApp) {
@@ -204,9 +237,9 @@ public class DosBoxManager {
 
 
         if (preferences.isFullScreen()) {
-            if (DosboxType.fromString(preferences.getDosBoxType()).equals(DosboxType.CLASSIC)){
+            if (DosboxType.fromString(preferences.getDosBoxType()).equals(DosboxType.CLASSIC)) {
                 sdl.put("fullscreen", "true");
-            }else {
+            } else {
                 sdl.put("fullscreen", "false");
                 sdl.put("windowresolution", "desktop");
                 sdl.put("windowborderless", "true");
@@ -288,4 +321,6 @@ public class DosBoxManager {
             return DosboxType.UNKNOWN;
         }
     }
+
+
 }
