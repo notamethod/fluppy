@@ -32,6 +32,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
+import javafx.scene.shape.Circle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -48,13 +49,13 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
-
 @Slf4j
 public class GamesWall extends Application {
 
     public enum TILES_VIEW {
         DEFAULT, YEARS;
     }
+
     private static final int ORIGINAL_WIDTH = 900;
     private static final int ORIGINAL_HEIGHT = 700;
     private static final int ROW_SIZE = 9;
@@ -67,6 +68,7 @@ public class GamesWall extends Application {
     CategoryManager categoryManager;
 
     StackPane midRoot;
+    private Pane backOverlay;
     GameDetailPanel detailPane;
     List<Node> gamesBlocks = new ArrayList<>();
     VBox content;
@@ -76,8 +78,9 @@ public class GamesWall extends Application {
     private Category expandCategory = null;
     List<Category> gameCategories = new ArrayList<>();
     private double width = ORIGINAL_WIDTH;
-    private TILES_VIEW view= TILES_VIEW.DEFAULT;
-    private boolean isFullScreen=false;
+    private TILES_VIEW view = TILES_VIEW.DEFAULT;
+    private boolean isFullScreen = false;
+
     @Override
     public void init() throws Exception {
         super.init();
@@ -94,10 +97,10 @@ public class GamesWall extends Application {
             throw new RuntimeException(e);
         }
 
-        gameManager = new GameManager(applicationDatabase, preferences);
+        gameManager = new GameManager(applicationDatabase, preferences, dosBoxManager);
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(dosBoxManager, gameManager);
-        gameCategories  = categoryManager.getShownCategories(preferences.getViewFilter());
+        gameCategories = categoryManager.getShownCategories(preferences.getViewFilter());
 
         FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
         FontUtils.loadCustomFont("MonkeyIsland-1991.ttf", 16);
@@ -108,7 +111,7 @@ public class GamesWall extends Application {
         FontUtils.loadCustomFont("lucasarts-scumm-credits.otf", 16);
         FontUtils.loadCustomFont("lucasarts-scumm-subtitle-roman.otf", 16);
         FontUtils.loadCustomFont("Storyboo.ttf", 16);
-
+        FontUtils.loadCustomFont("Retro Gaming.ttf", 16);
     }
 
     @Override
@@ -132,8 +135,18 @@ public class GamesWall extends Application {
                                        updateList();
                                        detailPane.hide();
                                    }
+
                                    public void onClose() {
                                        detailPane.hide();
+                                   }
+
+                                   public void onLaunchGame() {
+                                       Platform.runLater(() -> darkenUI());
+                                       // darkenUI();
+                                   }
+
+                                   public void onExitGame() {
+                                       lightenUI();
                                    }
                                }
         );
@@ -152,7 +165,6 @@ public class GamesWall extends Application {
         StackPane topRibbon0 = new StackPane(topRibbon, dropLabel);
 
 
-
         midRoot = new StackPane();
         midRoot.setId("midRoot");
 
@@ -161,7 +173,14 @@ public class GamesWall extends Application {
         midRoot.getChildren().addAll(scrollPane, detailPane, searchOverlay);
 
         root0.getChildren().addAll(/*titleBar, */topRibbon0, midRoot);
+
         midRoot.setId("realRoot");
+
+        backOverlay = initBackOverlay();
+        backOverlay.prefWidthProperty().bind(root0.widthProperty());
+        backOverlay.prefHeightProperty().bind(root0.heightProperty());
+        midRoot.getChildren().add(backOverlay);
+
         Scene scene = new Scene(root0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
 
         /*  drag&drop on top ribbon */
@@ -189,14 +208,14 @@ public class GamesWall extends Application {
             event.consume();
         });
         scene.widthProperty().addListener((obs, oldV, newV) -> {
-            midWidth=newV.doubleValue();
+            midWidth = newV.doubleValue();
             midRoot.setPrefWidth(midWidth);
             midRoot.setMaxWidth(midWidth);
             midRoot.setMinWidth(midWidth);
 
             //try request layuout on reduce
-                 midRoot.requestLayout();
-                });
+            midRoot.requestLayout();
+        });
 //
         scene.heightProperty().addListener((obs, oldV, newV) ->
                 log.debug("Height = " + newV)
@@ -249,11 +268,26 @@ public class GamesWall extends Application {
         });
 
         scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
-        scrollPane.setStyle("-fx-background: #121212;"); // Fond du ScrollPane
+        scrollPane.setStyle("-fx-background: #1A1E2E;"); // Fond du ScrollPane
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog2.png")));
         stage.setScene(scene);
 
         stage.show();
+    }
+
+    private Pane initBackOverlay() {
+
+
+        backOverlay = new Pane();
+        backOverlay.setStyle("-fx-background-color: black;");
+        backOverlay.setOpacity(0);
+        backOverlay.setMouseTransparent(true); // ne bloque pas les clics
+        backOverlay.setVisible(true);
+
+
+        return backOverlay;
+
+
     }
 
     private ScrollPane createScrollPane() {
@@ -301,7 +335,7 @@ public class GamesWall extends Application {
         URL titleUrl = classLoader.getResource("fluppy3.png");
         Image titleImage = new Image(titleUrl.toString(), 90, 50, true, true);
         ImageView titleView = new ImageView(titleImage);
-        titleView.setOnMouseClicked(event ->{
+        titleView.setOnMouseClicked(event -> {
             AboutDialog dialog = new AboutDialog(stage);
             dialog.showAndWait();
         });
@@ -335,14 +369,14 @@ public class GamesWall extends Application {
                 stage.setHeight(ORIGINAL_HEIGHT);
                 stage.centerOnScreen();
                 log.debug("reduce");
-                isFullScreen=false;
+                isFullScreen = false;
                 //midRoot.setPrefWidth(800);
-              //  midRoot.requestLayout();
+                //  midRoot.requestLayout();
 
                 //e.cons
 
             } else {
-                isFullScreen=true;
+                isFullScreen = true;
                 stage.setMaximized(true);
                 midRoot.requestLayout();
 
@@ -474,17 +508,17 @@ public class GamesWall extends Application {
         tilePane.setPadding(new Insets(20, 10, 30, 0)); // top, right, bottom, left
         tilePane.setHgap(10);
         tilePane.setVgap(10);
-        if (isFullScreen){
+        if (isFullScreen) {
             tilePane.setPrefColumns(9);
-        }else{
+        } else {
             tilePane.setPrefColumns(5);
         }
 
         tilePane.setAlignment(Pos.TOP_LEFT);
         tilePane.widthProperty().addListener((obs, oldW, newW) -> {
-            log.debug("width"+tilePane.getWidth());
-            if (midWidth==0){
-                midWidth=midRoot.getWidth();
+            log.debug("width" + tilePane.getWidth());
+            if (midWidth == 0) {
+                midWidth = midRoot.getWidth();
             }
 
 
@@ -500,14 +534,39 @@ public class GamesWall extends Application {
         }
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(20, 10, 10, 50)); // top, right, bottom, left
-        String expandedSymbol = category.isExpanded() ? "<" : ">";
-        Label blockTitle = new Label(expandedSymbol + category.getLabel());
-        blockTitle.getStyleClass().add("blockTitle");
+       // String expandedSymbol = category.isExpanded() ? "<" : ">";
+        HBox blockTitle = new HBox();
+        Label label = new Label(category.getLabel());
+        label.getStyleClass().add("blockTitle");
+        blockTitle.setAlignment(Pos.CENTER_LEFT);
+        Button titleButton = new Button();
+        ImageView moreReleased = new ImageView();
+        moreReleased.setImage(new Image(getClass().getResourceAsStream("/images/plus_rel.png"), 46, 32, false, false));
+        ImageView morePressed = new ImageView();
+        morePressed.setImage(new Image(getClass().getResourceAsStream("/images/plus_press.png"), 46, 32, false, false));
+        ImageView lessReleased = new ImageView();
+        lessReleased.setImage(new Image(getClass().getResourceAsStream("/images/less_rel.png"), 46, 32, false, false));
+        ImageView lessPressed = new ImageView();
+        lessPressed.setImage(new Image(getClass().getResourceAsStream("/images/less_press.png"), 46, 32, false, false));
+
+        titleButton.setGraphic(category.isExpanded() ?lessReleased:moreReleased);
+        titleButton.setStyle("-fx-background-color: transparent;");
+        titleButton.setOnMousePressed(e -> titleButton.setGraphic(category.isExpanded() ?lessPressed:morePressed));
+        titleButton.setOnMouseReleased(e -> titleButton.setGraphic(category.isExpanded() ?lessReleased:moreReleased));
+        playSparkles(titleButton,  new StackPane(vBox));
+        //titleButton.setOnMouseExited(e -> titleButton.setGraphic(normalIcon));
+        titleButton.setOnAction(e -> {
+            System.out.println("action");
+            activateCategory(category, label);
+          //  updateSizingImage(plusImage);
+
+
+        });
         // Ajouter une action au clic
         blockTitle.setOnMouseClicked(event -> {
-            activateCategory(category, blockTitle);
+    //        activateCategory(category, label);
         });
-
+        blockTitle.getChildren().addAll(titleButton, label);
         vBox.getChildren().addAll(blockTitle, tilePane);
         return vBox;
     }
@@ -605,11 +664,18 @@ public class GamesWall extends Application {
                     long returne = 0;
                     log.debug(game.toString());
                     try {
-                        returne = dosBoxManager.runApplication(game.getGameExe(), game);
+
+                        long duration = gameManager.runGame(game, null);
+//                            if (duration>0){
+//                                gameManager.updateTime(game, returne);
+//                            }
+                        //  returne = dosBoxManager.runApplication(game.getGameExe(), game, listener);
+
+                        //   returne = dosBoxManager.runApplication(game.getGameExe(), game, null,null );
                     } catch (DosBoxException ex) {
                         throw new RuntimeException(ex);
                     }
-                    gameManager.updateTime(game, returne);
+                    // gameManager.updateTime(game, returne);
                 }
             }
         });
@@ -642,19 +708,19 @@ public class GamesWall extends Application {
         double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
         double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
         double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
-        log.debug("tile " + "point "+point.getX()+" / "+point.getY());
-        log.debug("tile pt2 " + "point "+fixedPoint2.getX()+" / "+fixedPoint2.getY());
-        log.debug("midroot " + +midRoot.getWidth()+" / "+midRoot.getHeight());
-        log.debug("tileSceneBounds " + tileSceneBounds.getMinX() );
+        log.debug("tile " + "point " + point.getX() + " / " + point.getY());
+        log.debug("tile pt2 " + "point " + fixedPoint2.getX() + " / " + fixedPoint2.getY());
+        log.debug("midroot " + +midRoot.getWidth() + " / " + midRoot.getHeight());
+        log.debug("tileSceneBounds " + tileSceneBounds.getMinX());
 
-        double decalRatio = -(Screen.getPrimary().getDpi()/100);
+        double decalRatio = -(Screen.getPrimary().getDpi() / 100);
 
         if (diffx > 0)
             fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
 
-        if (diffy> 0)
-            fixedPoint2 = fixedPoint2.add(0, decalRatio*diffy);
-       // return fixedPoint2;
+        if (diffy > 0)
+            fixedPoint2 = fixedPoint2.add(0, decalRatio * diffy);
+        // return fixedPoint2;
         return fixedPoint2;
     }
 
@@ -676,21 +742,21 @@ public class GamesWall extends Application {
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
         double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - width/*screen.getMaxX()*/;
         double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
-        log.debug("midroot " + +midRoot.getWidth()+"-"+midRoot.getHeight());
+        log.debug("midroot " + +midRoot.getWidth() + "-" + midRoot.getHeight());
         double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
-        log.debug("tile " + "point "+point.getX()+" / "+point.getY());
-        log.debug("tile " + "fixedpoint2 "+fixedPoint2.getX()+" / "+fixedPoint2.getY());
-        log.debug("tile " + "container "+container.getWidth()+" / "+container.getHeight());
-        log.debug("tileSceneBounds min " + tileSceneBounds.getMinX() );
+        log.debug("tile " + "point " + point.getX() + " / " + point.getY());
+        log.debug("tile " + "fixedpoint2 " + fixedPoint2.getX() + " / " + fixedPoint2.getY());
+        log.debug("tile " + "container " + container.getWidth() + " / " + container.getHeight());
+        log.debug("tileSceneBounds min " + tileSceneBounds.getMinX());
 
-        double decalRatio = -(Screen.getPrimary().getDpi()/100);
-        log.debug("dpi:"+Screen.getPrimary().getDpi());
+        double decalRatio = -(Screen.getPrimary().getDpi() / 100);
+        log.debug("dpi:" + Screen.getPrimary().getDpi());
         if (diffx > 0) {
 
             fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
         }
-        if (diffy> 0)
-            fixedPoint2 = fixedPoint2.add(0, decalRatio*diffy);
+        if (diffy > 0)
+            fixedPoint2 = fixedPoint2.add(0, decalRatio * diffy);
         return fixedPoint2;
     }
 
@@ -701,7 +767,7 @@ public class GamesWall extends Application {
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
-        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - ORIGINAL_WIDTH ) / 2 : 0;
+        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - ORIGINAL_WIDTH) / 2 : 0;
 
         double fixHeight = midRoot.getHeight() - ORIGINAL_HEIGHT > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
@@ -713,12 +779,12 @@ public class GamesWall extends Application {
         double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
         double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
 
-        double decalRatio = -(Screen.getPrimary().getDpi()/100);
+        double decalRatio = -(Screen.getPrimary().getDpi() / 100);
         if (diffx > 0) {
             fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
         }
-        if (diffy> 0)
-            fixedPoint2 = fixedPoint2.add(0, decalRatio*diffy);
+        if (diffy > 0)
+            fixedPoint2 = fixedPoint2.add(0, decalRatio * diffy);
         return fixedPoint2;
     }
 
@@ -751,7 +817,7 @@ public class GamesWall extends Application {
             }
 
         } catch (Exception e) {
-           log.error("error", e);
+            log.error("error", e);
         }
     }
 
@@ -759,15 +825,75 @@ public class GamesWall extends Application {
         launch();
     }
 
-    public void changeView(){
-        if (view==TILES_VIEW.DEFAULT){
-            view=TILES_VIEW.YEARS;
-            gameCategories=categoryManager.getShownCategories("years");
-        }else{
-            view=TILES_VIEW.DEFAULT;
-            gameCategories=categoryManager.getShownCategories(null);
+    public void changeView() {
+        if (view == TILES_VIEW.DEFAULT) {
+            view = TILES_VIEW.YEARS;
+            gameCategories = categoryManager.getShownCategories("years");
+        } else {
+            view = TILES_VIEW.DEFAULT;
+            gameCategories = categoryManager.getShownCategories(null);
         }
         updateList();
     }
+
+    private void fadeOverlay(double targetOpacity, int durationMs) {
+        FadeTransition ft = new FadeTransition(Duration.millis(durationMs), backOverlay);
+        ft.setToValue(targetOpacity);
+        ft.play();
+    }
+
+    public void darkenUI() {
+        System.out.println("coucou");
+        fadeOverlay(0.6, 200); // assombrir
+    }
+
+    public void lightenUI() {
+        fadeOverlay(0.0, 300); // éclaircir
+    }
+
+
+    private void playSparkles(Button button,  Pane layer) {
+        //Pane layer = (Pane) button.getParent(); // le parent doit être un Pane ou StackPane
+
+        for (int i = 0; i < 12; i++) {
+            Circle sparkle = new Circle(2, Color.WHITE);
+            sparkle.setOpacity(0);
+
+            // Position de départ : centre du bouton
+            double startX = button.getLayoutX() + button.getWidth() / 2;
+            double startY = button.getLayoutY() + button.getHeight() / 2;
+
+            sparkle.setLayoutX(startX);
+            sparkle.setLayoutY(startY);
+
+            layer.getChildren().add(sparkle);
+
+            // Destination aléatoire
+            double angle = Math.random() * 360;
+            double distance = 20 + Math.random() * 20;
+
+            double endX = startX + Math.cos(Math.toRadians(angle)) * distance;
+            double endY = startY + Math.sin(Math.toRadians(angle)) * distance;
+
+            Timeline tl = new Timeline(
+                    new KeyFrame(Duration.ZERO,
+                            new KeyValue(sparkle.opacityProperty(), 1),
+                            new KeyValue(sparkle.scaleXProperty(), 1),
+                            new KeyValue(sparkle.scaleYProperty(), 1)
+                    ),
+                    new KeyFrame(Duration.millis(300),
+                            new KeyValue(sparkle.opacityProperty(), 0),
+                            new KeyValue(sparkle.scaleXProperty(), 0.1),
+                            new KeyValue(sparkle.scaleYProperty(), 0.1),
+                            new KeyValue(sparkle.layoutXProperty(), endX),
+                            new KeyValue(sparkle.layoutYProperty(), endY)
+                    )
+            );
+
+            tl.setOnFinished(e -> layer.getChildren().remove(sparkle));
+            tl.play();
+        }
+    }
+
 }
 

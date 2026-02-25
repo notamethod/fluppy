@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.controlsfx.control.Rating;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class GameDetailPanel extends StackPane {
@@ -93,15 +94,55 @@ public class GameDetailPanel extends StackPane {
                 long returne = 0;
                 log.debug(game.toString());
                 try {
-                    returne = dosBoxManager.runApplication(game.getGameExe(), game);
+                    long duration = runGame();
+                    if (duration>0){
+                        gameManager.updateTime(game, returne);
+                    }
+                  //  returne = dosBoxManager.runApplication(game.getGameExe(), game, listener);
                 } catch (DosBoxException ex) {
                     throw new RuntimeException(ex);
                 }
-                gameManager.updateTime(game, returne);
-                if (listener != null) listener.onClose();
+             //   gameManager.updateTime(game, returne);
+                if (listener != null) {
+                    listener.onClose();
+                 //   listener.onExitGame();
+                }
             }
         });
         getChildren().add(content);
+    }
+
+    private long runGame() throws DosBoxException {
+
+        AtomicReference<Long> duration= new AtomicReference<>(0L);
+        dosBoxManager.runApplication(
+                game.getGameExe(),
+                game,
+                listener,
+                line -> log.info("[DOSBOX] "+line),
+                err -> log.error("[DOSBOX] " + err ),
+                result -> {
+
+                    if (listener != null) {
+
+                        listener.onExitGame();
+                    }
+                    if (result.success) {
+                        System.out.println("DOSBox OK");
+                    } else {
+                        System.out.println("Erreur : " + result.error);
+                    }
+
+                    System.out.println("Durée : " + result.durationMillis + " ms");
+                    duration.set(result.durationMillis);
+                    if (duration.get()>0){
+                        gameManager.updateTime(game, duration.get()/1000);
+                    }
+                    System.out.println("Exit code : " + result.exitCode);
+                }
+        );
+        return duration.get();
+
     }
 
     private void editAction() throws IOException {
