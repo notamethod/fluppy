@@ -754,22 +754,25 @@
 }
 
 .scroll-pane {
-    -fx-background-color: #141414;
+    -fx-background-color: #1A1E2E;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.main-pane {
+    -fx-background-color: #1A1E2E;
     -fx-border-color: transparent;
     -fx-padding: 0;
 }
 
 .ribbon {
-    -fx-background-color: #00050D;
+    -fx-background-color: #1A1E2E;
     -fx-border-color: transparent;
      -fx-border-width: 4;
 }
 
-.ribbon-highlightold {
-    -fx-border-color: green;
-    -fx-border-width: 4;
 
-}
+
 .ribbon-highlight {
 
     -fx-border-width: 4;
@@ -797,10 +800,10 @@
 
 .blockTitle {
 
-   -fx-font-family: "Storybook", "Courier New";
-    -fx-font-size: 28px;
-    -fx-text-fill: #d3761e;
-    -fx-text-fill: linear-gradient(to right, #f2c76c, #d3761e);
+   -fx-font-family: "LucasArts SCUMM - Subtitle - Roman", "Courier New";
+    -fx-font-size: 22px;
+
+    -fx-text-fill: linear-gradient(to bottom, #337fc4, #b9d2dc);
 }
 
 .blockTitle:hover {
