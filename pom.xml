@@ -139,8 +139,18 @@
                     <groupId>org.hibernate.orm</groupId>
                     <artifactId>hibernate-bytecode-bytebuddy</artifactId>
                 </exclusion>
-
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.29.2-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.12</version>
+            <scope>runtime</scope>
         </dependency>
         <!-- H2 Database -->
         <dependency>
@@ -247,11 +257,11 @@
                                         <buildArg>--enable-url-protocols=http,https</buildArg>
                                         <buildArg>--enable-native-access=ALL-UNNAMED</buildArg>
                                         <buildArg>-H:NativeLinkerOption=/DEFAULTLIB:Shlwapi.lib</buildArg>
-<!-- reduce file size
-                                        <buildArg>-H:GenerateDebugInfo=0</buildArg>
-                                        <buildArg>-H:+RemoveUnusedSymbols</buildArg>
-                                        <buildArg>-H:Optimize=2</buildArg>
-                                        -->
+                                        <!-- reduce file size
+                                                                                <buildArg>-H:GenerateDebugInfo=0</buildArg>
+                                                                                <buildArg>-H:+RemoveUnusedSymbols</buildArg>
+                                                                                <buildArg>-H:Optimize=2</buildArg>
+                                                                                -->
                                     </buildArgs>
 
                                 </configuration>

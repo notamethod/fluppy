@@ -24,7 +24,8 @@ public class HibernateUtil {
                     .applySetting("hibernate.connection.pool_size", "1")
                     .applySetting("hibernate.boot.allow_jpa_metadata_access", "true")
                     .applySetting("hibernate.implicit_naming_strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl")
-                    .applySetting("hibernate.bytecode.provider", "none")
+                    //.applySetting("hibernate.bytecode.provider", "none")
+                    .applySetting("hibernate.bytecode.provider", "javassist")
                     .build();
 
             sessionFactory = new MetadataSources(registry).addAnnotatedClass(com.notamethod.fluppy.core.game.GameEntity.class).addAnnotatedClass(com.notamethod.fluppy.core.game.GenreEntity.class).buildMetadata().buildSessionFactory();
