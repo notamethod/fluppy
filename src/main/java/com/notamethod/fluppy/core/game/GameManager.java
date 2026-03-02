@@ -134,12 +134,13 @@ public class GameManager {
         return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByYear(year, preferences.isNsfw(), count));
     }
 
-    public long runGame(GameApp game, PanelListener listener) throws DosBoxException {
+    public long runGame(GameApp game, String screenRez, PanelListener listener) throws DosBoxException {
 
         AtomicReference<Long> duration= new AtomicReference<>(0L);
         dosBoxManager.runApplication(
                 game.getGameExe(),
                 game,
+                screenRez,
                 listener,
                 line -> log.info("[DOSBOX] "+line),
                 err -> log.error("[DOSBOX] " + err ),

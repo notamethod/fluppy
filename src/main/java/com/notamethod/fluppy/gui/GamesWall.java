@@ -52,6 +52,8 @@ import java.util.*;
 @Slf4j
 public class GamesWall extends Application {
 
+    private Stage stage;
+
     public enum TILES_VIEW {
         DEFAULT, YEARS;
     }
@@ -67,7 +69,7 @@ public class GamesWall extends Application {
     GameManager gameManager;
     CategoryManager categoryManager;
 
-    StackPane midRoot;
+    StackPane mainPane;
     private Pane backOverlay;
     GameDetailPanel detailPane;
     List<Node> gamesBlocks = new ArrayList<>();
@@ -118,7 +120,7 @@ public class GamesWall extends Application {
     public void start(Stage stage) throws MalformedURLException, URISyntaxException {
 
         stage.initStyle(StageStyle.UNDECORATED);
-
+        this.stage = stage;
         HBox topRibbon = createTopRibbon(stage);
         Animation bordureAnim = effects.getBordureAnim(topRibbon);
 
@@ -159,29 +161,26 @@ public class GamesWall extends Application {
         dropLabel.setVisible(false); // caché par défaut
 
 
-        VBox root0 = new VBox();
-        // Cette ligne est cruciale
+        VBox root = new VBox();
         VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
         StackPane topRibbon0 = new StackPane(topRibbon, dropLabel);
 
 
-        midRoot = new StackPane();
-        midRoot.setId("midRoot");
+        mainPane = new StackPane();
 
         SearchOverlay searchOverlay = new SearchOverlay();
 
-        midRoot.getChildren().addAll(scrollPane, detailPane, searchOverlay);
+        mainPane.getChildren().addAll(scrollPane, detailPane, searchOverlay);
 
-        root0.getChildren().addAll(/*titleBar, */topRibbon0, midRoot);
+        root.getChildren().addAll(/*titleBar, */topRibbon0, mainPane);
 
-        midRoot.setId("realRoot");
 
         backOverlay = initBackOverlay();
-        backOverlay.prefWidthProperty().bind(root0.widthProperty());
-        backOverlay.prefHeightProperty().bind(root0.heightProperty());
-        midRoot.getChildren().add(backOverlay);
+        backOverlay.prefWidthProperty().bind(root.widthProperty());
+        backOverlay.prefHeightProperty().bind(root.heightProperty());
+        mainPane.getChildren().add(backOverlay);
 
-        Scene scene = new Scene(root0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
+        Scene scene = new Scene(root, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
 
         /*  drag&drop on top ribbon */
         topRibbon0.setOnDragOver(event -> {
@@ -209,12 +208,12 @@ public class GamesWall extends Application {
         });
         scene.widthProperty().addListener((obs, oldV, newV) -> {
             midWidth = newV.doubleValue();
-            midRoot.setPrefWidth(midWidth);
-            midRoot.setMaxWidth(midWidth);
-            midRoot.setMinWidth(midWidth);
+            mainPane.setPrefWidth(midWidth);
+            mainPane.setMaxWidth(midWidth);
+            mainPane.setMinWidth(midWidth);
 
             //try request layuout on reduce
-            midRoot.requestLayout();
+            mainPane.requestLayout();
         });
 //
         scene.heightProperty().addListener((obs, oldV, newV) ->
@@ -269,6 +268,8 @@ public class GamesWall extends Application {
 
         scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
         scrollPane.setStyle("-fx-background: #1A1E2E;"); // Fond du ScrollPane
+
+        scrollPane.getStyleClass().add("main-pane");
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog2.png")));
         stage.setScene(scene);
 
@@ -319,14 +320,14 @@ public class GamesWall extends Application {
         topRibbon.setPrefHeight(60);
         topRibbon.setSpacing(15);
         topRibbon.getStyleClass().add("ribbon");
-        topRibbon.getStyleClass().add("scanline");
+        // topRibbon.getStyleClass().add("scanline");
 
         Animation biosAnim = effects.biosEffectAnim(topRibbon);
         biosAnim.play();
         Animation distortion = effects.distortionAnim(topRibbon);
         distortion.play();
 
-        Label info = new Label("(c) 2025");
+        Label info = new Label("(c) 2026");
         info.setTextFill(Color.WHITE);
         ClassLoader classLoader = GamesWall.class.getClassLoader();
         URL logoUrl = classLoader.getResource("dosdog2.png");
@@ -378,7 +379,7 @@ public class GamesWall extends Application {
             } else {
                 isFullScreen = true;
                 stage.setMaximized(true);
-                midRoot.requestLayout();
+                mainPane.requestLayout();
 
             }
             updateSizingImage(plusImage);
@@ -518,7 +519,7 @@ public class GamesWall extends Application {
         tilePane.widthProperty().addListener((obs, oldW, newW) -> {
             log.debug("width" + tilePane.getWidth());
             if (midWidth == 0) {
-                midWidth = midRoot.getWidth();
+                midWidth = mainPane.getWidth();
             }
 
 
@@ -534,7 +535,7 @@ public class GamesWall extends Application {
         }
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(20, 10, 10, 50)); // top, right, bottom, left
-       // String expandedSymbol = category.isExpanded() ? "<" : ">";
+        // String expandedSymbol = category.isExpanded() ? "<" : ">";
         HBox blockTitle = new HBox();
         Label label = new Label(category.getLabel());
         label.getStyleClass().add("blockTitle");
@@ -549,22 +550,22 @@ public class GamesWall extends Application {
         ImageView lessPressed = new ImageView();
         lessPressed.setImage(new Image(getClass().getResourceAsStream("/images/less_press.png"), 46, 32, false, false));
 
-        titleButton.setGraphic(category.isExpanded() ?lessReleased:moreReleased);
+        titleButton.setGraphic(category.isExpanded() ? lessReleased : moreReleased);
         titleButton.setStyle("-fx-background-color: transparent;");
-        titleButton.setOnMousePressed(e -> titleButton.setGraphic(category.isExpanded() ?lessPressed:morePressed));
-        titleButton.setOnMouseReleased(e -> titleButton.setGraphic(category.isExpanded() ?lessReleased:moreReleased));
-        playSparkles(titleButton,  new StackPane(vBox));
+        titleButton.setOnMousePressed(e -> titleButton.setGraphic(category.isExpanded() ? lessPressed : morePressed));
+        titleButton.setOnMouseReleased(e -> titleButton.setGraphic(category.isExpanded() ? lessReleased : moreReleased));
+        playSparkles(titleButton, new StackPane(vBox));
         //titleButton.setOnMouseExited(e -> titleButton.setGraphic(normalIcon));
         titleButton.setOnAction(e -> {
             System.out.println("action");
             activateCategory(category, label);
-          //  updateSizingImage(plusImage);
+            //  updateSizingImage(plusImage);
 
 
         });
         // Ajouter une action au clic
         blockTitle.setOnMouseClicked(event -> {
-    //        activateCategory(category, label);
+            //        activateCategory(category, label);
         });
         blockTitle.getChildren().addAll(titleButton, label);
         vBox.getChildren().addAll(blockTitle, tilePane);
@@ -613,7 +614,7 @@ public class GamesWall extends Application {
         PauseTransition hoverDelay = new PauseTransition(Duration.millis(600));
         hoverDelay.setOnFinished(e -> {
             Point2D point = caculatePosition(container);
-            detailPane.show(game, point.getX(), point.getY());
+            detailPane.show(game, point.getX(), point.getY(), getScreenRez());
         });
         PauseTransition hoverDelayExit = new PauseTransition(Duration.millis(50));
         hoverDelayExit.setOnFinished(e -> {
@@ -665,7 +666,7 @@ public class GamesWall extends Application {
                     log.debug(game.toString());
                     try {
 
-                        long duration = gameManager.runGame(game, null);
+                        long duration = gameManager.runGame(game, getScreenRez(), null);
 //                            if (duration>0){
 //                                gameManager.updateTime(game, returne);
 //                            }
@@ -694,23 +695,23 @@ public class GamesWall extends Application {
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
-        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - 1) / 2 : 0;
-        double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
+        double fixWidth = mainPane.getWidth() - ORIGINAL_WIDTH > 0 ? (mainPane.getWidth() - 1) / 2 : 0;
+        double fixHeight = fixWidth > 0 ? (mainPane.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
         Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
 
 
-        Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
+        Bounds tileParentBounds = mainPane.sceneToLocal(tileSceneBounds);
         Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
         //TODO recalculate midroot size
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
         point = point.add(-container.getWidth(), -container.getHeight());
-        double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
-        double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
-        double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
+        double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - mainPane.getWidth()/*screen.getMaxX()*/;
+        double diffx = (point.getX() + detailPanelEstimatedWidth) - mainPane.getWidth()/*screen.getMaxX()*/;
+        double diffy = (point.getY() + detailPanelEstimatedHeight) - mainPane.getHeight()/*screen.getMaxX()*/;
         log.debug("tile " + "point " + point.getX() + " / " + point.getY());
         log.debug("tile pt2 " + "point " + fixedPoint2.getX() + " / " + fixedPoint2.getY());
-        log.debug("midroot " + +midRoot.getWidth() + " / " + midRoot.getHeight());
+        log.debug("midroot " + +mainPane.getWidth() + " / " + mainPane.getHeight());
         log.debug("tileSceneBounds " + tileSceneBounds.getMinX());
 
         double decalRatio = -(Screen.getPrimary().getDpi() / 100);
@@ -734,16 +735,16 @@ public class GamesWall extends Application {
         detailPane.applyCss();
         detailPane.layout();
         double fixWidth = 0;
-        double fixHeight = fixWidth > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
+        double fixHeight = fixWidth > 0 ? (mainPane.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
-        Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
+        Bounds tileParentBounds = mainPane.sceneToLocal(tileSceneBounds);
         Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
         //TODO recalculate midroot size
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
         double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - width/*screen.getMaxX()*/;
-        double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
-        log.debug("midroot " + +midRoot.getWidth() + "-" + midRoot.getHeight());
-        double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
+        double diffx = (point.getX() + detailPanelEstimatedWidth) - mainPane.getWidth()/*screen.getMaxX()*/;
+        log.debug("midroot " + +mainPane.getWidth() + "-" + mainPane.getHeight());
+        double diffy = (point.getY() + detailPanelEstimatedHeight) - mainPane.getHeight()/*screen.getMaxX()*/;
         log.debug("tile " + "point " + point.getX() + " / " + point.getY());
         log.debug("tile " + "fixedpoint2 " + fixedPoint2.getX() + " / " + fixedPoint2.getY());
         log.debug("tile " + "container " + container.getWidth() + " / " + container.getHeight());
@@ -767,17 +768,17 @@ public class GamesWall extends Application {
         Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
         detailPane.applyCss();
         detailPane.layout();
-        double fixWidth = midRoot.getWidth() - ORIGINAL_WIDTH > 0 ? (midRoot.getWidth() - ORIGINAL_WIDTH) / 2 : 0;
+        double fixWidth = mainPane.getWidth() - ORIGINAL_WIDTH > 0 ? (mainPane.getWidth() - ORIGINAL_WIDTH) / 2 : 0;
 
-        double fixHeight = midRoot.getHeight() - ORIGINAL_HEIGHT > 0 ? (midRoot.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
+        double fixHeight = mainPane.getHeight() - ORIGINAL_HEIGHT > 0 ? (mainPane.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
 
-        Bounds tileParentBounds = midRoot.sceneToLocal(tileSceneBounds);
+        Bounds tileParentBounds = mainPane.sceneToLocal(tileSceneBounds);
         Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
         //TODO recalculate midroot size
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
 
-        double diffx = (point.getX() + detailPanelEstimatedWidth) - midRoot.getWidth()/*screen.getMaxX()*/;
-        double diffy = (point.getY() + detailPanelEstimatedHeight) - midRoot.getHeight()/*screen.getMaxX()*/;
+        double diffx = (point.getX() + detailPanelEstimatedWidth) - mainPane.getWidth()/*screen.getMaxX()*/;
+        double diffy = (point.getY() + detailPanelEstimatedHeight) - mainPane.getHeight()/*screen.getMaxX()*/;
 
         double decalRatio = -(Screen.getPrimary().getDpi() / 100);
         if (diffx > 0) {
@@ -844,7 +845,7 @@ public class GamesWall extends Application {
 
     public void darkenUI() {
         System.out.println("coucou");
-        fadeOverlay(0.6, 200); // assombrir
+        fadeOverlay(0.95, 300); // assombrir
     }
 
     public void lightenUI() {
@@ -852,7 +853,7 @@ public class GamesWall extends Application {
     }
 
 
-    private void playSparkles(Button button,  Pane layer) {
+    private void playSparkles(Button button, Pane layer) {
         //Pane layer = (Pane) button.getParent(); // le parent doit être un Pane ou StackPane
 
         for (int i = 0; i < 12; i++) {
@@ -895,5 +896,15 @@ public class GamesWall extends Application {
         }
     }
 
+    private String getScreenRez() {
+        Screen screen = Screen.getScreensForRectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()).get(0);
+        //exclude task bar: Rectangle2D visualBounds = screen.getVisualBounds();
+        Rectangle2D bounds = screen.getBounds();
+        double scaleX = screen.getOutputScaleX();
+        double scaleY = screen.getOutputScaleY();
+        double physicalWidth = bounds.getWidth() * scaleX;
+        double physicalHeight = bounds.getHeight() * scaleY;
+        return (int)bounds.getWidth() + "x" + (int)bounds.getHeight() ;
+    }
 }
 

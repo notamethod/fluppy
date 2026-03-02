@@ -38,6 +38,7 @@ public class GameDetailPanel extends StackPane {
     private PanelListener listener;
     private final VBox extraFiles;
     private final Rating rating;
+    private String  screenRez;
     VBox detailContent;
 
     public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
@@ -81,7 +82,7 @@ public class GameDetailPanel extends StackPane {
         });
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
-        detailContent = new VBox(10, name, year, genre, ratbox,timePlayed,  extraFiles);
+        detailContent = new VBox(10, name, year, genre, ratbox, timePlayed, extraFiles);
 
         launchButton.setDisable(!dosBoxManager.isDosboxPresent());
         VBox buttonBox = new VBox(5, launchButton, editButton);
@@ -95,17 +96,17 @@ public class GameDetailPanel extends StackPane {
                 log.debug(game.toString());
                 try {
                     long duration = runGame();
-                    if (duration>0){
+                    if (duration > 0) {
                         gameManager.updateTime(game, returne);
                     }
-                  //  returne = dosBoxManager.runApplication(game.getGameExe(), game, listener);
+                    //  returne = dosBoxManager.runApplication(game.getGameExe(), game, listener);
                 } catch (DosBoxException ex) {
                     throw new RuntimeException(ex);
                 }
-             //   gameManager.updateTime(game, returne);
+                //   gameManager.updateTime(game, returne);
                 if (listener != null) {
                     listener.onClose();
-                 //   listener.onExitGame();
+                    //   listener.onExitGame();
                 }
             }
         });
@@ -114,13 +115,15 @@ public class GameDetailPanel extends StackPane {
 
     private long runGame() throws DosBoxException {
 
-        AtomicReference<Long> duration= new AtomicReference<>(0L);
+
+        AtomicReference<Long> duration = new AtomicReference<>(0L);
         dosBoxManager.runApplication(
                 game.getGameExe(),
                 game,
+                screenRez,
                 listener,
-                line -> log.info("[DOSBOX] "+line),
-                err -> log.error("[DOSBOX] " + err ),
+                line -> log.info("[DOSBOX] " + line),
+                err -> log.error("[DOSBOX] " + err),
                 result -> {
 
                     if (listener != null) {
@@ -135,8 +138,8 @@ public class GameDetailPanel extends StackPane {
 
                     System.out.println("Durée : " + result.durationMillis + " ms");
                     duration.set(result.durationMillis);
-                    if (duration.get()>0){
-                        gameManager.updateTime(game, duration.get()/1000);
+                    if (duration.get() > 0) {
+                        gameManager.updateTime(game, duration.get() / 1000);
                     }
                     System.out.println("Exit code : " + result.exitCode);
                 }
@@ -167,8 +170,9 @@ public class GameDetailPanel extends StackPane {
     }
 
 
-    public void show(GameApp game, double x, double y) {
+    public void show(GameApp game, double x, double y, String screenRez) {
         this.game = game;
+        this.screenRez=screenRez;
         imageView.getChildren().clear();
         imageView.getChildren().add(ImageFactory.getMedium(game));
         descriptionLabel.setText(game.getName());

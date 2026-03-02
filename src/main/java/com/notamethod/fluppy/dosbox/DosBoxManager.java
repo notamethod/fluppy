@@ -62,7 +62,7 @@ public class DosBoxManager {
     }
 
 
-    public long runApplication(String program, GameApp gameApp, PanelListener listener,
+    public long runApplication(String program, GameApp gameApp, String screenRez, PanelListener listener,
                                Consumer<String> onStdout,
                                Consumer<String> onStderr,
                                 Consumer<DosBoxResult> onFinish) throws DosBoxException {
@@ -70,7 +70,9 @@ public class DosBoxManager {
         log.info("running {}", program);
         int returnOK = 0;
 
-        generateConfiguration(program, gameApp);
+        //reload
+        preferences = PreferencesIO.load();
+        generateConfiguration(program, gameApp, screenRez);
 
         // Build execute command
         String[] par = generateDosBoxParams();
@@ -169,7 +171,7 @@ public class DosBoxManager {
         return par;
     }
 
-    private void generateConfiguration(String program, GameApp gameApp) {
+    private void generateConfiguration(String program, GameApp gameApp, String screenRez) {
         //Create HashMaps for preferences
         HashMap<String, HashMap<String, String>> allProps = new HashMap<>();
         HashMap<String, String> cpu = new HashMap<>();
@@ -235,19 +237,56 @@ public class DosBoxManager {
         HelperClass.addOtherSettings(finito, "renderer", renderer);
         allProps.put("RENDER", renderer);
 
-
         if (preferences.isFullScreen()) {
             if (DosboxType.fromString(preferences.getDosBoxType()).equals(DosboxType.CLASSIC)) {
                 sdl.put("fullscreen", "true");
             } else {
+                //  sdl.put("windowresolution", "1920x1080");
                 sdl.put("fullscreen", "false");
-                sdl.put("windowresolution", "desktop");
+
                 sdl.put("windowborderless", "true");
                 sdl.put("output", "opengl");
                 sdl.put("aspect", "true");
-                sdl.put("scaler", "none");
+                System.out.println(screenRez);
+                if (screenRez!=null){
+                    sdl.put("windowresolution",screenRez);
+                }else{
+                    sdl.put("windowresolution", "desktop");
+                }
+
+
+             //  renderer.put("viewport","120%");
+//                renderer.put("aspect","stretch");
+//                renderer.put("glshader","crt\\ega-720p");
+//renderer.put("glshader_param1","1.0");
+//                renderer.put("glshader_param2","0.5");
+//                renderer.put("glshader_param3","0.2");
+//                renderer.put("glshader_param4","0.1");
+
             }
         }
+
+//        if (preferences.isFullScreen()) {
+//            if (DosboxType.fromString(preferences.getDosBoxType()).equals(DosboxType.CLASSIC)) {
+//                sdl.put("fullscreen", "true");
+//            } else {
+//                sdl.put("fullscreen", "false");
+//                sdl.put("windowresolution", "desktop");
+//                sdl.put("windowborderless", "true");
+//                sdl.put("output", "opengl");
+//                sdl.put("aspect", "true");
+//                sdl.put("scaler", "none");
+//
+//                        renderer.put("viewport","89%");
+//                renderer.put("aspect","stretch");
+////                renderer.put("glshader","crt\\ega-720p");
+////renderer.put("glshader_param1","1.0");
+////                renderer.put("glshader_param2","0.5");
+////                renderer.put("glshader_param3","0.2");
+////                renderer.put("glshader_param4","0.1");
+//
+//            }
+//        }
 
         HelperClass.addOtherSettings(finito, "sdl", sdl);
         allProps.put("SDL", sdl);
