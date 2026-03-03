@@ -9,6 +9,7 @@ import com.notamethod.fluppy.core.*;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.core.game.GenreApp;
+import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.FileActions;
 import com.notamethod.fluppy.gui.common.OperationCanceledException;
 import com.notamethod.fluppy.util.ArchiveExtractor;
@@ -127,7 +128,12 @@ public class AddGameDialog extends Stage {
             });
             refreshButton.setOnAction(e -> {
                 foundBox.getItems().clear();
-                foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
+                try {
+                    foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
+                } catch (ApiException ex) {
+                    log.error("external API Error", ex);
+                    DialogActionsJfx.showErrorDialog(ex.getLocalizedMessage());
+                }
                 if (foundBox.getItems().isEmpty()){
                     GameApiBean dummyGame = new GameApiBean();
                     dummyGame.setName(nameSearch.getText());
@@ -150,7 +156,12 @@ public class AddGameDialog extends Stage {
 
             listRow++;
             if (searchString!=null){
-                foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
+                try {
+                    foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
+                } catch (ApiException e) {
+                    log.error("external API Error", e);
+                    DialogActionsJfx.showErrorDialog(e.getLocalizedMessage());
+                }
                 if (!foundBox.getItems().isEmpty()){
                     foundBox.setValue(foundBox.getItems().getFirst());
                 }
@@ -351,21 +362,13 @@ public class AddGameDialog extends Stage {
         return resultat;
     }
 
-    private List<GameApiBean> findGame(String name, ApiCalls apiCalls) {
+    private List<GameApiBean> findGame(String name, ApiCalls apiCalls) throws ApiException {
         // searching game
         String response = "";
         final List<GameApiBean> games = new ArrayList<>();
-        try {
-            games.addAll(apiCalls.findGame(name));
-        } catch (ApiException | MappingException e) {
-            log.error("Internal Error", e);
-        }
-        if (!games.isEmpty()) {
-            return games;
-        }
-        //no games found
 
-//
+            games.addAll(apiCalls.findGame(name));
+
         return games;
     }
 
