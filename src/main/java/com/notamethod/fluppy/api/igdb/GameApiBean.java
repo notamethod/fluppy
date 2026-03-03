@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,7 +19,7 @@ public class GameApiBean {
     Long id;
     Long cover;
     Long first_release_date;
-    List<Genre> genres;
+    List<Genre> genres=new ArrayList<>();
     List<involvedCompany> involved_companies;
 
 
