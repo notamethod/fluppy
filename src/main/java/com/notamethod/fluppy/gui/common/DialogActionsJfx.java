@@ -2,6 +2,8 @@ package com.notamethod.fluppy.gui.common;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -94,10 +96,13 @@ public class DialogActionsJfx implements DialogActions {
 
     @Override
     public void showMessageDialog(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert = new RetroAlert(Alert.AlertType.INFORMATION);
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.initStyle(StageStyle.UNDECORATED);
+
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
-        dialogPane.getStyleClass().add("custom-dialog");
+        dialogPane.getStyleClass().add("message-dialog");
         alert.setTitle(title);
         alert.getDialogPane().setPrefSize(500, 220);
 

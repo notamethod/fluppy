@@ -12,14 +12,53 @@
 .root{
     -fx-background-color: #2D2D30;
     -fx-font-family: "Retro Pixel Arcade Regular";
-    -fx-font-size: 10px;
+    -fx-font-size: 14px;
     background-color: #2D2D30;
 }
 
 
 /* Label */
 .label{
--fx-font-size:12 px;
+-fx-font-size:14 px;
     -fx-text-fill: #d3761e;
 
+}
+
+.nightwish{
+
+    -fx-background-color: #1A1A2A;
+    -fx-border-color: #6A6A9A;
+    -fx-text-fill: #E0E0E0;
+    -fx-border-width: 2; -fx-padding: 12;
+    -fx-font-family: "PxPlus IBM VGA 8x16",  "Consolas", monospace;
+    -fx-font-size: 16px;
+
+    }
+
+.nightwish .label{
+-fx-font-size:18 px;
+    -fx-text-fill: #FF6CEB;
+}
+.nightwish .title{
+-fx-font-size:20 px;
+    -fx-font-family: "Monkey Island 1990";
+    -fx-text-fill: #FF6CEB;
+     -fx-padding: 0 0 30 0;   /* top right bottom left */
+}
+.nightwish .button {
+    -fx-background-color: #2A2A3A;
+    -fx-border-color: #6A6A9A;
+    -fx-border-width: 2;
+    -fx-text-fill: yellow;
+
+    -fx-padding: 2 10;        /* réduit le padding vertical */
+    -fx-alignment: CENTER;    /* force le centrage du texte */
+    -fx-font-size: 14px;      /* police plus petite */
+}
+
+
+}
+
+.nightwish .button:hover {
+    -fx-background-color: #3A3A4A;
 }

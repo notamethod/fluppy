@@ -314,11 +314,9 @@ public class GameEditorController {
         }
 
         if (games.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("warning");
-            alert.setContentText("Cant't update: no game found");
-            alert.showAndWait();
-            return updated;
+            da.showMessageDialog("warning", "Cant't update: no game found");
+
+            return false;
         }
 
         GameApiBean game = games.size() > 1 ? gameActions.chooseGame(games) : games.get(0);

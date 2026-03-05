@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -27,6 +28,7 @@ public class AboutDialog extends Stage {
 
     public AboutDialog(Stage owner) {
         initModality(Modality.APPLICATION_MODAL);
+        initStyle(StageStyle.UNDECORATED);
         initOwner(owner);
         setTitle(Messages.getString("aboutdialog.titie"));
 
@@ -42,12 +44,12 @@ public class AboutDialog extends Stage {
         Button okButton = new Button("OK");
 
         Label oursLabel = new Label(OURS);
-        oursLabel.setPadding(new Insets(0,0,40,0));
+
         okButton.setOnAction(e -> {
             result = null;
             close();
         });
-
+        oursLabel.getStyleClass().add("title");
         HBox buttonBox = new HBox(10, okButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
@@ -60,6 +62,7 @@ public class AboutDialog extends Stage {
         layout.setPadding(new Insets(20));
         Scene scene = new Scene(layout);
         scene.getStylesheets().add(getClass().getResource("dialog.css").toExternalForm());
+        layout.getStyleClass().add("nightwish");
         setScene(scene);
 
     }

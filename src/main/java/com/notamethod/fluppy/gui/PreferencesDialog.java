@@ -19,18 +19,18 @@ public class PreferencesDialog extends Stage {
 
     private TextField cheminField;
     private CheckBox fullscreenCheck;
-    private ListView<String> typeList;
     private PreferencesBean preferences;
     private CheckBox nsfwCheck;
     private PreferencesBean result;
 
     public PreferencesDialog(Stage owner) {
         initModality(Modality.APPLICATION_MODAL);
+       initStyle(StageStyle.UNDECORATED);
         initOwner(owner);
         setTitle("Préférences");
         preferences = PreferencesIO.load();
         cheminField = new TextField();
-        cheminField.setPrefWidth(250);
+        cheminField.setPrefWidth(350);
         cheminField.setText(preferences.getDosBoxPath());
         Button browseButton = new Button("Parcourir...");
         browseButton.setOnAction(e -> {
@@ -48,10 +48,7 @@ public class PreferencesDialog extends Stage {
 
         fullscreenCheck = new CheckBox("Plein écran");
         fullscreenCheck.setSelected(preferences.isFullScreen());
-        typeList = new ListView<>();
-        typeList.getItems().addAll("dosbox", "dosbox-x");
-        typeList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        typeList.setPrefHeight(80);
+
         nsfwCheck = new CheckBox("NSFW");
         nsfwCheck.setSelected(preferences.isNsfw());
         Button saveButton = new Button("Enregistrer");
@@ -60,7 +57,7 @@ public class PreferencesDialog extends Stage {
         saveButton.setOnAction(e -> {
             log.debug("Chemin DOSBox: " + cheminField.getText());
             log.debug("Plein écran: " + fullscreenCheck.isSelected());
-            log.debug("Types sélectionnés: " + typeList.getSelectionModel().getSelectedItems());
+           // log.debug("Types sélectionnés: " + typeList.getSelectionModel().getSelectedItems());
             preferences.setDosBoxPath(cheminField.getText());
             DosboxType dosboxType =  DosBoxManager.detectDosboxType(Path.of(preferences.getDosBoxPath()));
             preferences.setDosBoxType(dosboxType.toString());
@@ -78,16 +75,20 @@ public class PreferencesDialog extends Stage {
 
         HBox buttonBox = new HBox(10, saveButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
-
+        Label title = new Label("Preferences");
+        title.getStyleClass().add("title");
         VBox layout = new VBox(15,
+                title,
                 new Label("Chemin vers DOSBox:"), cheminBox,
-                fullscreenCheck,
-                new Label("Type de DOSBox:"), typeList, nsfwCheck,
+
+                new Label("Options:"),   fullscreenCheck,nsfwCheck,
                 buttonBox
         );
         layout.setPadding(new Insets(20));
+
         Scene scene = new Scene(layout);
         scene.getStylesheets().add(getClass().getResource("dialog.css").toExternalForm());
+        layout.getStyleClass().add("nightwish");
         setScene(scene);
 
 
@@ -97,5 +98,7 @@ public class PreferencesDialog extends Stage {
         showAndWait(); // bloque jusqu'à fermeture
         return result;
     }
+
+
 }
 

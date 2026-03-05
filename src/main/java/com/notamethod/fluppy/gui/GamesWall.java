@@ -114,6 +114,7 @@ public class GamesWall extends Application {
         FontUtils.loadCustomFont("lucasarts-scumm-subtitle-roman.otf", 16);
         FontUtils.loadCustomFont("Storyboo.ttf", 16);
         FontUtils.loadCustomFont("Retro Gaming.ttf", 16);
+        FontUtils.loadCustomFont("PxPlus_IBM_VGA_8x16.ttf", 16);
     }
 
     @Override

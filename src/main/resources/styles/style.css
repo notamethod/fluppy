@@ -740,6 +740,64 @@
     padding: 5;
 }
 
+.message-dialog {
+    -fx-background-color: #1A1A2A;
+    -fx-border-color: #6A6A9A;
+    -fx-border-width: 2; -fx-padding: 12;
+    -fx-font-family: "PxPlus IBM VGA 8x16", "Topaz", "Consolas", monospace;
+    -fx-font-size: 14px;
+    -fx-text-fill: #E0E0E0; }
+
+
+.message-dialog .content {
+    -fx-font-family: "PxPlus IBM VGA 8x16";
+    -fx-font-size: 18px;
+      -fx-text-fill: #E0E0E0;
+}
+
+
+
+.message-dialog .header-panel {
+    -fx-background-color: #2A2A3A;
+    -fx-border-color: #6A6A9A;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 6;
+}
+
+.message-dialog .header-panel .label {
+    -fx-text-fill: #FFD860;
+    -fx-font-weight: bold;
+}
+
+
+
+.message-dialog .button {
+    -fx-background-color: #2A2A3A;
+    -fx-border-color: #6A6A9A;
+    -fx-border-width: 2;
+    -fx-text-fill: yellow;
+
+    -fx-padding: 2 10;        /* réduit le padding vertical */
+    -fx-alignment: CENTER;    /* force le centrage du texte */
+    -fx-font-size: 12px;      /* police plus petite */
+}
+
+
+}
+
+.message-dialog .button:hover {
+    -fx-background-color: #3A3A4A;
+}
+
+
+
+
+
+
+
+
+
+
 .custom-dialog {
     -fx-background-color: #AA5500;
 }
