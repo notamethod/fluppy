@@ -11,6 +11,8 @@ import javafx.animation.ScaleTransition;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -58,8 +60,10 @@ public class GameDetailPanel extends StackPane {
         descriptionLabel.setStyle("-fx-text-fill: white; -fx-wrap-text: true;");
         name.getStyleClass().add("game-title");
         name.setWrapText(true);
-        launchButton = new Button("Lancer");
-        editButton = new Button("Éditer");
+
+        launchButton = createRButton("/images/play1.png");
+
+        editButton = createRButton("/images/edit1.png");
         editButton.setOnMouseClicked(event -> {
             try {
                 editAction();
@@ -82,10 +86,11 @@ public class GameDetailPanel extends StackPane {
         });
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
-        detailContent = new VBox(10, name, year, genre, ratbox, timePlayed, extraFiles);
+        detailContent = new VBox(10, name, year, genre, timePlayed, extraFiles);
 
         launchButton.setDisable(!dosBoxManager.isDosboxPresent());
-        VBox buttonBox = new VBox(5, launchButton, editButton);
+        HBox buttonBox = new HBox(2, launchButton, editButton);
+        buttonBox.setPadding(new Insets(40, 0, 0, 0)); // top, right, bottom, left
         VBox infoContent = new VBox(detailContent, buttonBox);
 
         HBox content = new HBox(10, imageView, infoContent);
@@ -219,6 +224,14 @@ public class GameDetailPanel extends StackPane {
 
     }
 
+    private Button createRButton(String imagePath) {
+        Image img = new Image(getClass().getResourceAsStream(imagePath), 32, 32, false, false);
+        ImageView imgView = new ImageView(img);
+        Button button = new Button();
+        button.setGraphic(imgView);
+        button.setStyle("-fx-background-color: transparent;");
+        return button;
+    }
     public void hide() {
         setVisible(false);
     }
