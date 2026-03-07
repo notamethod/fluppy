@@ -5,6 +5,8 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class involvedCompany {
+public class InvolvedCompany {
     private Long company;
+    private boolean publisher;
+
 }

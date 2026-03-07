@@ -5,11 +5,9 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Company {
-    private String id;
-    private String name;
-    private String slug;
-    private IgdbImage logo;
-
+public class IgdbImage {
+    Long width;
+    Long height;
+    String url;
 
 }

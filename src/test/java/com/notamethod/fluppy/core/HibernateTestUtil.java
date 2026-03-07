@@ -1,5 +1,6 @@
 package com.notamethod.fluppy.core;
 
+import com.notamethod.fluppy.core.game.CompanyEntity;
 import com.notamethod.fluppy.core.game.GameEntity;
 import com.notamethod.fluppy.core.game.GenreEntity;
 import org.hibernate.SessionFactory;
@@ -26,7 +27,8 @@ public class HibernateTestUtil {
 
             MetadataSources sources = new MetadataSources(registry)
                     .addAnnotatedClass(GameEntity.class)
-                    .addAnnotatedClass(GenreEntity.class);
+                    .addAnnotatedClass(GenreEntity.class)
+                    .addAnnotatedClass(CompanyEntity.class);
 
             sessionFactory = sources.buildMetadata().buildSessionFactory();
         }

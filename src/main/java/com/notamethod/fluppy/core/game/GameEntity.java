@@ -36,7 +36,6 @@ public class GameEntity {
     private int gameYear;
     private String machine;
 
-    private String publisher;
 
     private boolean favorite = false;
     private LocalDateTime added;
@@ -67,4 +66,8 @@ public class GameEntity {
         this.genres.add(genre);
 
     }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publisher_id")
+    private CompanyEntity publisher;
 }

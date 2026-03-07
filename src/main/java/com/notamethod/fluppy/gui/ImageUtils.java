@@ -1,11 +1,16 @@
 package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.game.GameApp;
+import javafx.beans.NamedArg;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -82,6 +87,47 @@ public class ImageUtils {
             throw new RuntimeException(e);
         }
 
+    }
 
+    public static ImageView buildImageViewFromBytes(byte[] bytes) {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        Image img = new Image(bis);
+
+        ImageView iv = new ImageView(img);
+      //  iv.setPreserveRatio(true);
+       // iv.setFitWidth(300);
+
+        return iv;
+    }
+
+    public static Image buildImageFromBytes(byte[] bytes) {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+
+
+        Image img = new Image(bis);
+        System.out.println(img.getWidth());
+        try (FileOutputStream fos = new FileOutputStream("c:/tmp/test-output.jpg")) {
+            fos.write(bytes);
+            fos.flush();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        //  iv.setPreserveRatio(true);
+        // iv.setFitWidth(300);
+
+        return img;
+    }
+
+    public static void testImage(byte[] image) {
+        try (FileOutputStream fos = new FileOutputStream("c:/tmp/test-output.jpg")) {
+            fos.write(image);
+            fos.flush();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -46,6 +46,19 @@ public class ApplicationDatabase {
         GameEntity gameEntity = GameMapper.INSTANCE.toEntity(gameApp);
 
         sessionFactory.inTransaction(session -> {
+            Company company = gameApp.getPublisher();
+            if (company!=null) {
+                Optional<CompanyEntity> compEnt = findCompanyById(session, company.getId());
+                if (compEnt.isPresent()) {
+                    gameEntity.setPublisher(compEnt.get());
+
+                } else {
+                    CompanyEntity compEnt2 = new CompanyEntity(company.getId(), company.getName(), company.getImage());
+                            //GameMapper.INSTANCE.toEntity(company);
+                    session.persist(compEnt2);
+                    gameEntity.setPublisher(compEnt2);
+                }
+            }
             for (GenreApp genre : gameApp.getGenres()) {
                 Optional<GenreEntity> gent = findGenreByID(session, genre.getId());
                 if (gent.isPresent()) {
@@ -101,7 +114,14 @@ public class ApplicationDatabase {
         });
 
     }
+    public GameEntity findFullGameById(long id) {
+        return sessionFactory.fromSession(session -> {
+            Query<GameEntity> q = session.createQuery("SELECT game FROM GameEntity game left join fetch game.genres  left join fetch game.publisher where game.id=:id", GameEntity.class);
+            q.setParameter("id", id);
+            return q.getSingleResult();
+        });
 
+    }
     public List<GameEntity> findGameByName(String name) {
         return sessionFactory.fromSession(session -> {
             Query<GameEntity> q = session.createQuery("""
@@ -151,6 +171,23 @@ public class ApplicationDatabase {
                     AND (:nsfw is true OR game.ageRating < 1)
                     """, GameEntity.class);
             q.setParameter("year", year);
+            q.setParameter("nsfw", nsfw);
+            if (maxResult > 0)
+                q.setMaxResults(maxResult);
+
+            return q.getResultList();
+        });
+    }
+
+    public List<GameEntity> findGameByPublisher(String publisher, boolean nsfw, int maxResult) {
+        return sessionFactory.fromSession(session -> {
+            Query<GameEntity> q = session.createQuery("""
+                    SELECT game FROM GameEntity game 
+                    left join fetch game.genres
+                    WHERE game.publisher.id=:publisher
+                    AND (:nsfw is true OR game.ageRating < 1)
+                    """, GameEntity.class);
+            q.setParameter("publisher", publisher);
             q.setParameter("nsfw", nsfw);
             if (maxResult > 0)
                 q.setMaxResults(maxResult);
@@ -226,7 +263,27 @@ public class ApplicationDatabase {
             return map;
         });
     }
+    public Map<Company, Long> getTopCompanies(int limit) {
+        return sessionFactory.fromSession(session -> {
+            int count = 0;
+            List<Object[]> games = session.createQuery("""
+                    SELECT game.publisher, COUNT(game)
+                    FROM GameEntity game GROUP BY game.publisher ORDER BY game.publisher
+                    """, Object[].class).getResultList();
 
+            Map<Company, Long> map = new LinkedHashMap<>();
+            for (Object[] o : games) {
+                CompanyEntity companyEntity = (CompanyEntity) o[0];
+                map.put(GameMapper.INSTANCE.toCompany(companyEntity), (Long) o[1]);
+                count++;
+                if (++count >= limit) {
+                    break;
+                }
+            }
+            log.debug("{} companies found",count);
+            return map;
+        });
+    }
     public Optional<GenreEntity> findGenreByID(String id) {
         return sessionFactory.fromSession(session -> {
             Query<GenreEntity> q = session.createQuery("SELECT p FROM GenreEntity p where p.id=:id", GenreEntity.class);
@@ -237,12 +294,14 @@ public class ApplicationDatabase {
     }
 
     public Optional<GenreEntity> findGenreByID(Session session, String id) {
-
         Query<GenreEntity> q = session.createQuery("SELECT p FROM GenreEntity p where p.id=:id", GenreEntity.class);
         q.setParameter("id", id);
-
         return q.uniqueResultOptional();
-
+    }
+    public Optional<CompanyEntity> findCompanyById(Session session, String id) {
+        Query<CompanyEntity> q = session.createQuery("SELECT p FROM CompanyEntity p where p.id=:id", CompanyEntity.class);
+        q.setParameter("id", id);
+        return q.uniqueResultOptional();
     }
 
     public List<GameEntity> loadAllGamesButNot(Set<Long> gameIds, boolean nsfw) {

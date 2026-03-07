@@ -1,12 +1,18 @@
 package com.notamethod.fluppy.core.category;
 
 import com.notamethod.fluppy.core.ApplicationDatabase;
+import com.notamethod.fluppy.core.game.Company;
+import com.notamethod.fluppy.gui.GamesWall;
+import com.notamethod.fluppy.gui.ImageUtils;
 import com.notamethod.fluppy.gui.Messages;
+import javafx.scene.image.Image;
 
+import java.io.ByteArrayInputStream;
 import java.util.*;
 
 public class CategoryManager {
     private static final int MAX_GENRE = 4;
+    private static final int MAX_COMPANIES = 20;
     private static final int MAX_YEAR = 20;
     private final ApplicationDatabase applicationDatabase;
 
@@ -20,7 +26,9 @@ public class CategoryManager {
     public Map<Integer, Long> getTopYears() {
         return applicationDatabase.getTopYears(MAX_YEAR);
     }
-
+    public Map<Company, Long> getTopCompanies() {
+        return applicationDatabase.getTopCompanies(MAX_COMPANIES);
+    }
     public Category getCategoryFromGenre(String genre) {
         Category c = new Category();
         c.setCategoryType(CategoryType.GENRE);
@@ -33,6 +41,17 @@ public class CategoryManager {
         c.setCategoryType(CategoryType.YEAR);
         c.setId(String.valueOf(year));
         c.setLabel(Messages.getString("category.year", String.valueOf(year)));
+        return c;
+    }
+
+    private Category getCategoryFromCompany(Company company) {
+        Category c = new Category();
+        c.setCategoryType(CategoryType.COMPANY);
+        c.setId(company.getId());
+        c.setLabel(company.getName());
+        if (company.getImage() != null) {
+            c.setImage(new Image(new ByteArrayInputStream(company.getImage())));
+        }
         return c;
     }
     public List<Category> getTopCategories() {
@@ -52,15 +71,25 @@ public class CategoryManager {
         }
         return cats;
     }
+    public List<Category> getCompanyCategories() {
+        List<Category> cats = new ArrayList<>();
+        Map<Company, Long> comps = getTopCompanies();
+        for (Company company : comps.keySet()) {
+            cats.add(getCategoryFromCompany(company));
+        }
+        return cats;
+    }
 
 
-
-    public List<Category> getShownCategories(String viewFilter) {
-        if (viewFilter==null){
+    public List<Category> getShownCategories(GamesWall.TILES_VIEW viewFilter) {
+        if (viewFilter==null || viewFilter == GamesWall.TILES_VIEW.DEFAULT) {
             return getDefaultCategories();
         }else{
-            return getYearCategories();
+            if (viewFilter== GamesWall.TILES_VIEW.YEARS) {
+                return getYearCategories();
+            }
         }
+        return getCompanyCategories();
     }
 
     private List<Category> getDefaultCategories() {

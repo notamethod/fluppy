@@ -45,10 +45,11 @@ public class AddGameDialog extends Stage {
     private final ObservableList<GameApp> result = FXCollections.observableArrayList();
 
     private FileActions fileActions;
-    private boolean haErrors=false;
-    public AddGameDialog(List<File> metaGamesFiles,  ApiCalls apiCalls) {
+    private boolean haErrors = false;
 
-        this.apiCalls=apiCalls;
+    public AddGameDialog(List<File> metaGamesFiles, ApiCalls apiCalls) {
+
+        this.apiCalls = apiCalls;
         initModality(Modality.APPLICATION_MODAL);
         fileActions = new FileActions();
         setTitle("Add Game");
@@ -62,41 +63,41 @@ public class AddGameDialog extends Stage {
         scrollPane.setPannable(true); // active le drag à la souris
         content.setStyle("-fx-background-color: transparent;");
         grid.setStyle("-fx-background-color: black;");
-        List<ComboBox<GameApiBean>> foundBoxes=new ArrayList<>();
+        List<ComboBox<GameApiBean>> foundBoxes = new ArrayList<>();
         List<ComboBox<File>> comboExeFilesList = new ArrayList<>();
-        List <String> extractionErrors =new ArrayList<>();
-        Map<String, List <String>> errorTypes = new HashMap<>();
-        errorTypes.put("Error extracting the folowwing files:",extractionErrors);
-        int listRow=0;
-        int order=0;
+        List<String> extractionErrors = new ArrayList<>();
+        Map<String, List<String>> errorTypes = new HashMap<>();
+        errorTypes.put("Error extracting the folowwing files:", extractionErrors);
+        int listRow = 0;
+        int order = 0;
         this.setMaxHeight(500);
         this.setMaxWidth(1500);
-        for (File metaGameFile : metaGamesFiles){
-            GameApp metaGame=null;
+        for (File metaGameFile : metaGamesFiles) {
+            GameApp metaGame = null;
             try {
-                 metaGame= processFile(metaGameFile);
+                metaGame = processFile(metaGameFile);
 
             } catch (GameManagerException e) {
-               log.error("archive extraction",e);
+                log.error("archive extraction", e);
             } catch (OperationCanceledException e) {
                 throw new RuntimeException(e);
             }
-            if (metaGame==null){
-                haErrors=true;
+            if (metaGame == null) {
+                haErrors = true;
                 extractionErrors.add(metaGameFile.getAbsolutePath());
                 continue;
             }
             order++;
 
-            String searchString=metaGame.getSearchName();
+            String searchString = metaGame.getSearchName();
 
             ComboBox<File> comboExeFiles = new ComboBox<>();
             comboExeFilesList.add(comboExeFiles);
             comboExeFiles.setConverter(getFileConverter());
 
-            if (metaGame.getExeFiles()==null && metaGame.getExePath()!=null){
-            }else{
-                List<File> sorted=sortRunners(searchString, metaGame.getExeFiles());
+            if (metaGame.getExeFiles() == null && metaGame.getExePath() != null) {
+            } else {
+                List<File> sorted = sortRunners(searchString, metaGame.getExeFiles());
                 comboExeFiles.getItems().addAll(sorted);
                 comboExeFiles.setValue(sorted.getFirst());
             }
@@ -107,7 +108,7 @@ public class AddGameDialog extends Stage {
                     if (empty || item == null) {
                         setText(null);
                     } else {
-                        setText(item.getName() );
+                        setText(item.getName());
                     }
                 }
             });
@@ -134,7 +135,7 @@ public class AddGameDialog extends Stage {
                     log.error("external API Error", ex);
                     DialogActionsJfx.showErrorDialog(ex.getLocalizedMessage());
                 }
-                if (foundBox.getItems().isEmpty()){
+                if (foundBox.getItems().isEmpty()) {
                     GameApiBean dummyGame = new GameApiBean();
                     dummyGame.setName(nameSearch.getText());
                     foundBox.getItems().add(dummyGame);
@@ -142,30 +143,31 @@ public class AddGameDialog extends Stage {
                 foundBox.setValue(foundBox.getItems().getFirst());
 
             });
-            grid.add(titleGame, 0, listRow++,6,1);
+            grid.add(titleGame, 0, listRow++, 6, 1);
             grid.add(deleteButton, 0, listRow);
             grid.add(labelExe, 1, listRow);
             grid.add(comboExeFiles, 2, listRow);
             grid.add(labelSearch, 3, listRow);
             grid.add(nameSearch, 4, listRow);
             grid.add(refreshButton, 5, listRow);
-            Label labelFound= new Label(Messages.getString("dialog.select_appname.text.short"));
+            Label labelFound = new Label(Messages.getString("dialog.select_appname.text.short"));
 
             grid.add(labelFound, 6, listRow);
             grid.add(foundBox, 7, listRow);
 
             listRow++;
-            if (searchString!=null){
+            if (searchString != null) {
                 try {
                     foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
                 } catch (ApiException e) {
                     log.error("external API Error", e);
                     DialogActionsJfx.showErrorDialog(e.getLocalizedMessage());
                 }
-                if (!foundBox.getItems().isEmpty()){
+                if (!foundBox.getItems().isEmpty()) {
                     foundBox.setValue(foundBox.getItems().getFirst());
                 }
             }
+
             foundBox.setCellFactory(lv -> new ListCell<GameApiBean>() {
                 @Override
                 protected void updateItem(GameApiBean item, boolean empty) {
@@ -201,7 +203,7 @@ public class AddGameDialog extends Stage {
             }
             close();
         });
-        Label labelError= new Label();
+        Label labelError = new Label();
         if (haErrors) {
             for (String error : errorTypes.keySet()) {
                 labelError.setText(error + String.join(", ", errorTypes.get(error)));
@@ -231,23 +233,23 @@ public class AddGameDialog extends Stage {
         });
 
         layout.setPadding(new Insets(20));
-        Scene scene=new Scene(layout);
+        Scene scene = new Scene(layout);
         scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
         setScene(scene);
 
     }
 
     private void updateGameList(List<ComboBox<GameApiBean>> foundBoxes, List<ComboBox<File>> comboExeFilesList) {
-        int i=0;
+        int i = 0;
 
-        for (GameApp metaGame:result){
-            if (foundBoxes.get(i).isDisabled()){
-                metaGame=null;
+        for (GameApp metaGame : result) {
+            if (foundBoxes.get(i).isDisabled()) {
+                metaGame = null;
                 i++;
                 continue;
             }
-            log.debug("meta "+metaGame.getName()+"-"+metaGame.getGameExe());
-            GameApiBean game=foundBoxes.get(i).getValue();
+            log.debug("meta " + metaGame.getName() + "-" + metaGame.getGameExe());
+            GameApiBean game = foundBoxes.get(i).getValue();
 
             try {
                 if (game != null) {
@@ -270,23 +272,27 @@ public class AddGameDialog extends Stage {
                             String coverFilename = "cover_" + HelperClass.sanitizeName(game.getName()) + game.getYear();
                             metaGame.setImagePath(Paths.get(apiCalls.getCover(Configuration.coverFolder, coverFilename, game.getCover(), 2)));
                         } catch (ApiException | MappingException e) {
-                            log.error("error",e);
+                            log.error("error", e);
                         }
                     }
-                    File exeFile=comboExeFilesList.get(i).getValue();
+                    if (game.getInvolved_companies() != null) {
+                        metaGame.setPublisher(apiCalls.findPublisher(game.getInvolved_companies()));
+                    }
+
+                    File exeFile = comboExeFilesList.get(i).getValue();
                     metaGame.setGameExe(exeFile.getName());
                     metaGame.setExePath(Paths.get(exeFile.getAbsolutePath().substring(0, exeFile.getAbsolutePath().lastIndexOf(File.separatorChar))));
 
-                    log.debug("meta2 "+metaGame.getName()+"-"+metaGame.getGameExe());
+                    log.debug("meta2 " + metaGame.getName() + "-" + metaGame.getGameExe());
                 } else {
-                  // nothing special
+                    // nothing special
                 }
 
-              //  return Optional.of(metaGame);
+                //  return Optional.of(metaGame);
             } catch (Exception e) {
                 log.error("error", e);
             }
-           // return Optional.empty();
+            // return Optional.empty();
 
             i++;
         }
@@ -301,7 +307,7 @@ public class AddGameDialog extends Stage {
             metaGame = fileActions.addArchive(inFile);
 
         } else if (metaGame == null && (!inFile.getName().toLowerCase().endsWith("exe") && !inFile.getName().toLowerCase().endsWith("com") && !inFile.getName().toLowerCase().endsWith("bat") && !inFile.getName().toLowerCase().endsWith("pif"))) {
-           //one file
+            //one file
         } else {
             metaGame = new GameApp();
         }
@@ -312,7 +318,7 @@ public class AddGameDialog extends Stage {
     private String calculateSearchString(GameApp metaGame, String sourceFileName) {
         String guessSource = null;
         File exeFile = null;
-        String searchString="";
+        String searchString = "";
         if (metaGame.getExePath() != null) {
             exeFile = metaGame.getExePath().toFile();
             guessSource = exeFile.getName();
@@ -330,7 +336,7 @@ public class AddGameDialog extends Stage {
             }
         }
 
-        String textSearch=searchString.isEmpty()?"":  HelperClass.fromCamelCase(searchString);
+        String textSearch = searchString.isEmpty() ? "" : HelperClass.fromCamelCase(searchString);
         metaGame.setSearchName(textSearch);
         return textSearch;
     }
@@ -364,11 +370,8 @@ public class AddGameDialog extends Stage {
 
     private List<GameApiBean> findGame(String name, ApiCalls apiCalls) throws ApiException {
         // searching game
-        String response = "";
         final List<GameApiBean> games = new ArrayList<>();
-
-            games.addAll(apiCalls.findGame(name));
-
+        games.addAll(apiCalls.findGame(name));
         return games;
     }
 
@@ -383,6 +386,7 @@ public class AddGameDialog extends Stage {
             public String toString(File person) {
                 return person != null ? person.getName() : "";
             }
+
             @Override
             public File fromString(String string) {
                 return new File(string); // ou une recherche dans une liste existante

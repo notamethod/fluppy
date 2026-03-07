@@ -1,11 +1,10 @@
 package com.notamethod.fluppy.api;
 
-import com.notamethod.fluppy.api.igdb.Cover;
-import com.notamethod.fluppy.api.igdb.GameApiBean;
-import com.notamethod.fluppy.api.igdb.Genre;
-import com.notamethod.fluppy.api.igdb.IgdbApi;
+import com.notamethod.fluppy.api.igdb.*;
 import com.notamethod.fluppy.core.Configuration;
+import com.notamethod.fluppy.core.game.Company;
 import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.gui.ImageUtils;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +14,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class ApiCalls {
@@ -43,9 +43,17 @@ public class ApiCalls {
         return destinationFile;
     }
 
+    public byte[] getImageBytes(String imageUrl) throws IOException, URISyntaxException {
+        if (imageUrl==null || imageUrl.isEmpty())
+            return null;
+        URI uri = new URI("https:"+imageUrl);
+        try (InputStream is = uri.toURL().openStream()){
+             return  is.readAllBytes();
+        }
+    }
+
 
     public void findAndUpdateData(GameApp beanGame, int size, GameApiBean foundGame) throws ApiException, MappingException, IOException {
-
 
         GameApiBean game = foundGame;
         beanGame.setName(game.getName());
@@ -59,8 +67,45 @@ public class ApiCalls {
         for (Genre genre : foundGame.getGenres()){
             beanGame.addGenre(genre.getSlug(), genre.getName());
         }
+        if (game.getInvolved_companies()!=null){
+            beanGame.setPublisher(findPublisher(game.getInvolved_companies()));
+        }
 
 
+    }
+
+    public Company findPublisher(List<InvolvedCompany> involvedCompanies) {
+        for (InvolvedCompany company:involvedCompanies){
+            if (company.isPublisher()){
+                return findCompany(company.getCompany());
+            }
+        }
+        return null;
+    }
+
+    private Company findCompany(Long companyID) {
+        try {
+            com.notamethod.fluppy.api.igdb.Company igdbCompany = igdbApi.getCompaniesFromID(companyID).getFirst();
+            if (igdbCompany==null)
+                return null;
+            String url = Optional.of(igdbCompany)
+                    .map(com.notamethod.fluppy.api.igdb.Company::getLogo)
+                    .map(IgdbImage::getUrl)
+                    .orElse(null);
+            Company company = new Company();
+            company.setName(igdbCompany.getName());
+            company.setId(igdbCompany.getSlug());
+            if (url!= null){
+                byte[] image=getImageBytes(getImageUri(url, 2));
+                if (image!=null){
+                    ImageUtils.testImage(image);
+                    company.setImage(image);
+                }
+            }
+            return company;
+        } catch (ApiException | IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<String> getCoverUri(Long coverID, int size) throws ApiException, MappingException, IOException {
@@ -76,17 +121,22 @@ public class ApiCalls {
             return coversUri;
         }
         for (Cover cover:covers){
-            String imgUrl = size == 2 ? cover.getUrl().replaceAll(IgdbApi.THUMB_SIZE, IgdbApi.BIG_SIZE) : cover.getUrl();
-            coversUri.add(imgUrl);
+
+            coversUri.add(getImageUri(cover.getUrl(), size));
         }
         return coversUri;
 
     }
 
-
+    private String getImageUri(String url, int size) {
+        if (url==null)
+            return null;
+        return  size == 2 ? url.replaceAll(IgdbApi.THUMB_SIZE, IgdbApi.BIG_SIZE) : url;
+    }
 
 
     public String getCover(String coverFolder, String coverFilename, Long coverID, int size) throws IOException, ApiException, MappingException {
+       log.debug("search and download cover image for {}",coverFilename);
         List<String> covers = getCoverUri(coverID,size);
         if (covers.isEmpty())
             return null;
@@ -101,4 +151,6 @@ public class ApiCalls {
             throw new ApiException("API ERROR", e);
         }
     }
+
+
 }

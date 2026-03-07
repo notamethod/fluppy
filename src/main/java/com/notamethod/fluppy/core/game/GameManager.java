@@ -63,7 +63,12 @@ public class GameManager {
         }
         return null;
     }
+    public GameApp loadFullGame(long id) {
+        GameEntity gameEntity = applicationDatabase.findFullGameById(id);
 
+            return GameMapper.INSTANCE.toFullGameApp(gameEntity);
+
+    }
     public void addGame(GameApp game) throws GameManagerException {
         if (game.getName() == null) {
             log.error("game name is null");
@@ -132,6 +137,9 @@ public class GameManager {
 
     public List<GameApp> getFromYear(Integer year , int count) {
         return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByYear(year, preferences.isNsfw(), count));
+    }
+    public List<GameApp> getFromPublisher(String publisher , int count) {
+        return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByPublisher(publisher, preferences.isNsfw(), count));
     }
 
     public long runGame(GameApp game, String screenRez, PanelListener listener) throws DosBoxException {

@@ -1,5 +1,6 @@
 package com.notamethod.fluppy.core.category;
 
+import javafx.scene.image.Image;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ public class Category {
     private CategoryType categoryType;
     private String id;
     private String label;
+    private Image image;
     private String filter;
     private boolean expanded=false;
 
