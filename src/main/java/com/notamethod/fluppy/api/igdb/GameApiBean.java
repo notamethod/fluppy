@@ -20,7 +20,7 @@ public class GameApiBean {
     Long cover;
     Long first_release_date;
     List<Genre> genres=new ArrayList<>();
-    List<involvedCompany> involved_companies;
+    List<InvolvedCompany> involved_companies;
 
 
     public GameApiBean(String name) {

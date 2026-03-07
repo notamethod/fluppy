@@ -1,5 +1,6 @@
 package com.notamethod.fluppy.core.game;
 
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -19,11 +20,16 @@ public interface GameMapper {
     GameEntity toEntity(GameApp gameApp);
     @Mapping(source = "game", target = "gameExe")
     @Mapping(source = "gameYear", target = "year")
+    @Mapping(target = "publisher", ignore = true)
+    @Named("toGameApp")
     GameApp toGameApp(GameEntity gameEntity);
-
+    @Mapping(source = "game", target = "gameExe")
+    @Mapping(source = "gameYear", target = "year")
+    GameApp toFullGameApp(GameEntity gameEntity);
     GameApp copyGameApp(GameApp a);
     GenreEntity toEntity(GenreApp genre);
 
+    @IterableMapping(qualifiedByName = "toGameApp")
     List<GameApp> toGameApps(List<GameEntity> entityList);
 
     @Named("StrYearConvert")
@@ -52,4 +58,7 @@ public interface GameMapper {
     }
 
     GameApp toGameApp(GameApp a);
+
+
+    Company toCompany(CompanyEntity companyEntity);
 }

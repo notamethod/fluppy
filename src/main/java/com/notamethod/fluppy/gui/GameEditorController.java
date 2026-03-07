@@ -86,6 +86,8 @@ public class GameEditorController {
     @FXML
     private Button cancelButton;
     private GameApp originalGame;
+    private GameApp editedGame;
+
     private GameManager gameManager;
     private GameApp result;
 
@@ -231,7 +233,7 @@ public class GameEditorController {
     }
 
     public void saveGame() {
-        GameApp editedGame = GameMapper.INSTANCE.copyGameApp(originalGame);
+    //    GameApp editedGame = GameMapper.INSTANCE.copyGameApp(originalGame);
         editedGame.setName(titleField.getText());
 
         //game.setPlatform(platformField.getText());
@@ -263,7 +265,8 @@ public class GameEditorController {
     }
 
 
-    public void setGame(GameApp game) {
+    public void setGame(GameApp gameLight) {
+        GameApp game = gameManager.loadFullGame(gameLight.getId());
         this.originalGame = game;
         commentField.setWrapText(true);
         commentField.setText(game.getComment());
@@ -274,7 +277,9 @@ public class GameEditorController {
         if (game.getImagePath() != null) {
             try {
                 // URL url = game.getImagePath().toUri();
-                imageGame.setImage(new Image(game.getImagePath().toUri().toString()));
+                if(game.getPublisher()!=null && game.getPublisher().getImage()!=null)
+                    imageGame.setImage(ImageUtils.buildImageFromBytes(game.getPublisher().getImage()));
+               // imageGame.setImage(new Image(game.getImagePath().toUri().toString()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -294,6 +299,7 @@ public class GameEditorController {
         if (game.getManualPath()!=null)
             manualPathField.setText(game.getManualPath().toFile().getAbsolutePath());
 
+         editedGame = GameMapper.INSTANCE.copyGameApp(originalGame);
     }
 
     public boolean updateAPI()  {
@@ -320,17 +326,19 @@ public class GameEditorController {
         }
 
         GameApiBean game = games.size() > 1 ? gameActions.chooseGame(games) : games.get(0);
-        GameApp gameApp = new GameApp();
+       // GameApp gameApp = new GameApp();
         if (game != null) {
             try {
-                apiCalls.findAndUpdateData(gameApp, 2, game);
+                apiCalls.findAndUpdateData(editedGame, 2, game);
+               // editedGame=gameApp;
                 updated = true;
                 //FIXME
-                coverPath.setText(gameApp.getImagePath() == null ? "" : gameApp.getImagePath().toString().toString());
+                coverPath.setText(editedGame.getImagePath() == null ? "" : editedGame.getImagePath().toString().toString());
             } catch (ApiException | MappingException | IOException e) {
                 log.error("Internal Error", e);
             }
-
+            System.out.println(editedGame.getImagePath());
+            System.out.println(editedGame.getPublisher().getName());
         } else {
             log.warn("game not found");
         }

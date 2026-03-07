@@ -7,7 +7,7 @@
     <logger name="org.hibernate" level="WARN"/>
     <logger name="org.hibernate.session.metrics" level="ERROR"/>
     <logger name="org.hibernate.HQL_FUNCTIONS" level="ERROR"/>
-    <logger name="com.notamethod.fluppy.gui" level="INFO"/>
+    <logger name="com.notamethod.fluppy.gui" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

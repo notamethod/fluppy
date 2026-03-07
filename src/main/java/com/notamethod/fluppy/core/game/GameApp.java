@@ -40,6 +40,7 @@ public class GameApp {
     private LocalDateTime lastPlayed;
     private Long timePlayed;
     private String comment;
+    private Company publisher;
 
 
     /**

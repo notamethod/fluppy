@@ -55,7 +55,7 @@ public class GamesWall extends Application {
     private Stage stage;
 
     public enum TILES_VIEW {
-        DEFAULT, YEARS;
+        DEFAULT, YEARS, COMPANY;
     }
 
     private static final int ORIGINAL_WIDTH = 900;
@@ -102,7 +102,7 @@ public class GamesWall extends Application {
         gameManager = new GameManager(applicationDatabase, preferences, dosBoxManager);
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(dosBoxManager, gameManager);
-        gameCategories = categoryManager.getShownCategories(preferences.getViewFilter());
+        gameCategories = categoryManager.getShownCategories(TILES_VIEW.DEFAULT);
 
         FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
         FontUtils.loadCustomFont("MonkeyIsland-1991.ttf", 16);
@@ -392,12 +392,15 @@ public class GamesWall extends Application {
         Button quitButton = createRibbonButton("/images/quit2.png");
         quitButton.setOnAction(e -> stage.close());
 
+        Button companyButton = createRibbonButton("/images/company1.png");
+        companyButton.setOnAction(e -> changeView(TILES_VIEW.COMPANY));
+
         Button calendarButton = createRibbonButton("/images/calendar1.png");
-        calendarButton.setOnAction(e -> changeView());
+        calendarButton.setOnAction(e -> changeView(TILES_VIEW.YEARS));
         Region spacerRibbon = new Region();
         HBox.setHgrow(spacerRibbon, Priority.ALWAYS);
         topRibbon.setAlignment(Pos.CENTER_LEFT);
-        topRibbon.getChildren().addAll(logoView, titleView, info, spacerRibbon, calendarButton, gearButton, plusButton, quitButton);
+        topRibbon.getChildren().addAll(logoView, titleView, info, spacerRibbon, calendarButton, companyButton, gearButton, plusButton, quitButton);
 
         topRibbon.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
@@ -493,6 +496,9 @@ public class GamesWall extends Application {
             case YEAR:
                 games = gameManager.getFromYear(Integer.valueOf(category.getId()), count);
                 break;
+            case COMPANY:
+                games = gameManager.getFromPublisher(category.getId(), count);
+                break;
             default:
                 games = null;
         }
@@ -518,12 +524,9 @@ public class GamesWall extends Application {
 
         tilePane.setAlignment(Pos.TOP_LEFT);
         tilePane.widthProperty().addListener((obs, oldW, newW) -> {
-            log.debug("width" + tilePane.getWidth());
             if (midWidth == 0) {
                 midWidth = mainPane.getWidth();
             }
-
-
         });
         for (GameApp gameStr : games) {
             if (!gameIds.contains(gameStr.getId())) {
@@ -541,34 +544,47 @@ public class GamesWall extends Application {
         Label label = new Label(category.getLabel());
         label.getStyleClass().add("blockTitle");
         blockTitle.setAlignment(Pos.CENTER_LEFT);
-        Button titleButton = new Button();
-        ImageView moreReleased = new ImageView();
-        moreReleased.setImage(new Image(getClass().getResourceAsStream("/images/plus_rel.png"), 46, 32, false, false));
-        ImageView morePressed = new ImageView();
-        morePressed.setImage(new Image(getClass().getResourceAsStream("/images/plus_press.png"), 46, 32, false, false));
-        ImageView lessReleased = new ImageView();
-        lessReleased.setImage(new Image(getClass().getResourceAsStream("/images/less_rel.png"), 46, 32, false, false));
-        ImageView lessPressed = new ImageView();
-        lessPressed.setImage(new Image(getClass().getResourceAsStream("/images/less_press.png"), 46, 32, false, false));
-
-        titleButton.setGraphic(category.isExpanded() ? lessReleased : moreReleased);
-        titleButton.setStyle("-fx-background-color: transparent;");
-        titleButton.setOnMousePressed(e -> titleButton.setGraphic(category.isExpanded() ? lessPressed : morePressed));
-        titleButton.setOnMouseReleased(e -> titleButton.setGraphic(category.isExpanded() ? lessReleased : moreReleased));
-        playSparkles(titleButton, new StackPane(vBox));
-        //titleButton.setOnMouseExited(e -> titleButton.setGraphic(normalIcon));
-        titleButton.setOnAction(e -> {
-            System.out.println("action");
-            activateCategory(category, label);
-            //  updateSizingImage(plusImage);
-
-
-        });
+//        Button titleButton = new Button();
+//        ImageView moreReleased = new ImageView();
+//        moreReleased.setImage(new Image(getClass().getResourceAsStream("/images/plus_rel.png"), 46, 32, false, false));
+//        ImageView morePressed = new ImageView();
+//        morePressed.setImage(new Image(getClass().getResourceAsStream("/images/plus_press.png"), 46, 32, false, false));
+//        ImageView lessReleased = new ImageView();
+//        lessReleased.setImage(new Image(getClass().getResourceAsStream("/images/less_rel.png"), 46, 32, false, false));
+//        ImageView lessPressed = new ImageView();
+//        lessPressed.setImage(new Image(getClass().getResourceAsStream("/images/less_press.png"), 46, 32, false, false));
+//
+//        titleButton.setGraphic(category.isExpanded() ? lessReleased : moreReleased);
+//        titleButton.setStyle("-fx-background-color: transparent;");
+//        titleButton.setOnMousePressed(e -> titleButton.setGraphic(category.isExpanded() ? lessPressed : morePressed));
+//        titleButton.setOnMouseReleased(e -> titleButton.setGraphic(category.isExpanded() ? lessReleased : moreReleased));
+//        playSparkles(titleButton, new StackPane(vBox));
+//        //titleButton.setOnMouseExited(e -> titleButton.setGraphic(normalIcon));
+//        titleButton.setOnAction(e -> {
+//            System.out.println("action");
+//            activateCategory(category, label);
+//            //  updateSizingImage(plusImage);
+//
+//
+//        });
         // Ajouter une action au clic
         blockTitle.setOnMouseClicked(event -> {
-            //        activateCategory(category, label);
+                 activateCategory(category, label);
         });
-        blockTitle.getChildren().addAll(titleButton, label);
+        if (category.getImage()!=null){
+            int maxHeight=120;
+            Image image=category.getImage();
+            ImageView iv = new ImageView(image);
+             iv.setPreserveRatio(true);
+             iv.setSmooth(true);
+            if (image.getHeight() > maxHeight) {
+                iv.setFitHeight(maxHeight);
+            }
+           //iv.setFitHeight(100);
+            blockTitle.getChildren().addAll(iv);
+        }else {
+            blockTitle.getChildren().addAll(label);
+        }
         vBox.getChildren().addAll(blockTitle, tilePane);
         return vBox;
     }
@@ -827,13 +843,19 @@ public class GamesWall extends Application {
         launch();
     }
 
-    public void changeView() {
+    public void changeView(TILES_VIEW change) {
         if (view == TILES_VIEW.DEFAULT) {
-            view = TILES_VIEW.YEARS;
-            gameCategories = categoryManager.getShownCategories("years");
+                view = change;
+                gameCategories = categoryManager.getShownCategories(change);
+
         } else {
-            view = TILES_VIEW.DEFAULT;
-            gameCategories = categoryManager.getShownCategories(null);
+            if (view == change) {
+                view = TILES_VIEW.DEFAULT;
+                gameCategories = categoryManager.getShownCategories(null);
+            }else{
+                view = change;
+                gameCategories = categoryManager.getShownCategories(change);
+            }
         }
         updateList();
     }
