@@ -1,10 +1,3 @@
-/*
-*
-*   Author: Antonio Pelusi
-*   Website: https://www.antoniopelusi.com
-*   Source code: https://github.com/antoniopelusi/JavaFX-Dark-Theme
-*
-*/
 
 
 
@@ -61,4 +54,35 @@
 
 .nightwish .button:hover {
     -fx-background-color: #3A3A4A;
+}
+
+
+
+/* Fond du TabPane */
+.nightwish .tab-pane {
+    -fx-background-color: #30303D
+
+}
+
+/* En-tête (barre des onglets) */
+.nightwish  .tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: rgba(0, 0, 255, 0.03);
+}
+
+/* Toutes les tabs */
+.tab-pane .tab {
+    -fx-background-color: #30303D
+}
+
+
+.nightwish .tab-pane .tab:selected {
+    -fx-background-color: #3A3A4A;
+}
+.nightwish .tab-pane .tab-label {
+
+     -fx-font-size: 18px;
+}
+.nightwish .tab-pane .tab:selected .tab-label {
+    -fx-text-fill: yellow;
+
 }
