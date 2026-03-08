@@ -812,33 +812,6 @@ public class GamesWall extends Application {
         }
     }
 
-    private void actionEdit(GameApp gameBean) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("GameEditor.fxml"));
-            DialogPane dialogPane = loader.load();
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setDialogPane(dialogPane);
-            dialog.setTitle("Éditer un jeu");
-
-            GameEditorController controller = loader.getController();
-            controller.setGame(gameBean);
-
-            Optional<ButtonType> result = dialog.showAndWait();
-            if (result.isPresent() && result.get().getButtonData().equals(ButtonBar.ButtonData.OK_DONE)) {
-                GameApp editedGame = controller.getResult();
-                editedGame.setId(gameBean.getId());
-                editedGame.merge(gameBean);
-                if (!editedGame.equals(gameBean)) {
-                    gameManager.save(editedGame);
-                }
-                updateList();
-            }
-
-        } catch (Exception e) {
-            log.error("error", e);
-        }
-    }
-
     public static void main(String[] args) {
         launch();
     }

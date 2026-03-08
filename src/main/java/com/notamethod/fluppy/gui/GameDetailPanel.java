@@ -155,18 +155,16 @@ public class GameDetailPanel extends StackPane {
 
     private void editAction() throws IOException {
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("GameEditor.fxml"));
-        DialogPane dialogPane = loader.load();
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setDialogPane(dialogPane);
-        dialog.setTitle(Messages.getString("title.edit"));
+        GameEditorView view = new GameEditorView();
+        view.setGameManager(gameManager);
+        view.setGame(game);
 
-        GameEditorController controller = loader.getController();
-        controller.setGameManager(gameManager);
-        controller.setGame(game);
-
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setDialogPane(view);
         dialog.showAndWait();
-        GameApp editedGame = controller.getResult();
+
+        GameApp result = view.getResult();
+        GameApp editedGame = view.getResult();
         if (editedGame != null && listener != null) {
             listener.onUpdate();
 
