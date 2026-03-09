@@ -121,7 +121,8 @@ public class ImageUtils {
     }
 
     public static void testImage(byte[] image) {
-        try (FileOutputStream fos = new FileOutputStream("c:/tmp/test-output.jpg")) {
+        //FIXME: to delete
+        try (FileOutputStream fos = new FileOutputStream("c:/tmp/test-img.jpg")) {
             fos.write(image);
             fos.flush();
         } catch (FileNotFoundException e) {
