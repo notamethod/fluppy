@@ -24,8 +24,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,42 +37,43 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GameEditorView extends DialogPane {
 
-    public enum EXTRA_TYPE { PROTECTION, MANUAL }
+    public enum EXTRA_TYPE {PROTECTION, MANUAL, PUBLISHER, COVER}
 
     // --- Champs UI ---
-    private final TextField        titleField          = new TextField();
-    private final TextField        genreField          = new TextField();
-    private final TextField        platformField       = new TextField();
-    private final TextField        yearField           = new TextField();
-    private final TextField        ratingField         = new TextField();
-    private final CheckBox         favoriteField       = new CheckBox();
-    private final CheckBox         nsfwField           = new CheckBox();
-    private final TextArea         commentField        = new TextArea();
-    private final ImageView        imageGame           = new ImageView();
-    private final ImageView        imagePublisher      = new ImageView();
-    private final Label            cyclesLabel         = new Label("Valeur : auto");
-    private final Slider           cyclesSpinner       = new Slider(0, 3000, 0);
-    private final ComboBox<String> comboMachines       = new ComboBox<>();
-    private final TextField        exeFile             = new TextField();
-    private final Button           exeButton           = new Button("...");
-    private final TextField        coverPath           = new TextField();
-    private final Button           coverButton         = new Button("...");
-    private final TextField        protectionPathField = new TextField();
-    private final TextField        manualPathField     = new TextField();
-    private final VBox             dropZone            = new VBox();
-    private final Button           okButton            = new Button("OK");
-    private final Button           cancelButton        = new Button("Annuler");
-    private final Button           syncButton          = new Button("sync");
+    private final TextField titleField = new TextField();
+    private final TextField genreField = new TextField();
+    private final TextField publisherField = new TextField();
+    private final TextField yearField = new TextField();
+    private final TextField ratingField = new TextField();
+    private final CheckBox favoriteField = new CheckBox();
+    private final CheckBox nsfwField = new CheckBox();
+    private final TextArea commentField = new TextArea();
+    private final ImageView imageGame = new ImageView();
+    private final ImageView imagePublisher = new ImageView();
+    private final Label cyclesLabel = new Label("Valeur : auto");
+    private final Slider cyclesSpinner = new Slider(0, 3000, 0);
+    private final ComboBox<String> comboMachines = new ComboBox<>();
+    private final TextField exeFile = new TextField();
+    private final Button exeButton = new Button("...");
+    private final TextField coverPath = new TextField();
+    private final Button coverButton = new Button("...");
+    private final TextField protectionPathField = new TextField();
+    private final TextField manualPathField = new TextField();
+    private final VBox dropZone = new VBox();
+    private final Button okButton = new Button("OK");
+    private final Button cancelButton = new Button("Annuler");
+    private final Button syncButton = new Button("sync");
 
     // --- État métier ---
-    private GameApp        originalGame;
-    private GameApp        editedGame;
-    private GameApp        result;
-    private GameManager    gameManager;
-    private Path           exePath;
-    private Path           manualPath;
-    private Path           protectionPath;
+    private GameApp originalGame;
+    private GameApp editedGame;
+    private GameApp result;
+    private GameManager gameManager;
+    private Path exePath;
+    private Path manualPath;
+    private Path protectionPath;
     private final DialogActionsJfx da = new DialogActionsJfx();
+    private boolean isChanged=false;
 
     // -------------------------------------------------------------------------
     // Constructeur
@@ -109,14 +111,14 @@ public class GameEditorView extends DialogPane {
         fieldsGrid.setHgap(10);
         fieldsGrid.setVgap(10);
         fieldsGrid.setPadding(new Insets(20));
-        addRow(fieldsGrid, 0, "Titre:",            titleField);
-        addRow(fieldsGrid, 1, "Genre:",            genreField);
-        addRow(fieldsGrid, 2, "Plateforme:",       platformField);
-        addRow(fieldsGrid, 3, "Année de sortie:",  yearField);
-        addRow(fieldsGrid, 4, "Note:",             ratingField);
-        addRow(fieldsGrid, 5, "Favorite:",         favoriteField);
-        addRow(fieldsGrid, 6, "NSFW:",             nsfwField);
-        addRow(fieldsGrid, 7, "Comment:",          commentField);
+        addRow(fieldsGrid, 0, "Titre:", titleField);
+        addRow(fieldsGrid, 1, "Genre:", genreField);
+        addRow(fieldsGrid, 2, "Editeur:", publisherField);
+        addRow(fieldsGrid, 3, "Année de sortie:", yearField);
+        addRow(fieldsGrid, 4, "Note:", ratingField);
+        addRow(fieldsGrid, 5, "Favorite:", favoriteField);
+        addRow(fieldsGrid, 6, "NSFW:", nsfwField);
+        addRow(fieldsGrid, 7, "Comment:", commentField);
 
         // Image + sync
         imageGame.setFitHeight(150);
@@ -133,16 +135,16 @@ public class GameEditorView extends DialogPane {
         imageGrid.setHgap(10);
         imageGrid.setVgap(10);
         imageGrid.setPadding(new Insets(20));
-        imageGrid.add(imageGame,  0, 0);
+        imageGrid.add(imageGame, 0, 0);
         imageGrid.add(syncButton, 0, 1);
-        imageGrid.add(imagePublisher,  0, 2);
+        imageGrid.add(imagePublisher, 0, 2);
         // Grille principale
         GridPane mainGrid = new GridPane();
         mainGrid.setHgap(15);
         mainGrid.setVgap(10);
         mainGrid.setPadding(new Insets(20));
         mainGrid.add(fieldsGrid, 0, 0);
-        mainGrid.add(imageGrid,  1, 0);
+        mainGrid.add(imageGrid, 1, 0);
 
         // Slider cycles
         cyclesSpinner.setBlockIncrement(100);
@@ -159,13 +161,15 @@ public class GameEditorView extends DialogPane {
 
         GridPane cyclesGrid = new GridPane();
         cyclesGrid.setPadding(new Insets(20));
-        ColumnConstraints col40 = new ColumnConstraints(); col40.setPercentWidth(40);
-        ColumnConstraints col50 = new ColumnConstraints(); col50.setPercentWidth(50);
+        ColumnConstraints col40 = new ColumnConstraints();
+        col40.setPercentWidth(40);
+        ColumnConstraints col50 = new ColumnConstraints();
+        col50.setPercentWidth(50);
         cyclesGrid.getColumnConstraints().addAll(col40, col50);
-        cyclesGrid.add(cyclesTitle,   0, 0);
-        cyclesGrid.add(cyclesLabel,   1, 0);
+        cyclesGrid.add(cyclesTitle, 0, 0);
+        cyclesGrid.add(cyclesLabel, 1, 0);
         cyclesGrid.add(cyclesSpinner, 1, 1);
-        cyclesGrid.add(machineLabel,  0, 2);
+        cyclesGrid.add(machineLabel, 0, 2);
         cyclesGrid.add(comboMachines, 1, 2);
 
         tab.setContent(new VBox(mainGrid, cyclesGrid));
@@ -180,10 +184,16 @@ public class GameEditorView extends DialogPane {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(0, 0, 20, 0));
-        grid.add(new Label("Executable:"),  0, 0); grid.add(exeFile,             1, 0); grid.add(exeButton,   2, 0);
-        grid.add(new Label("Cover:"),       0, 1); grid.add(coverPath,           1, 1); grid.add(coverButton, 2, 1);
-        grid.add(new Label("Protection:"),  0, 2); grid.add(protectionPathField, 1, 2);
-        grid.add(new Label("Manual:"),      0, 3); grid.add(manualPathField,     1, 3);
+        grid.add(new Label("Executable:"), 0, 0);
+        grid.add(exeFile, 1, 0);
+        grid.add(exeButton, 2, 0);
+        grid.add(new Label("Cover:"), 0, 1);
+        grid.add(coverPath, 1, 1);
+        grid.add(coverButton, 2, 1);
+        grid.add(new Label("Protection:"), 0, 2);
+        grid.add(protectionPathField, 1, 2);
+        grid.add(new Label("Manual:"), 0, 3);
+        grid.add(manualPathField, 1, 3);
 
         dropZone.getStyleClass().add("dropZone");
 
@@ -205,11 +215,17 @@ public class GameEditorView extends DialogPane {
         ));
         comboMachines.setValue("svga_s3");
 
-        okButton.setOnAction(e     -> { saveGame(); closeDialog(); });
-        cancelButton.setOnAction(e -> { result = null; closeDialog(); });
-        syncButton.setOnAction(e   -> updateAPI());
-        exeButton.setOnAction(e    -> selectExe());
-        coverButton.setOnAction(e  -> selectCover());
+        okButton.setOnAction(e -> {
+            saveGame();
+            closeDialog();
+        });
+        cancelButton.setOnAction(e -> {
+            result = null;
+            closeDialog();
+        });
+        syncButton.setOnAction(e -> updateAPI());
+        exeButton.setOnAction(e -> selectExe());
+        coverButton.setOnAction(e -> selectCover());
     }
 
     private void initDropZone() {
@@ -225,8 +241,14 @@ public class GameEditorView extends DialogPane {
                 event.acceptTransferModes(TransferMode.COPY);
             event.consume();
         });
-        dropZone.setOnDragEntered(event -> { styleDropZone(true);  event.consume(); });
-        dropZone.setOnDragExited(event  -> { styleDropZone(false); event.consume(); });
+        dropZone.setOnDragEntered(event -> {
+            styleDropZone(true);
+            event.consume();
+        });
+        dropZone.setOnDragExited(event -> {
+            styleDropZone(false);
+            event.consume();
+        });
         dropZone.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
@@ -248,16 +270,16 @@ public class GameEditorView extends DialogPane {
 
     private void styleDropZone(boolean active) {
         dropZone.setStyle(active ? """
-                -fx-border-color: #4CAF50;
-                -fx-border-width: 2;
-                -fx-border-style: solid;
-                -fx-background-color: rgba(76,175,80,0.1);
-            """ : """
-                -fx-border-color: #888;
-                -fx-border-width: 2;
-                -fx-border-style: dashed;
-                -fx-background-color: rgba(255,255,255,0.05);
-            """);
+                    -fx-border-color: #4CAF50;
+                    -fx-border-width: 2;
+                    -fx-border-style: solid;
+                    -fx-background-color: rgba(76,175,80,0.1);
+                """ : """
+                    -fx-border-color: #888;
+                    -fx-border-width: 2;
+                    -fx-border-style: dashed;
+                    -fx-background-color: rgba(255,255,255,0.05);
+                """);
     }
 
     // -------------------------------------------------------------------------
@@ -272,6 +294,7 @@ public class GameEditorView extends DialogPane {
         List<String> choices = List.of(
                 EXTRA_TYPE.PROTECTION.toString(),
                 EXTRA_TYPE.MANUAL.toString(),
+                EXTRA_TYPE.PUBLISHER.toString(),
                 "Something else..."
         );
         Optional<String> chosen = da.showListInputDialog(
@@ -292,12 +315,15 @@ public class GameEditorView extends DialogPane {
         if (choice.equals(EXTRA_TYPE.PROTECTION.toString())) {
             protectionPath = target;
             protectionPathField.setText(target.toFile().getCanonicalPath());
-        } else {
+        } else if (choice.equals(EXTRA_TYPE.MANUAL.toString())) {
             manualPath = target;
             manualPathField.setText(target.toFile().getCanonicalPath());
+        } else if (choice.equals(EXTRA_TYPE.PUBLISHER.toString()) || choice.equals(EXTRA_TYPE.COVER.toString())) {
+            updateImage(target.toFile().getCanonicalPath(), choice);
         }
         return target;
     }
+
 
     public void saveGame() {
         editedGame.setName(titleField.getText());
@@ -315,10 +341,12 @@ public class GameEditorView extends DialogPane {
         String imagePath = coverPath.getText();
         editedGame.setImagePath(imagePath.isEmpty() ? null : Path.of(imagePath));
 
-        if (!editedGame.equals(originalGame)) {
+        if (!editedGame.equals(originalGame) || isChanged) {
             gameManager.save(editedGame);
             result = editedGame;
+            log.debug("game saved");
         } else {
+            log.debug("game unchanged: not saving");
             result = null;
         }
     }
@@ -330,6 +358,8 @@ public class GameEditorView extends DialogPane {
         commentField.setWrapText(true);
         commentField.setText(game.getComment());
         titleField.setText(game.getName());
+        if (game.getPublisher() != null)
+            publisherField.setText(game.getPublisher().getName());
         yearField.setText(game.getYear() != null ? String.valueOf(game.getYear()) : "?");
         exePath = game.getExePath();
 
@@ -395,6 +425,23 @@ public class GameEditorView extends DialogPane {
         }
     }
 
+    private void updateImage(String canonicalPath, String choice) {
+        try (InputStream is = new FileInputStream(new File(canonicalPath))) {
+            if (editedGame.getPublisher()!=null) {
+                byte[] image = is.readAllBytes();
+                editedGame.getPublisher().setImage(image);
+                ImageUtils.testImage(image);
+                isChanged=true;
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
     public void selectExe() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Executable", "*.exe", "*.bat", "*.com"));
@@ -416,8 +463,13 @@ public class GameEditorView extends DialogPane {
             coverPath.setText(selectedFile.getAbsolutePath());
     }
 
-    public GameApp getResult()                         { return result; }
-    public void setGameManager(GameManager gameManager) { this.gameManager = gameManager; }
+    public GameApp getResult() {
+        return result;
+    }
+
+    public void setGameManager(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
 
     // -------------------------------------------------------------------------
     // Utilitaire
@@ -425,6 +477,6 @@ public class GameEditorView extends DialogPane {
 
     private void addRow(GridPane grid, int row, String labelText, javafx.scene.Node field) {
         grid.add(new Label(labelText), 0, row);
-        grid.add(field,                1, row);
+        grid.add(field, 1, row);
     }
 }

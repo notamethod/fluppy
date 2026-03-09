@@ -47,14 +47,14 @@ public class ApplicationDatabase {
 
         sessionFactory.inTransaction(session -> {
             Company company = gameApp.getPublisher();
-            if (company!=null) {
+            if (company != null) {
                 Optional<CompanyEntity> compEnt = findCompanyById(session, company.getId());
                 if (compEnt.isPresent()) {
                     gameEntity.setPublisher(compEnt.get());
 
                 } else {
                     CompanyEntity compEnt2 = new CompanyEntity(company.getId(), company.getName(), company.getImage());
-                            //GameMapper.INSTANCE.toEntity(company);
+                    //GameMapper.INSTANCE.toEntity(company);
                     session.persist(compEnt2);
                     gameEntity.setPublisher(compEnt2);
                 }
@@ -114,6 +114,7 @@ public class ApplicationDatabase {
         });
 
     }
+
     public GameEntity findFullGameById(long id) {
         return sessionFactory.fromSession(session -> {
             Query<GameEntity> q = session.createQuery("SELECT game FROM GameEntity game left join fetch game.genres  left join fetch game.publisher where game.id=:id", GameEntity.class);
@@ -122,6 +123,7 @@ public class ApplicationDatabase {
         });
 
     }
+
     public List<GameEntity> findGameByName(String name) {
         return sessionFactory.fromSession(session -> {
             Query<GameEntity> q = session.createQuery("""
@@ -263,6 +265,7 @@ public class ApplicationDatabase {
             return map;
         });
     }
+
     public Map<Company, Long> getTopCompanies(int limit) {
         return sessionFactory.fromSession(session -> {
             int count = 0;
@@ -280,10 +283,11 @@ public class ApplicationDatabase {
                     break;
                 }
             }
-            log.debug("{} companies found",count);
+            log.debug("{} companies found", count);
             return map;
         });
     }
+
     public Optional<GenreEntity> findGenreByID(String id) {
         return sessionFactory.fromSession(session -> {
             Query<GenreEntity> q = session.createQuery("SELECT p FROM GenreEntity p where p.id=:id", GenreEntity.class);
@@ -298,6 +302,7 @@ public class ApplicationDatabase {
         q.setParameter("id", id);
         return q.uniqueResultOptional();
     }
+
     public Optional<CompanyEntity> findCompanyById(Session session, String id) {
         Query<CompanyEntity> q = session.createQuery("SELECT p FROM CompanyEntity p where p.id=:id", CompanyEntity.class);
         q.setParameter("id", id);
@@ -332,6 +337,29 @@ public class ApplicationDatabase {
             return q.getResultList();
         });
     }
+
+    public List<GameEntity> loadGames(String clause, String orderBy, boolean nsfw, int maxResult) {
+        String where = (clause == null || clause.isEmpty()) ? "" : "AND " + clause + " ";
+
+        //String orderBy=" order by game.added DESC";
+        String query2 = "SELECT game FROM GameEntity game left join fetch game.genres where game.id in :ids " + orderBy;
+
+        String query1 = "SELECT game.id FROM GameEntity game  where (:nsfw is true OR game.ageRating < 1) " + where + orderBy;
+        return sessionFactory.fromSession(session -> {
+            Query<Long> q1 = session.createQuery(query1, Long.class);
+            q1.setParameter("nsfw", nsfw);
+
+            q1.setMaxResults(maxResult);
+            List<Long> ids = q1.getResultList();
+
+            Query<GameEntity> q = session.createQuery(query2, GameEntity.class);
+            q.setParameter("ids", ids);
+
+
+            return q.getResultList();
+        });
+    }
+
 
     public void close() {
         sessionFactory.close();
