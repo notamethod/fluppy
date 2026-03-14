@@ -20,7 +20,6 @@ public class GameEntity {
 
 
     private String gamePath;
-    private String imagePath;
     private String exePath;
     private String protectionPath;
     private String manualPath;
@@ -28,8 +27,7 @@ public class GameEntity {
     private String installer;
     private String extra;
     private String game;
-    //
-    private String cover;
+
 
     private Integer cycles = null;
 
@@ -44,6 +42,10 @@ public class GameEntity {
     private Long timePlayed = 0L;
     private int ageRating;
     private String comment;
+
+    @Lob
+    @Column(name = "cover_image")
+    private byte[] coverImage;
 
     @PrePersist
     public void prePersist() {

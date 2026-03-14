@@ -20,9 +20,8 @@ public class ImageFactory {
         return getImage(game, MEDIUM_WIDTH, MEDIUM_HEIGHT);
     }
     public static StackPane getImage(GameApp game, int width,int height) {
-        Path imagePath = game.getImagePath();
-        if (imagePath != null) {
-            Image image = new Image(imagePath.toUri().toString());
+        if (game.getCoverImage() != null) {
+            Image image = ImageUtils.buildImageFromBytes(game.getCoverImage());
             ImageView imageView = ImageUtils.resize(image,width,height );
             Rectangle clip = new Rectangle(width, height);
             clip.setArcWidth(12);

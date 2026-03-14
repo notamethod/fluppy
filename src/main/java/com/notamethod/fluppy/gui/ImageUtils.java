@@ -21,23 +21,7 @@ public class ImageUtils {
     static double STANDARD_HEIGHT=200;
     static double STANDARD_RATIO=STANDARD_WIDTH/STANDARD_HEIGHT;
     static double tolerance=.12;
-    public static ImageView resize(Image image) {
-        double height=image.getHeight();
-        double width=image.getWidth();
-        boolean preserveRatio=true;
 
-        double minRatio=STANDARD_RATIO-(STANDARD_RATIO*tolerance);
-        double maxRatio=STANDARD_RATIO+(STANDARD_RATIO*tolerance);
-        double ratio=width/height;
-        if (ratio<maxRatio && ratio>minRatio){
-            preserveRatio=false;
-        }
-        ImageView imageView  = new ImageView(image);
-        imageView.setFitWidth(STANDARD_WIDTH);
-        imageView.setFitHeight(STANDARD_HEIGHT);
-        imageView.setPreserveRatio(preserveRatio);
-        return imageView;
-    }
     public static ImageView resize(Image image, int fitWidth, int fitHeight) {
         double height=image.getHeight();
         double width=image.getWidth();
@@ -105,7 +89,6 @@ public class ImageUtils {
 
 
         Image img = new Image(bis);
-        System.out.println(img.getWidth());
         try (FileOutputStream fos = new FileOutputStream("c:/tmp/test-output.jpg")) {
             fos.write(bytes);
             fos.flush();

@@ -12,7 +12,6 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,11 +43,11 @@ public class ApiCalls {
     }
 
     public byte[] getImageBytes(String imageUrl) throws IOException, URISyntaxException {
-        if (imageUrl==null || imageUrl.isEmpty())
+        if (imageUrl == null || imageUrl.isEmpty())
             return null;
-        URI uri = new URI("https:"+imageUrl);
-        try (InputStream is = uri.toURL().openStream()){
-             return  is.readAllBytes();
+        URI uri = new URI("https:" + imageUrl);
+        try (InputStream is = uri.toURL().openStream()) {
+            return is.readAllBytes();
         }
     }
 
@@ -57,17 +56,18 @@ public class ApiCalls {
 
         GameApiBean game = foundGame;
         beanGame.setName(game.getName());
-        beanGame.setYear(game.getYear()==null?null:Integer.valueOf(game.getYear()));
-        String coverFilename = "cover_" + HelperClass.sanitizeName(game.getName()) + game.getYear();
+        beanGame.setYear(game.getYear() == null ? null : Integer.valueOf(game.getYear()));
 
-        String path=getCover(Configuration.coverFolder, coverFilename, game.getCover(), size);
-        if (path!=null){
-            beanGame.setImagePath(Path.of(path));
+
+        //TODO: new
+        byte[] image=getCover(game.getCover(), size);
+        if (image != null) {
+            beanGame.setCoverImage(image);
         }
-        for (Genre genre : foundGame.getGenres()){
+        for (Genre genre : foundGame.getGenres()) {
             beanGame.addGenre(genre.getSlug(), genre.getName());
         }
-        if (game.getInvolved_companies()!=null){
+        if (game.getInvolved_companies() != null) {
             beanGame.setPublisher(findPublisher(game.getInvolved_companies()));
         }
 
@@ -75,8 +75,8 @@ public class ApiCalls {
     }
 
     public Company findPublisher(List<InvolvedCompany> involvedCompanies) {
-        for (InvolvedCompany company:involvedCompanies){
-            if (company.isPublisher()){
+        for (InvolvedCompany company : involvedCompanies) {
+            if (company.isPublisher()) {
                 return findCompany(company.getCompany());
             }
         }
@@ -86,7 +86,7 @@ public class ApiCalls {
     private Company findCompany(Long companyID) {
         try {
             com.notamethod.fluppy.api.igdb.Company igdbCompany = igdbApi.getCompaniesFromID(companyID).getFirst();
-            if (igdbCompany==null)
+            if (igdbCompany == null)
                 return null;
             String url = Optional.of(igdbCompany)
                     .map(com.notamethod.fluppy.api.igdb.Company::getLogo)
@@ -95,9 +95,9 @@ public class ApiCalls {
             Company company = new Company();
             company.setName(igdbCompany.getName());
             company.setId(igdbCompany.getSlug());
-            if (url!= null){
-                byte[] image=getImageBytes(getImageUri(url, 2));
-                if (image!=null){
+            if (url != null) {
+                byte[] image = getImageBytes(getImageUri(url, 2));
+                if (image != null) {
                     ImageUtils.testImage(image);
                     company.setImage(image);
                 }
@@ -108,40 +108,33 @@ public class ApiCalls {
         }
     }
 
-    public List<String> getCoverUri(Long coverID, int size) throws ApiException, MappingException, IOException {
+    public String getCoverUri(Long coverID, int size) throws ApiException, MappingException, IOException {
 
-        List<String> coversUri = new ArrayList<>();
-        if (coverID == null || coverID == 0){
+        if (coverID == null || coverID == 0) {
             log.warn("no cover found for game ");
-            return coversUri;
+            return null;
         }
         List<Cover> covers = igdbApi.getCoverInfo(coverID);
         if (covers.isEmpty()) {
             log.warn("no cover found for game ");
-            return coversUri;
+            return null;
         }
-        for (Cover cover:covers){
 
-            coversUri.add(getImageUri(cover.getUrl(), size));
-        }
-        return coversUri;
-
+        return getImageUri(covers.getFirst().getUrl(), size);
     }
 
     private String getImageUri(String url, int size) {
-        if (url==null)
+        if (url == null)
             return null;
-        return  size == 2 ? url.replaceAll(IgdbApi.THUMB_SIZE, IgdbApi.BIG_SIZE) : url;
+        return size == 2 ? url.replaceAll(IgdbApi.THUMB_SIZE, IgdbApi.BIG_SIZE) : url;
     }
 
 
     public String getCover(String coverFolder, String coverFilename, Long coverID, int size) throws IOException, ApiException, MappingException {
-       log.debug("search and download cover image for {}",coverFilename);
-        List<String> covers = getCoverUri(coverID,size);
-        if (covers.isEmpty())
-            return null;
-        String cover = covers.get(0);
-        if (cover==null){
+        log.debug("search and download cover image for {}", coverFilename);
+        String cover = getCoverUri(coverID, size);
+
+        if (cover == null) {
             return null;
         }
         File outputFile = new File(coverFolder, coverFilename);
@@ -152,5 +145,31 @@ public class ApiCalls {
         }
     }
 
+    public byte[] getCover(Long coverID, int size) throws IOException, ApiException, MappingException {
+        log.debug("search and download cover image for {}", coverID);
+        String cover = getCoverUri(coverID, size);
+
+        if (cover == null) {
+            return null;
+        }
+
+        byte[] image = null;
+        try {
+            image = getImageBytes(getImageUri(cover, 2));
+            if (image != null) {
+                ImageUtils.testImage(image);
+
+            }
+            return image;
+        } catch (URISyntaxException e) {
+            throw new ApiException("API ERROR", e);
+        }
+
+
+    }
+
 
 }
+
+
+
