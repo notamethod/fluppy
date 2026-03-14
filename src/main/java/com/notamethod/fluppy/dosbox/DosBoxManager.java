@@ -125,14 +125,19 @@ public class DosBoxManager {
 
                 outThread.join();
                 errThread.join();
-            } catch (Exception e) {
+            } catch (InterruptedException e) {
                error=e;
+               log.warn("app interrupted", e);
+                /* Clean up whatever needs to be handled before interrupting  */
+                Thread.currentThread().interrupt();
+            } catch (IOException e) {
+                error=e;
+                throw new RuntimeException(e);
             }
             long duration = System.currentTimeMillis() - start;
             DosBoxResult result = new DosBoxResult( error == null && exitCode == 0, duration, exitCode, error );
             Platform.runLater(() -> onFinish.accept(result));
         });
-
 
         t.setDaemon(true); // propre : le thread ne bloque pas la fermeture de l’app
         t.start();
