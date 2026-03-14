@@ -18,6 +18,8 @@ import com.notamethod.fluppy.util.HelperClass;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.*;
 import javafx.scene.Node;
@@ -41,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -65,7 +68,7 @@ public class GamesWall extends Application {
     ApplicationDatabase applicationDatabase;
     PreferencesBean preferences;
     DosBoxManager dosBoxManager = new DosBoxManager();
-
+    private LinkedHashMap imageCache;
     GameManager gameManager;
     CategoryManager categoryManager;
 
@@ -82,7 +85,7 @@ public class GamesWall extends Application {
     private double width = ORIGINAL_WIDTH;
     private TILES_VIEW view = TILES_VIEW.DEFAULT;
     private boolean isFullScreen = false;
-
+    private GameTile hoveredTile = null;
     @Override
     public void init() throws Exception {
         super.init();
@@ -103,6 +106,12 @@ public class GamesWall extends Application {
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(dosBoxManager, gameManager);
         gameCategories = categoryManager.getShownCategories(TILES_VIEW.DEFAULT);
+        LinkedHashMap imageCache = new LinkedHashMap() {
+
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                return size() > 100; // garde max 100 images en mémoire
+            }
+        };
 
         FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
         FontUtils.loadCustomFont("MonkeyIsland-1991.ttf", 16);
@@ -138,7 +147,6 @@ public class GamesWall extends Application {
                                        updateList();
                                        detailPane.hide();
                                    }
-
                                    public void onClose() {
                                        detailPane.hide();
                                    }
@@ -153,6 +161,12 @@ public class GamesWall extends Application {
                                    }
                                }
         );
+
+        detailPane.hoverProperty().addListener((obs, wasHover, isHover) -> {
+            if (!isHover && (hoveredTile == null || !hoveredTile.isHover())) {
+                detailPane.hide();
+            }
+        });
         ScrollPane scrollPane = createScrollPane();
 
         // Label overlay
@@ -544,29 +558,6 @@ public class GamesWall extends Application {
         Label label = new Label(category.getLabel());
         label.getStyleClass().add("blockTitle");
         blockTitle.setAlignment(Pos.CENTER_LEFT);
-//        Button titleButton = new Button();
-//        ImageView moreReleased = new ImageView();
-//        moreReleased.setImage(new Image(getClass().getResourceAsStream("/images/plus_rel.png"), 46, 32, false, false));
-//        ImageView morePressed = new ImageView();
-//        morePressed.setImage(new Image(getClass().getResourceAsStream("/images/plus_press.png"), 46, 32, false, false));
-//        ImageView lessReleased = new ImageView();
-//        lessReleased.setImage(new Image(getClass().getResourceAsStream("/images/less_rel.png"), 46, 32, false, false));
-//        ImageView lessPressed = new ImageView();
-//        lessPressed.setImage(new Image(getClass().getResourceAsStream("/images/less_press.png"), 46, 32, false, false));
-//
-//        titleButton.setGraphic(category.isExpanded() ? lessReleased : moreReleased);
-//        titleButton.setStyle("-fx-background-color: transparent;");
-//        titleButton.setOnMousePressed(e -> titleButton.setGraphic(category.isExpanded() ? lessPressed : morePressed));
-//        titleButton.setOnMouseReleased(e -> titleButton.setGraphic(category.isExpanded() ? lessReleased : moreReleased));
-//        playSparkles(titleButton, new StackPane(vBox));
-//        //titleButton.setOnMouseExited(e -> titleButton.setGraphic(normalIcon));
-//        titleButton.setOnAction(e -> {
-//            System.out.println("action");
-//            activateCategory(category, label);
-//            //  updateSizingImage(plusImage);
-//
-//
-//        });
         // Ajouter une action au clic
         blockTitle.setOnMouseClicked(event -> {
                  activateCategory(category, label);
@@ -645,6 +636,7 @@ public class GamesWall extends Application {
         });
 
         container.setOnMouseEntered(e -> {
+            hoveredTile = container;
             if (detailPane.isVisible())
                 detailPane.hide();
             //imageView.setOpacity(0.0); // démarre transparent
@@ -698,11 +690,14 @@ public class GamesWall extends Application {
             }
         });
 
-        detailPane.hoverProperty().addListener((obs, wasHover, isHover) -> {
-            if (!isHover && !container.isHover()) {
-                detailPane.hide();
-            }
-        });
+//        WeakReference<GameTile> ref = new WeakReference<>(container);
+//        ChangeListener<Boolean> hoverListener = new WeakChangeListener<>((obs, wasHover, isHover) -> {
+//            GameTile c = ref.get();
+//            if (c != null && !isHover && !c.isHover()) {
+//                detailPane.hide();
+//            }
+//        });
+//        detailPane.hoverProperty().addListener(hoverListener);
         return container;
     }
 
@@ -840,7 +835,6 @@ public class GamesWall extends Application {
     }
 
     public void darkenUI() {
-        System.out.println("coucou");
         fadeOverlay(0.95, 300); // assombrir
     }
 
