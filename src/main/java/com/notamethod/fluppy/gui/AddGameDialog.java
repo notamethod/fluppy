@@ -249,14 +249,14 @@ public class AddGameDialog extends Stage {
                 continue;
             }
             log.debug("meta " + metaGame.getName() + "-" + metaGame.getGameExe());
-            GameApiBean game = foundBoxes.get(i).getValue();
+            GameApiBean gameApiBean = foundBoxes.get(i).getValue();
 
             try {
-                if (game != null) {
-                    metaGame.setName(game.getName());
+                if (gameApiBean != null) {
+                    metaGame.setName(gameApiBean.getName());
                     //FIXME
-                    if (game.getGenres() != null) {
-                        for (Genre genre : game.getGenres()) {
+                    if (gameApiBean.getGenres() != null) {
+                        for (Genre genre : gameApiBean.getGenres()) {
                             GenreApp genraApp = new GenreApp();
                             genraApp.setId(genre.getSlug());
                             genraApp.setName(genre.getName());
@@ -265,18 +265,17 @@ public class AddGameDialog extends Stage {
                     }
 
                     //metaGame.getGenres().addAll(genres);
-                    metaGame.setYear(game.getYear() == null ? 1970 : Integer.valueOf(game.getYear()));
-                    if (game.getCover() != null) {
+                    metaGame.setYear(gameApiBean.getYear() == null ? 1970 : Integer.valueOf(gameApiBean.getYear()));
+                    if (gameApiBean.getCover() != null) {
                         try {
 
-                            String coverFilename = "cover_" + HelperClass.sanitizeName(game.getName()) + game.getYear();
-                            metaGame.setImagePath(Paths.get(apiCalls.getCover(Configuration.coverFolder, coverFilename, game.getCover(), 2)));
+                            metaGame.setCoverImage(apiCalls.getCover(gameApiBean.getCover(), 2));
                         } catch (ApiException | MappingException e) {
                             log.error("error", e);
                         }
                     }
-                    if (game.getInvolved_companies() != null) {
-                        metaGame.setPublisher(apiCalls.findPublisher(game.getInvolved_companies()));
+                    if (gameApiBean.getInvolved_companies() != null) {
+                        metaGame.setPublisher(apiCalls.findPublisher(gameApiBean.getInvolved_companies()));
                     }
 
                     File exeFile = comboExeFilesList.get(i).getValue();

@@ -247,46 +247,16 @@ public class DosBoxManager {
                 sdl.put("windowborderless", "true");
                 sdl.put("output", "opengl");
                 sdl.put("aspect", "true");
-                System.out.println(screenRez);
+                log.debug("screen resolution:"+screenRez);
                 if (screenRez!=null){
                     sdl.put("windowresolution",screenRez);
                 }else{
                     sdl.put("windowresolution", "desktop");
                 }
 
-
-             //  renderer.put("viewport","120%");
-//                renderer.put("aspect","stretch");
-//                renderer.put("glshader","crt\\ega-720p");
-//renderer.put("glshader_param1","1.0");
-//                renderer.put("glshader_param2","0.5");
-//                renderer.put("glshader_param3","0.2");
-//                renderer.put("glshader_param4","0.1");
-
             }
         }
 
-//        if (preferences.isFullScreen()) {
-//            if (DosboxType.fromString(preferences.getDosBoxType()).equals(DosboxType.CLASSIC)) {
-//                sdl.put("fullscreen", "true");
-//            } else {
-//                sdl.put("fullscreen", "false");
-//                sdl.put("windowresolution", "desktop");
-//                sdl.put("windowborderless", "true");
-//                sdl.put("output", "opengl");
-//                sdl.put("aspect", "true");
-//                sdl.put("scaler", "none");
-//
-//                        renderer.put("viewport","89%");
-//                renderer.put("aspect","stretch");
-////                renderer.put("glshader","crt\\ega-720p");
-////renderer.put("glshader_param1","1.0");
-////                renderer.put("glshader_param2","0.5");
-////                renderer.put("glshader_param3","0.2");
-////                renderer.put("glshader_param4","0.1");
-//
-//            }
-//        }
 
         HelperClass.addOtherSettings(finito, "sdl", sdl);
         allProps.put("SDL", sdl);
