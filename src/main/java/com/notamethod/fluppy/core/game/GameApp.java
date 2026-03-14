@@ -18,7 +18,6 @@ public class GameApp {
     private String gameExe;
     private String installer;
     private int cycles = 0;
-    private Path imagePath;
     private Integer year;
     private boolean favorite;
     private Path gamePath;
@@ -41,43 +40,7 @@ public class GameApp {
     private Long timePlayed;
     private String comment;
     private Company publisher;
-
-
-    /**
-     * Update game info
-     * @param srcGame
-     */
-    //FIXME: remove method
-    public void merge(GameApp srcGame) {
-        if (name == null && srcGame.name != null) {
-            this.name = srcGame.name;
-        }
-        if (gameExe == null && srcGame.gameExe != null) {
-            this.gameExe = srcGame.gameExe;
-        }
-
-        if (installer == null && srcGame.installer != null) {
-            this.installer = srcGame.installer;
-        }
-        if (imagePath == null && srcGame.imagePath != null) {
-          //  this.imagePath = srcGame.imagePath;
-        }
-        if (gamePath == null && srcGame.gamePath != null) {
-            this.gamePath = srcGame.gamePath;
-        }
-        if (exePath == null && srcGame.exePath != null) {
-            this.exePath = srcGame.exePath;
-        }
-        if (exePath == null && srcGame.exePath != null) {
-            this.exePath = srcGame.exePath;
-        }
-        if (genres.isEmpty() && !srcGame.genres.isEmpty()) {
-            this.genres.addAll(srcGame.genres);
-        }
-        this.setTimePlayed(srcGame.getTimePlayed()==null?0:srcGame.getTimePlayed());
-        this.setAdded(srcGame.getAdded());
-    }
-
+    private byte[] coverImage;
 
     public void addGenre(String id, String name) {
         GenreApp genre = new GenreApp();

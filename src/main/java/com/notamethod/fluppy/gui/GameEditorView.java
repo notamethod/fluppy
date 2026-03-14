@@ -55,7 +55,6 @@ public class GameEditorView extends DialogPane {
     private final ComboBox<String> comboMachines = new ComboBox<>();
     private final TextField exeFile = new TextField();
     private final Button exeButton = new Button("...");
-    private final TextField coverPath = new TextField();
     private final Button coverButton = new Button("...");
     private final TextField protectionPathField = new TextField();
     private final TextField manualPathField = new TextField();
@@ -187,9 +186,6 @@ public class GameEditorView extends DialogPane {
         grid.add(new Label("Executable:"), 0, 0);
         grid.add(exeFile, 1, 0);
         grid.add(exeButton, 2, 0);
-        grid.add(new Label("Cover:"), 0, 1);
-        grid.add(coverPath, 1, 1);
-        grid.add(coverButton, 2, 1);
         grid.add(new Label("Protection:"), 0, 2);
         grid.add(protectionPathField, 1, 2);
         grid.add(new Label("Manual:"), 0, 3);
@@ -225,7 +221,7 @@ public class GameEditorView extends DialogPane {
         });
         syncButton.setOnAction(e -> updateAPI());
         exeButton.setOnAction(e -> selectExe());
-        coverButton.setOnAction(e -> selectCover());
+
     }
 
     private void initDropZone() {
@@ -338,8 +334,7 @@ public class GameEditorView extends DialogPane {
         editedGame.setManualPath(manualPath);
         editedGame.setComment(commentField.getText());
         editedGame.setId(originalGame.getId());
-        String imagePath = coverPath.getText();
-        editedGame.setImagePath(imagePath.isEmpty() ? null : Path.of(imagePath));
+
 
         if (!editedGame.equals(originalGame) || isChanged) {
             gameManager.save(editedGame);
@@ -363,13 +358,13 @@ public class GameEditorView extends DialogPane {
         yearField.setText(game.getYear() != null ? String.valueOf(game.getYear()) : "?");
         exePath = game.getExePath();
 
-        if (game.getImagePath() != null) {
+        if (game.getCoverImage()!= null) {
             try {
-                imageGame.setImage(new Image(game.getImagePath().toUri().toString()));
+                imageGame.setImage(ImageUtils.buildImageFromBytes(game.getCoverImage()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            coverPath.setText(game.getImagePath().toString());
+
         }
         if (game.getPublisher() != null && game.getPublisher().getImage() != null) {
             imagePublisher.setImage(ImageUtils.buildImageFromBytes(game.getPublisher().getImage()));
@@ -417,7 +412,6 @@ public class GameEditorView extends DialogPane {
 
         try {
             apiCalls.findAndUpdateData(editedGame, 2, game);
-            coverPath.setText(editedGame.getImagePath() == null ? "" : editedGame.getImagePath().toString());
             return true;
         } catch (ApiException | MappingException | IOException e) {
             log.error("Internal Error", e);
@@ -427,18 +421,17 @@ public class GameEditorView extends DialogPane {
 
     private void updateImage(String canonicalPath, String choice) {
         try (InputStream is = new FileInputStream(new File(canonicalPath))) {
-            if (editedGame.getPublisher()!=null) {
+
                 byte[] image = is.readAllBytes();
-                editedGame.getPublisher().setImage(image);
+                editedGame.setCoverImage(image);
                 ImageUtils.testImage(image);
                 isChanged=true;
-            }
+
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
 
@@ -454,14 +447,7 @@ public class GameEditorView extends DialogPane {
         }
     }
 
-    public void selectCover() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(new File(coverPath.getText()).getParentFile());
-        fileChooser.setTitle("Choisir un fichier");
-        File selectedFile = fileChooser.showOpenDialog(null);
-        if (selectedFile != null && selectedFile.isFile())
-            coverPath.setText(selectedFile.getAbsolutePath());
-    }
+
 
     public GameApp getResult() {
         return result;
