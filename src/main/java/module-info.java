@@ -18,7 +18,7 @@ module com.notamethod.fluppy {
     requires org.hibernate.orm.core;
     requires javafx.graphics;
     requires com.fasterxml.jackson.annotation;
-
+    requires ch.qos.logback.classic;
 
 
     exports com.notamethod.fluppy.gui;
