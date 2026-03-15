@@ -393,4 +393,13 @@ public class ApplicationDatabase {
         });
     }
 
+    public Long countGames(boolean nsfw) {
+        return sessionFactory.fromSession(session -> {
+
+            Query<Long> q  = session.createQuery("SELECT COUNT(game.id) FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)", Long.class);
+            q.setParameter("nsfw", nsfw);
+
+            return q.getSingleResult();
+        });
+    }
 }

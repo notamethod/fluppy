@@ -86,6 +86,7 @@ public class GamesWall extends Application {
     private TILES_VIEW view = TILES_VIEW.DEFAULT;
     private boolean isFullScreen = false;
     private GameTile hoveredTile = null;
+    LongProperty gameCounter = new SimpleLongProperty(0);
     @Override
     public void init() throws Exception {
         super.init();
@@ -140,7 +141,11 @@ public class GamesWall extends Application {
             throw new RuntimeException(e);
         }
         content = new VBox();
-        updateList();
+        gameCounter.set(gameManager.countGames());
+        if (gameCounter.get()>0){
+            updateList();
+        }
+
 
         detailPane.setListener(new PanelListener() {
                                    public void onUpdate() {
@@ -411,10 +416,14 @@ public class GamesWall extends Application {
 
         Button calendarButton = createRibbonButton("/images/calendar1.png");
         calendarButton.setOnAction(e -> changeView(TILES_VIEW.YEARS));
+        VBox globalInfos = new VBox();
+        Label param1 = new Label();
+        param1.textProperty().bind(gameCounter.asString("%d games"));
+        globalInfos.getChildren().add(param1);
         Region spacerRibbon = new Region();
         HBox.setHgrow(spacerRibbon, Priority.ALWAYS);
         topRibbon.setAlignment(Pos.CENTER_LEFT);
-        topRibbon.getChildren().addAll(logoView, titleView, info, spacerRibbon, calendarButton, companyButton, gearButton, plusButton, quitButton);
+        topRibbon.getChildren().addAll(logoView, titleView, info, globalInfos, spacerRibbon, calendarButton, companyButton, gearButton, plusButton, quitButton);
 
         topRibbon.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
@@ -516,7 +525,7 @@ public class GamesWall extends Application {
             default:
                 games = null;
         }
-        if (games != null && (!category.getCategoryType().equals(CategoryType.FAVORITES) || category.getCategoryType().equals(CategoryType.FAVORITES) && !games.isEmpty())/* && !games.isEmpty()*/) {
+        if (games != null && !games.isEmpty()) {
             return createBlock(category, games, gameIds);
         }
         return null;

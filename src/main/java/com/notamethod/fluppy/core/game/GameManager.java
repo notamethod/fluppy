@@ -43,9 +43,7 @@ public class GameManager {
 
 
     public List<GameApp> loadAll() {
-        List<GameApp> games = GameMapper.INSTANCE.toGameApps(applicationDatabase.loadAllGames());
-        log.debug("Loaded {} games", games.size());
-        return games;
+        return null;
     }
 
     public void save(GameApp gameApp) {
@@ -175,5 +173,9 @@ public class GameManager {
         );
         return duration.get();
 
+    }
+
+    public long countGames() {
+        return applicationDatabase.countGames(preferences.isNsfw());
     }
 }
