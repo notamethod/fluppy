@@ -9,7 +9,6 @@
     background-color: #2D2D30;
 }
 
-
 /* Label */
 .label{
 -fx-font-size:14 px;
@@ -85,4 +84,115 @@
 .nightwish .tab-pane .tab:selected .tab-label {
     -fx-text-fill: yellow;
 
+}
+
+.sierra{
+
+ -fx-background-color:
+        #fefefe,
+        linear-gradient(
+            from 0px 0px to 0px 4px,
+            rgba(0,0,0,0.10) 0%,
+            rgba(0,0,0,0.10) 50%,
+            transparent 50%,
+            transparent 100%
+        );/* couche 1 : motif */
+
+    /* Les deux couches couvrent toute la zone */
+    -fx-background-insets: 0, 0;
+
+    /* Répéter uniquement le motif verticalement */
+    -fx-background-repeat: no-repeat, repeat-y;
+
+    /* Taille du motif : largeur 100%, hauteur 4px (donc une ligne tous les 4px) */
+    -fx-background-size: auto, 100% 4px;
+
+      /* Bordure interne rouge de 2px */
+        -fx-border-color: #9b4f59;
+        -fx-border-width: 2px;
+        -fx-border-insets: 5px;
+
+        /* Facultatif : pour éviter que le contenu colle à la bordure */
+        -fx-padding: 10px;
+    -fx-text-fill: #232323;
+    -fx-border-width: 2; -fx-padding: 8;
+    -fx-font-family: "Monkey Island 1990";
+    -fx-font-size: 16px;
+
+    }
+
+.scanline-dialog {
+    /* 1) Fond principal (blanc) */
+    -fx-background-color:
+        white,
+        transparent,
+        red;
+
+    /* 2) Insets = décalage de chaque couche */
+    -fx-background-insets:
+        0,          /* fond blanc */
+        5,          /* espace intérieur de 5px */
+        5;          /* bordure rouge à 5px du bord */
+
+    /* 3) Taille de la bordure */
+    -fx-background-radius: 0;
+    -fx-background-size: auto;
+
+    /* 4) Épaisseur de la bordure */
+    -fx-background-repeat: no-repeat;
+    -fx-padding: 10;
+}
+
+
+
+.sierra .label{
+-fx-font-size:16 px;
+ -fx-font-family: "Monkey Island 1990";
+    -fx-text-fill: black;
+}
+.sierra .title{
+-fx-font-size:20 px;
+    -fx-font-family: "Monkey Island 1990";
+    -fx-text-fill: #FF6CEB;
+     -fx-padding: 0 0 30 0;   /* top right bottom left */
+}
+.sierra .button {
+    -fx-background-color: #fefefe;
+    -fx-border-color: #9b4f59;
+    -fx-border-width: 2;
+
+
+    -fx-padding: 2 10;        /* réduit le padding vertical */
+    -fx-alignment: CENTER;    /* force le centrage du texte */
+    -fx-font-size: 18px;      /* police plus petite */
+}
+
+
+}
+
+.sierra .button:hover {
+    -fx-background-color: #3A3A4A;
+}
+
+
+.sierra .scanline {
+    /* Fond blanc de base */
+    -fx-background-color:
+        white,
+        linear-gradient(
+            from 0px 0px to 0px 4px,
+            rgba(0,0,0,0.10) 0%,
+            rgba(0,0,0,0.10) 50%,
+            transparent 50%,
+            transparent 100%
+        );/* couche 1 : motif */
+
+    /* Les deux couches couvrent toute la zone */
+    -fx-background-insets: 0, 0;
+
+    /* Répéter uniquement le motif verticalement */
+    -fx-background-repeat: no-repeat, repeat-y;
+
+    /* Taille du motif : largeur 100%, hauteur 4px (donc une ligne tous les 4px) */
+    -fx-background-size: auto, 100% 4px;
 }

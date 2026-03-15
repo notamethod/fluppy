@@ -18,6 +18,8 @@ import com.notamethod.fluppy.util.HelperClass;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
 import javafx.fxml.FXMLLoader;
@@ -294,6 +296,10 @@ public class GamesWall extends Application {
         stage.setScene(scene);
 
         stage.show();
+        if (gameCounter.get()==0){
+           Story story = new Story(stage,"firstrun");
+           story.start();
+        }
     }
 
     private Pane initBackOverlay() {
@@ -384,18 +390,12 @@ public class GamesWall extends Application {
         plusButton.setOnAction(e -> {
             updateSizingImage(plusImage);
             if (isFullScreen) {
-
                 stage.setMaximized(false);
                 stage.setWidth(ORIGINAL_WIDTH);
                 stage.setHeight(ORIGINAL_HEIGHT);
                 stage.centerOnScreen();
                 log.debug("reduce");
                 isFullScreen = false;
-                //midRoot.setPrefWidth(800);
-                //  midRoot.requestLayout();
-
-                //e.cons
-
             } else {
                 isFullScreen = true;
                 stage.setMaximized(true);
@@ -824,7 +824,6 @@ public class GamesWall extends Application {
         if (view == TILES_VIEW.DEFAULT) {
                 view = change;
                 gameCategories = categoryManager.getShownCategories(change);
-
         } else {
             if (view == change) {
                 view = TILES_VIEW.DEFAULT;
