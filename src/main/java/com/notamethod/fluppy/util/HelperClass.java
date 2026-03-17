@@ -92,7 +92,9 @@ public class HelperClass {
     public static String getDataDirectory(String appName) {
         return getDirectory(appName, "data");
     }
-
+    public static String getLauncherDirectory(String appName) {
+        return getDirectory(appName, "launcher");
+    }
     public static String getTempDirectory(String appName) {
         return getDirectory(appName, "temp");
     }

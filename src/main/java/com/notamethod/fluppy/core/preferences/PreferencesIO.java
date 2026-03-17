@@ -12,19 +12,19 @@ import java.io.IOException;
 @Slf4j
 public class PreferencesIO {
 
-    private static String PREFERENCE_FILE=Configuration.appFolder+"prefs.json";
+    private static String PREFERENCE_FILE = Configuration.appFolder + "prefs.json";
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static PreferencesBean load(String path) {
         File file = new File(path);
         if (!file.exists()) {
-           log.info("Config file not found, using defaults.");
+            log.info("Config file not found, using defaults.");
             return new PreferencesBean(); // ou PreferencesDefaults.get()
         }
         try {
             return mapper.readValue(file, PreferencesBean.class);
         } catch (IOException e) {
-          log.error("Failed to read config: " + e.getMessage());
+            log.error("Failed to read config: " + e.getMessage());
             return new PreferencesBean();
         }
     }
@@ -32,6 +32,10 @@ public class PreferencesIO {
     public static PreferencesBean load() {
 
         return load(PREFERENCE_FILE);
+    }
+
+    public static void save(PreferencesBean prefs) {
+        save(prefs, PREFERENCE_FILE);
     }
 
     public static void save(PreferencesBean prefs, String path) {

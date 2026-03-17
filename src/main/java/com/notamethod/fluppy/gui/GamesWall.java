@@ -288,16 +288,24 @@ public class GamesWall extends Application {
 
         });
 
-        scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         scrollPane.setStyle("-fx-background: #1A1E2E;"); // Fond du ScrollPane
 
         scrollPane.getStyleClass().add("main-pane");
+
+        EventBus.subscribe("highlight-ribbon", () -> {
+            System.out.println("A notifié via EventBus !");
+            bordureAnim.play();
+            dropLabel.setVisible(true);
+            topRibbon.getStyleClass().add("ribbon-highlight");
+        });
+
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/dosdog2.png")));
         stage.setScene(scene);
 
         stage.show();
         if (gameCounter.get()==0){
-           Story story = new Story(stage,"firstrun");
+           Story story = new Story(stage,"firstrun", preferences);
            story.start();
         }
     }
@@ -449,9 +457,11 @@ public class GamesWall extends Application {
         GameActions gameActions = new GameActions(new DialogActionsJfx());
         List<GameApp> gampeApps = gameActions.createFromFiles(files);
         List<String> errors = new ArrayList<>();
+        int added=0;
         for (GameApp gameApp : gampeApps) {
             try {
                 gameManager.addGame(gameApp);
+                added++;
             } catch (GameManagerException e) {
                 errors.add(e.getLocalizedMessage() + ": " + gameApp.getGamePath());
                 log.error("import error", e);
@@ -460,7 +470,11 @@ public class GamesWall extends Application {
         if (!errors.isEmpty()) {
             gameActions.showErrors(errors);
         }
+
         updateList();
+        if (added>0){
+            EventBus.publish("game-added");
+        }
     }
 
     private void updateSizingImage(ImageView imageView) {

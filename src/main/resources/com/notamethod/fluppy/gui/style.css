@@ -18,8 +18,8 @@
 
 /* Label */
 .label{
--fx-font-size:10 px;
-
+-fx-font-size:14 px;
+    -fx-text-fill: #d3761e;
 }
 
 .subtitle{
@@ -757,7 +757,13 @@
 }
 
 .scroll-pane {
-    -fx-background-color: #141414;
+    -fx-background-color: #1A1E2E;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.main-pane {
+    -fx-background-color: #1A1E2E;
     -fx-border-color: transparent;
     -fx-padding: 0;
 }
@@ -783,11 +789,6 @@
         transparent 3px);
 }
 
-.main-pane {
-    -fx-background-color: #1A1E2E;
-    -fx-border-color: transparent;
-    -fx-padding: 0;
-}
 
 .game-title{
      -fx-text-fill: #b3b300;
@@ -799,10 +800,10 @@
 }
 
 .blockTitle {
-   -fx-font-family: "Retro Gaming", "Courier New";
-    -fx-font-size: 28px;
-    -fx-text-fill: #d3761e;
-    -fx-text-fill: linear-gradient(to right, #f2c76c, #d3761e);
+    -fx-font-family: "PxPlus IBM VGA 8x16";
+    -fx-font-size: 24px;
+    -fx-text-fill: #129d12;
+
 }
 
 .blockTitle:hover {
