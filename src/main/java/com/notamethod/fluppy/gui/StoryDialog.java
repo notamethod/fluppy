@@ -30,7 +30,6 @@ import java.util.function.Consumer;
 @Slf4j
 public class StoryDialog extends Stage {
 
-    private TextField cheminField;
     private Button nextButton;
     private Button okButton;
     private Button actionButton;
@@ -40,11 +39,8 @@ public class StoryDialog extends Stage {
     String titleText;
 
     public StoryDialog(Stage owner) {
-      //  initModality(Modality.APPLICATION_MODAL);
         initStyle(StageStyle.UNDECORATED);
         initOwner(owner);
-        //  setTitle("Coucou");
-
 
         nextButton = new Button("Next");
         nextButton.setId(StoryButton.NEXT.toString());
@@ -59,11 +55,9 @@ public class StoryDialog extends Stage {
             if (onAction != null) onAction.accept("action1");
         });
         nextButton.setOnAction(e -> {
-            //   result = null;
             close();
         });
         okButton.setOnAction(e -> {
-            //   result = null;
             close();
         });
         VBox textBox = new VBox(10);
@@ -90,7 +84,6 @@ public class StoryDialog extends Stage {
         layout.setPadding(new Insets(20));
 
         layout.setFillWidth(true);
-        // layout.getStyleClass().add("scanline");
         VBox.setVgrow(title, Priority.ALWAYS);
         StackPane root = new StackPane(layout);
         root.getStyleClass().add("sierra");

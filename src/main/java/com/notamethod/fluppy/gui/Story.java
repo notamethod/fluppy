@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 
 public class Story {
 
-    public enum StoryType {WELCOME, DOSBOX, ADDGAME}
+    public enum StoryType {WELCOME}
 
     private Stage stage;
     private String model;
@@ -24,9 +24,9 @@ public class Story {
 
     public void start() {
         storyDialog = new StoryDialog(stage);
-
-        launch(StoryType.WELCOME);
-
+        if (model.equals("firstrun")){
+            launch(StoryType.WELCOME);
+        }
     }
 
     private void launch(StoryType storyType) {
@@ -63,12 +63,11 @@ public class Story {
                 if (preferences.getGamesCount()==0){
                     storyDialog.setText(getAdverb(step)+Messages.getString("story.dialog.addgame"));
                     storyDialog.activate(StoryButton.OK, StoryButton.NEXT);
-
                     storyDialog.showAndWait("highlight-ribbon");
-                    //storyDialog.setTextButton(StoryButton.ACTION, "automatique");
                 }
                 break;
-
+            default:
+                break;
         }
 
     }
