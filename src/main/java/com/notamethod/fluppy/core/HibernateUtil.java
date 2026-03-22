@@ -25,7 +25,7 @@ public class HibernateUtil {
                     .applySetting("hibernate.boot.allow_jpa_metadata_access", "true")
                     .applySetting("hibernate.implicit_naming_strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl")
                     //.applySetting("hibernate.bytecode.provider", "none")
-                    .applySetting("hibernate.bytecode.provider", "javassist")
+                    .applySetting("hibernate.bytecode.provider", "none")
                     .build();
 
             sessionFactory = new MetadataSources(registry)

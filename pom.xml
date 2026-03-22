@@ -146,12 +146,12 @@
             <artifactId>javassist</artifactId>
             <version>3.29.2-GA</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
             <version>1.14.12</version>
             <scope>runtime</scope>
-        </dependency>
+        </dependency>-->
         <!-- H2 Database -->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -254,6 +254,8 @@
 
                                     <buildArgs>
                                         <buildArg>--no-fallback</buildArg>
+
+                                        <buildArg>-Dhibernate.bytecode.provider=none</buildArg>
                                         <buildArg>--enable-url-protocols=http,https</buildArg>
                                         <buildArg>--enable-native-access=ALL-UNNAMED</buildArg>
                                         <buildArg>-H:NativeLinkerOption=/DEFAULTLIB:Shlwapi.lib</buildArg>
@@ -264,6 +266,24 @@
                                                                                 -->
                                     </buildArgs>
 
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.hibernate.orm</groupId>
+                        <artifactId>hibernate-maven-plugin</artifactId>
+                        <version>7.1.0.Final</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>enhance</goal>
+                                </goals>
+                                <configuration>
+                                    <enableLazyInitialization>true</enableLazyInitialization>
+                                    <enableDirtyTracking>true</enableDirtyTracking>
+                                    <enableAssociationManagement>true</enableAssociationManagement>
+                                    <enableExtendedEnhancement>false</enableExtendedEnhancement>
                                 </configuration>
                             </execution>
                         </executions>
