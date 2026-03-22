@@ -178,4 +178,12 @@ public class GameManager {
     public long countGames() {
         return applicationDatabase.countGames(preferences.isNsfw());
     }
+
+    public CompanyEntity loadCompany(String id) {
+        return applicationDatabase.findCompany(id).orElse(null);
+    }
+
+    public void save(CompanyEntity company) {
+         applicationDatabase.saveCompany(company);
+    }
 }

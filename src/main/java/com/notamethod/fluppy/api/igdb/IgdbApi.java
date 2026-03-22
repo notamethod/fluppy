@@ -21,15 +21,42 @@ public class IgdbApi {
     static String user=System.getenv("IGDB_USER");
     public static final String THUMB_SIZE="t_thumb";
     public static final String BIG_SIZE="t_cover_big";
+    public static final String PLATFORM_DOS ="(13,6)";
+    public static final long YEAR_98 =883687213;
 
-    public List<GameApiBean> getGames(String name) throws ApiException, MappingException {
+    ObjectMapper mapper = new ObjectMapper();
+
+    public List<GameApiBean> getGames(String name, int limit) throws ApiException, MappingException {
         name=name.replace("-"," ");
         name=name.replace("_"," ");
-        log.info("searching game ->{}<-", name);
-        ObjectMapper mapper = new ObjectMapper();
+        log.info("searching game ->{}<- with limit:{}", name, limit);
+        mapper = new ObjectMapper();
         String endpoint="https://api.igdb.com/v4/games";
-        String body="fields *, genres.*,involved_companies.*;\n" +
+        String body0="fields *, genres.*,involved_companies.*;\n" +
                 "search \""+name+"\";";
+        String body=body0+
+                "where platforms="+PLATFORM_DOS+" & first_release_date<"+YEAR_98+";";
+
+        List<GameApiBean> games =getGames(name,body,limit);
+        if (games.isEmpty()){
+            body=body0+
+                    "where first_release_date<"+YEAR_98+";";
+        }
+        games =getGames(name,body,limit);
+        if (games.isEmpty()){
+            games =getGames(name,body0,limit);
+        }
+
+        log.debug("found {} games ", games.size());
+        return games;
+    }
+
+    public List<GameApiBean> getGames(String name, String body, int limitValue) throws ApiException, MappingException {
+
+        String limit=limitValue>0?  String.format("limit %d;", limitValue):"";
+        body=body+limit;
+        String endpoint="https://api.igdb.com/v4/games";
+
         HttpResponse<String> response;
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = igdbRequest(endpoint, body);
@@ -57,7 +84,7 @@ public class IgdbApi {
         } catch (JsonProcessingException e) {
             throw new MappingException(e);
         }
-        log.debug("found {} games ", games.size());
+
         return games;
     }
 

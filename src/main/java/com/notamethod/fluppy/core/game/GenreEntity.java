@@ -16,6 +16,7 @@ public class GenreEntity {
 
     @Id
     private String id;
+
     private String name;
 
     @ManyToMany(mappedBy = "genres")

@@ -17,12 +17,14 @@ public class CompanyEntity {
 
     @Id
     private String id;
+
     private String name;
 
     @Lob
     @Column(name = "image")
     private byte[] image;
 
+    private Long edition;
 
     @OneToMany(mappedBy = "publisher", orphanRemoval = true)
     private List<GameEntity> games = new ArrayList<>();

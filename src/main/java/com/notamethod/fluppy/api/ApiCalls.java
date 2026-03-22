@@ -18,11 +18,14 @@ import java.util.Optional;
 @Slf4j
 public class ApiCalls {
 
+    public static int LIMIT=10;
     IgdbApi igdbApi = new IgdbApi();
 
     public List<GameApiBean> findGame(String name) throws ApiException, MappingException {
-
-        return igdbApi.getGames(name);
+        return igdbApi.getGames(name, LIMIT);
+    }
+    public List<GameApiBean> findGame(String name, int limit) throws ApiException, MappingException {
+        return igdbApi.getGames(name,limit);
     }
 
     public String downloadImage(String imageUrl, String destinationFile) throws IOException, URISyntaxException {

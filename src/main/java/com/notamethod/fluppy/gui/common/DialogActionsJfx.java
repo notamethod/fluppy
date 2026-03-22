@@ -115,8 +115,8 @@ public class DialogActionsJfx implements DialogActions {
     public void showErrorDialog(List<String> content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
-        dialogPane.getStyleClass().add("custom-dialog");
+        dialogPane.getStylesheets().add(DialogActionsJfx.class.getResource("/com/notamethod/fluppy/gui/dialog.css").toExternalForm());
+        dialogPane.getStyleClass().add("sierra");
         alert.setTitle(TITLE);
         alert.getDialogPane().setPrefSize(500, 220);
 
@@ -127,8 +127,8 @@ public class DialogActionsJfx implements DialogActions {
     public static void showErrorDialog(String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add(DialogActionsJfx.class.getResource("/styles/style.css").toExternalForm());
-        dialogPane.getStyleClass().add("custom-dialog");
+        dialogPane.getStylesheets().add(DialogActionsJfx.class.getResource("dialog.css").toExternalForm());
+        dialogPane.getStyleClass().add("sierra");
         alert.setTitle(TITLE);
         alert.getDialogPane().setPrefSize(500, 220);
 

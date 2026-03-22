@@ -20,9 +20,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -45,7 +42,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -583,7 +579,11 @@ public class GamesWall extends Application {
         blockTitle.setAlignment(Pos.CENTER_LEFT);
         // Ajouter une action au clic
         blockTitle.setOnMouseClicked(event -> {
-                 activateCategory(category, label);
+            if (event.getButton() == MouseButton.SECONDARY) {
+                editCategory(category, label);
+            }else {
+                activateCategory(category, label);
+            }
         });
         if (category.getImage()!=null){
             int maxHeight=120;
@@ -621,6 +621,30 @@ public class GamesWall extends Application {
         }
         updateList();
     }
+
+    private void editCategory(Category category, Label blockTitle) {
+
+        if (category.getCategoryType().equals(CategoryType.COMPANY)) {
+            CompanyEditorView view = new CompanyEditorView();
+            view.setGameManager(gameManager);
+            view.setCompany(category.getId());
+
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setDialogPane(view);
+            dialog.showAndWait();
+
+            Boolean editedCompany = view.getResult();
+            if (editedCompany) {
+              //update
+            }
+
+
+
+
+        }
+        updateList();
+    }
+
 
     private GameTile addGame(GameApp game) {
         StackPane imagePane = ImageFactory.getThumb(game);

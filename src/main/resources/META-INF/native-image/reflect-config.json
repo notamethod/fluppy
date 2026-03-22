@@ -18,6 +18,12 @@
     "allDeclaredFields": true
   },
   {
+    "name": "com.notamethod.fluppy.core.game.CompanyEntity",
+    "allDeclaredFields": true,
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true
+  },
+  {
     "name": "com.notamethod.fluppy.core.game.GameMapperImpl",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,

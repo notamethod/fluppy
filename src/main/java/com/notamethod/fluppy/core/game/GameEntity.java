@@ -33,7 +33,7 @@ public class GameEntity {
 
     private int gameYear;
     private String machine;
-
+    private Long edition;
 
     private boolean favorite = false;
     private LocalDateTime added;

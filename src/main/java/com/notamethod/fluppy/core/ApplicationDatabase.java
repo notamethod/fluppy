@@ -402,4 +402,22 @@ public class ApplicationDatabase {
             return q.getSingleResult();
         });
     }
+
+    public Optional<CompanyEntity> findCompany(String id) {
+        return sessionFactory.fromSession(session -> findCompanyById(session, id));
+
+    }
+
+
+    public void saveCompany(CompanyEntity entity) {
+        sessionFactory.inTransaction(session -> {
+
+            if (entity.getId() == null) {
+                session.persist(entity);
+            } else {
+                session.merge(entity);
+            }
+
+        });
+    }
 }

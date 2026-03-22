@@ -41,6 +41,7 @@ public class GameApp {
     private String comment;
     private Company publisher;
     private byte[] coverImage;
+    private Long edition;
 
     public void addGenre(String id, String name) {
         GenreApp genre = new GenreApp();

@@ -290,8 +290,7 @@ public class GameEditorView extends DialogPane {
         List<String> choices = List.of(
                 EXTRA_TYPE.PROTECTION.toString(),
                 EXTRA_TYPE.MANUAL.toString(),
-                EXTRA_TYPE.PUBLISHER.toString(),
-                "Something else..."
+                EXTRA_TYPE.COVER.toString()
         );
         Optional<String> chosen = da.showListInputDialog(
                 "What's the name of the game?",
@@ -314,8 +313,8 @@ public class GameEditorView extends DialogPane {
         } else if (choice.equals(EXTRA_TYPE.MANUAL.toString())) {
             manualPath = target;
             manualPathField.setText(target.toFile().getCanonicalPath());
-        } else if (choice.equals(EXTRA_TYPE.PUBLISHER.toString()) || choice.equals(EXTRA_TYPE.COVER.toString())) {
-            updateImage(target.toFile().getCanonicalPath(), choice);
+        } else if (choice.equals(EXTRA_TYPE.COVER.toString())) {
+            updateImage(target.toFile(), choice);
         }
         return target;
     }
@@ -419,13 +418,13 @@ public class GameEditorView extends DialogPane {
         }
     }
 
-    private void updateImage(String canonicalPath, String choice) {
-        try (InputStream is = new FileInputStream(new File(canonicalPath))) {
-
-                byte[] image = is.readAllBytes();
-                editedGame.setCoverImage(image);
-                ImageUtils.testImage(image);
-                isChanged=true;
+    private void updateImage(File file, String choice) {
+        try (InputStream is = new FileInputStream(file)) {
+            byte[] image = is.readAllBytes();
+            imageGame.setImage(ImageUtils.buildImageFromBytes(image));
+            editedGame.setCoverImage(image);
+            editedGame.setEdition(1L);
+            isChanged=true;
 
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

@@ -163,11 +163,9 @@ public class GameDetailPanel extends StackPane {
         dialog.setDialogPane(view);
         dialog.showAndWait();
 
-        GameApp result = view.getResult();
         GameApp editedGame = view.getResult();
         if (editedGame != null && listener != null) {
             listener.onUpdate();
-
         }
 
     }

@@ -26,6 +26,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +47,7 @@ public class AddGameDialog extends Stage {
 
     private FileActions fileActions;
     private boolean haErrors = false;
-
+    private int limit=10;
     public AddGameDialog(List<File> metaGamesFiles, ApiCalls apiCalls) {
 
         this.apiCalls = apiCalls;
@@ -69,6 +70,7 @@ public class AddGameDialog extends Stage {
         Map<String, List<String>> errorTypes = new HashMap<>();
         errorTypes.put("Error extracting the folowwing files:", extractionErrors);
         int listRow = 0;
+
         int order = 0;
         this.setMaxHeight(500);
         this.setMaxWidth(1500);
@@ -121,7 +123,7 @@ public class AddGameDialog extends Stage {
             Button refreshButton = new Button("<>");
             Button deleteButton = new Button("x");
             ComboBox<GameApiBean> foundBox = new ComboBox<>();
-            foundBox.setMaxWidth(400);
+            foundBox.setMaxWidth(250);
             foundBoxes.add(foundBox);
             deleteButton.setOnAction(e -> {
                 foundBox.setValue(null);
@@ -130,7 +132,8 @@ public class AddGameDialog extends Stage {
             refreshButton.setOnAction(e -> {
                 foundBox.getItems().clear();
                 try {
-                    foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
+                    limit=limit+5;
+                    foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls,limit));
                 } catch (ApiException ex) {
                     log.error("external API Error", ex);
                     DialogActionsJfx.showErrorDialog(ex.getLocalizedMessage());
@@ -158,7 +161,7 @@ public class AddGameDialog extends Stage {
             listRow++;
             if (searchString != null) {
                 try {
-                    foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls));
+                    foundBox.getItems().addAll(findGame(nameSearch.getText(), apiCalls,ApiCalls.LIMIT));
                 } catch (ApiException e) {
                     log.error("external API Error", e);
                     DialogActionsJfx.showErrorDialog(e.getLocalizedMessage());
@@ -168,17 +171,62 @@ public class AddGameDialog extends Stage {
                 }
             }
 
-            foundBox.setCellFactory(lv -> new ListCell<GameApiBean>() {
+//            foundBox.setCellFactory(lv -> new ListCell<GameApiBean>() {
+//                @Override
+//                protected void updateItem(GameApiBean item, boolean empty) {
+//                    super.updateItem(item, empty);
+//                    if (empty || item == null) {
+//                        setText(null);
+//                    } else {
+//                        setText(item.getName() + " (" + item.getYear() + ")");
+//                    }
+//                }
+//            });
+
+            // Fabrique de cellule réutilisable
+//            Callback<ListView<GameApiBean>, ListCell<GameApiBean>> cellFactory = lv -> new ListCell<>() {
+//                @Override
+//                protected void updateItem(GameApiBean item, boolean empty) {
+//                    super.updateItem(item, empty);
+//                    if (empty || item == null) {
+//                        setText(null);
+//                        setGraphic(null);
+//                    } else {
+//                        setText(null);
+//                        Label label = new Label(item.getName() + " (" + item.getYear() + ")");
+//                        label.setWrapText(true);
+//                        label.setMaxWidth(300);
+//                        label.prefWidthProperty().bind(widthProperty().subtract(20));
+//                       setPrefHeight(60);
+//                        setGraphic(label);
+//                    }
+//                }
+//            };
+
+            foundBox.setCellFactory(param -> new ListCell<GameApiBean>() {
+
+                // Create a Label to store our text. We'll set it to wrap text and it's preferred width
+                final Label label = new Label() {{
+                    setWrapText(true);
+                    setPrefWidth(200);
+                }};
+
                 @Override
                 protected void updateItem(GameApiBean item, boolean empty) {
                     super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
+
+                    if (item == null || empty) {
+                        setGraphic(null);
                     } else {
-                        setText(item.getName() + " (" + item.getYear() + ")");
+                        // Add our text to the Label
+                        label.setText(item.getName() + " (" + item.getYear() + ")");
+                        setGraphic(label);
                     }
                 }
             });
+
+          //  foundBox.setCellFactory(cellFactory);
+           // foundBox.setButtonCell(cellFactory.call(null)); // pour la valeur affichée
             result.add(metaGame);
         }
 
@@ -367,10 +415,10 @@ public class AddGameDialog extends Stage {
         return resultat;
     }
 
-    private List<GameApiBean> findGame(String name, ApiCalls apiCalls) throws ApiException {
+    private List<GameApiBean> findGame(String name, ApiCalls apiCalls,int limit) throws ApiException {
         // searching game
         final List<GameApiBean> games = new ArrayList<>();
-        games.addAll(apiCalls.findGame(name));
+        games.addAll(apiCalls.findGame(name,limit));
         return games;
     }
 
