@@ -27,7 +27,7 @@ public class GameEntity {
     private String installer;
     private String extra;
     private String game;
-
+    private String language;
 
     private Integer cycles = null;
 

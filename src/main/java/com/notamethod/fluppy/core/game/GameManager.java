@@ -67,14 +67,14 @@ public class GameManager {
             return GameMapper.INSTANCE.toFullGameApp(gameEntity);
 
     }
-    public void addGame(GameApp game) throws GameManagerException {
+    public void addGame(GameApp game) throws GameAlreadyPresentException {
         if (game.getName() == null) {
             log.error("game name is null");
             return;
         }
 
         log.debug("adding game ->{} <- to database", game.getName());
-        List<GameEntity> entiites = applicationDatabase.findGameByNameAndYear(game.getName(), game.getYear());
+        List<GameEntity> entiites = applicationDatabase.findGameByUnique(game.getName(), game.getYear(),game.getLanguage());
         if (!entiites.isEmpty()) {
             StringBuilder b = new StringBuilder();
             for (GameEntity gamelog:entiites){
@@ -83,7 +83,7 @@ public class GameManager {
                         .append("/").append(gamelog.getGamePath())
                         .append(">>>");
             }
-            throw new GameManagerException("game already in database: "+b.toString());
+            throw new GameAlreadyPresentException("game already in database: "+b.toString());
         }
         if (HelperClass.gameIsInTempDir(game)) {
             try {

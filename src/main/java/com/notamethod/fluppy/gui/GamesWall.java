@@ -5,6 +5,7 @@ import com.notamethod.fluppy.core.*;
 import com.notamethod.fluppy.core.category.Category;
 import com.notamethod.fluppy.core.category.CategoryManager;
 import com.notamethod.fluppy.core.category.CategoryType;
+import com.notamethod.fluppy.core.game.GameAlreadyPresentException;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
@@ -12,7 +13,6 @@ import com.notamethod.fluppy.dosbox.DosBoxException;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.GameActions;
-import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.util.HelperClass;
 import javafx.animation.*;
@@ -85,6 +85,7 @@ public class GamesWall extends Application {
     private boolean isFullScreen = false;
     private GameTile hoveredTile = null;
     LongProperty gameCounter = new SimpleLongProperty(0);
+
     @Override
     public void init() throws Exception {
         super.init();
@@ -140,7 +141,7 @@ public class GamesWall extends Application {
         }
         content = new VBox();
         gameCounter.set(gameManager.countGames());
-        if (gameCounter.get()>0){
+        if (gameCounter.get() > 0) {
             updateList();
         }
 
@@ -150,6 +151,7 @@ public class GamesWall extends Application {
                                        updateList();
                                        detailPane.hide();
                                    }
+
                                    public void onClose() {
                                        detailPane.hide();
                                    }
@@ -300,9 +302,9 @@ public class GamesWall extends Application {
         stage.setScene(scene);
 
         stage.show();
-        if (gameCounter.get()==0){
-           Story story = new Story(stage,"firstrun", preferences);
-           story.start();
+        if (gameCounter.get() == 0) {
+            Story story = new Story(stage, "firstrun", preferences);
+            story.start();
         }
     }
 
@@ -451,16 +453,31 @@ public class GamesWall extends Application {
 
     private void importFiles(List<File> files) {
         GameActions gameActions = new GameActions(new DialogActionsJfx());
-        List<GameApp> gampeApps = gameActions.createFromFiles(files);
+        List<GameApp> gameApps = gameActions.createFromFiles(files);
         List<String> errors = new ArrayList<>();
-        int added=0;
-        for (GameApp gameApp : gampeApps) {
+        int added = 0;
+        if (gameApps.size() == 1) {
             try {
-                gameManager.addGame(gameApp);
+                gameManager.addGame(gameApps.getFirst());
                 added++;
-            } catch (GameManagerException e) {
-                errors.add(e.getLocalizedMessage() + ": " + gameApp.getGamePath());
-                log.error("import error", e);
+            } catch (GameAlreadyPresentException e) {
+
+                String returnValue=gameActions.doSameGame(gameApps.getFirst(), gameManager);
+                if (returnValue==null) {
+                    errors.add(e.getLocalizedMessage() + ": " + gameApps.getFirst().getGamePath());
+                    log.error("import error", e);
+                }
+
+            }
+        } else {
+            for (GameApp gameApp : gameApps) {
+                try {
+                    gameManager.addGame(gameApp);
+                    added++;
+                } catch (GameAlreadyPresentException e) {
+                    errors.add(e.getLocalizedMessage() + ": " + gameApp.getGamePath());
+                    log.error("import error", e);
+                }
             }
         }
         if (!errors.isEmpty()) {
@@ -468,10 +485,12 @@ public class GamesWall extends Application {
         }
 
         updateList();
-        if (added>0){
+        if (added > 0) {
             EventBus.publish("game-added");
         }
     }
+
+
 
     private void updateSizingImage(ImageView imageView) {
         if (isFullScreen) {
@@ -581,22 +600,22 @@ public class GamesWall extends Application {
         blockTitle.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.SECONDARY) {
                 editCategory(category, label);
-            }else {
+            } else {
                 activateCategory(category, label);
             }
         });
-        if (category.getImage()!=null){
-            int maxHeight=120;
-            Image image=category.getImage();
+        if (category.getImage() != null) {
+            int maxHeight = 120;
+            Image image = category.getImage();
             ImageView iv = new ImageView(image);
-             iv.setPreserveRatio(true);
-             iv.setSmooth(true);
+            iv.setPreserveRatio(true);
+            iv.setSmooth(true);
             if (image.getHeight() > maxHeight) {
                 iv.setFitHeight(maxHeight);
             }
-           //iv.setFitHeight(100);
+            //iv.setFitHeight(100);
             blockTitle.getChildren().addAll(iv);
-        }else {
+        } else {
             blockTitle.getChildren().addAll(label);
         }
         vBox.getChildren().addAll(blockTitle, tilePane);
@@ -635,10 +654,8 @@ public class GamesWall extends Application {
 
             Boolean editedCompany = view.getResult();
             if (editedCompany) {
-              //update
+                //update
             }
-
-
 
 
         }
@@ -860,13 +877,13 @@ public class GamesWall extends Application {
 
     public void changeView(TILES_VIEW change) {
         if (view == TILES_VIEW.DEFAULT) {
-                view = change;
-                gameCategories = categoryManager.getShownCategories(change);
+            view = change;
+            gameCategories = categoryManager.getShownCategories(change);
         } else {
             if (view == change) {
                 view = TILES_VIEW.DEFAULT;
                 gameCategories = categoryManager.getShownCategories(null);
-            }else{
+            } else {
                 view = change;
                 gameCategories = categoryManager.getShownCategories(change);
             }
@@ -940,7 +957,7 @@ public class GamesWall extends Application {
         double scaleY = screen.getOutputScaleY();
         double physicalWidth = bounds.getWidth() * scaleX;
         double physicalHeight = bounds.getHeight() * scaleY;
-        return (int)bounds.getWidth() + "x" + (int)bounds.getHeight() ;
+        return (int) bounds.getWidth() + "x" + (int) bounds.getHeight();
     }
 }
 

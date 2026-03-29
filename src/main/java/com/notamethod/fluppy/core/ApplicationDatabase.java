@@ -213,6 +213,27 @@ public class ApplicationDatabase {
             return q.getResultList();
         });
     }
+    public List<GameEntity> findGameByUnique(String name, Integer year, String language) {
+        return sessionFactory.fromSession(session -> {
+            String queryString = "SELECT p FROM GameEntity p where p.name=:name";
+            if (year != null) {
+                queryString = queryString + " and p.gameYear=:year";
+            }
+            if (language != null) {
+                queryString = queryString + " and p.language=:language";
+            }
+            Query<GameEntity> q = session.createQuery(queryString, GameEntity.class);
+
+            q.setParameter("name", name);
+            if (year != null) {
+                q.setParameter("year", year);
+            }
+            if (language != null) {
+                q.setParameter("language", language);
+            }
+            return q.getResultList();
+        });
+    }
 
     public List<GameEntity> loadAllGames() {
         return sessionFactory.fromSession(session -> {

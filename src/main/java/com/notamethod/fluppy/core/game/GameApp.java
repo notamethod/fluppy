@@ -35,10 +35,12 @@ public class GameApp {
     private List<File> installers = new ArrayList<>();
     private Set<GenreApp> genres = new HashSet<>();
     private int ageRating;
+
     private LocalDateTime added;
     private LocalDateTime lastPlayed;
     private Long timePlayed;
     private String comment;
+    private String language;
     private Company publisher;
     private byte[] coverImage;
     private Long edition;

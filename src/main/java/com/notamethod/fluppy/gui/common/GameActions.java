@@ -3,9 +3,12 @@ package com.notamethod.fluppy.gui.common;
 
 import com.notamethod.fluppy.api.ApiCalls;
 import com.notamethod.fluppy.api.igdb.GameApiBean;
+import com.notamethod.fluppy.core.game.GameAlreadyPresentException;
 import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.gui.AddGameDialog;
-import com.notamethod.fluppy.gui.Messages;
+import com.notamethod.fluppy.gui.SameGameAction;
+import com.notamethod.fluppy.gui.SameGameDialog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -14,12 +17,12 @@ import java.util.*;
 @Slf4j
 public class GameActions {
 
-    DialogActions da;
+    private DialogActions da;
 
     public GameActions(DialogActions da) {
         this.da = da;
     }
-
+    public record ActionResult(SameGameAction type, String valeur) {}
     public GameApiBean chooseGame(List<GameApiBean> games) {
         Map<String, GameApiBean> map = new HashMap<>();
         List<String> choices = new ArrayList<>();
@@ -43,10 +46,10 @@ public class GameActions {
     public List<GameApp> createFromFiles(List<File> inFiles) {
         List<GameApp> gameAppList = new ArrayList<>();
         boolean doAction = true;
-        if (inFiles.size() > 1) {
-            doAction = da.showConfirmDialog(Messages.getString("confirmation.import.header"),
-                    Messages.getString("confirmation.import.multifiles"));
-        }
+//        if (inFiles.size() > 1) {
+//            doAction = da.showConfirmDialog(Messages.getString("confirmation.import.header"),
+//                    Messages.getString("confirmation.import.multifiles"));
+//        }
         if (!doAction)
             return gameAppList;
 
@@ -60,7 +63,26 @@ public class GameActions {
 
 
 
+    public String doSameGame(GameApp first, GameManager gameManager){
+        SameGameDialog dialog = new SameGameDialog(first);
+        dialog.showAndWait();
+        SameGameDialog.ActionResult actionResult  = dialog.getResult();
+        if (actionResult!=null && actionResult.type().equals(SameGameAction.VARIANT)) {
+            if (!actionResult.valeur().isEmpty() && !actionResult.valeur().equals(first.getLanguage())){
+                first.setLanguage(actionResult.valeur());
+                first.setId(null);
+                try {
+                    gameManager.addGame(first);
+                    return "ok";
+                } catch (GameAlreadyPresentException e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
+        }
+        return null;
+
+    }
 
     public void showErrors(List<String> errors) {
         da.showErrorDialog(errors);

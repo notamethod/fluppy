@@ -31,6 +31,7 @@ public class GameDetailPanel extends StackPane {
     private final Label genre;
     private final Label timePlayed;
     private final Label year;
+    private final Label language;
     private final Label name;
     private final Button launchButton;
     private final Button editButton;
@@ -57,6 +58,7 @@ public class GameDetailPanel extends StackPane {
         name = new Label();
         timePlayed = new Label();
         year = new Label();
+        language=new Label();
         descriptionLabel.setStyle("-fx-text-fill: white; -fx-wrap-text: true;");
         name.getStyleClass().add("game-title");
         name.setWrapText(true);
@@ -86,7 +88,7 @@ public class GameDetailPanel extends StackPane {
         });
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
-        detailContent = new VBox(10, name, year, genre, timePlayed, extraFiles);
+        detailContent = new VBox(10, name, year, genre, language,timePlayed, extraFiles);
 
         launchButton.setDisable(!dosBoxManager.isDosboxPresent());
         HBox buttonBox = new HBox(2, launchButton, editButton);
@@ -182,6 +184,7 @@ public class GameDetailPanel extends StackPane {
         String genres = String.join(" ■ ",
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)
         );
+        language.setText(game.getLanguage() == null ? "" : game.getLanguage());
         genre.setText(genres);
         long played = game.getTimePlayed() / 60;
         if (played > 60) {
