@@ -15,3 +15,26 @@ add link to manual
 
 ## build from sources
 generate native executable: mvn clean -Pnative package
+
+update to GUI mode:
+editbin /SUBSYSTEM:WINDOWS d:\fluppy.exe
+<plugin>
+<groupId>org.codehaus.mojo</groupId>
+<artifactId>exec-maven-plugin</artifactId>
+<executions>
+<execution>
+<id>editbin</id>
+<phase>package</phase>
+<goals>
+<goal>exec</goal>
+</goals>
+<configuration>
+<executable>editbin</executable>
+<arguments>
+<argument>/SUBSYSTEM:WINDOWS</argument>
+<argument>${project.build.directory}/${project.artifactId}.exe</argument>
+</arguments>
+</configuration>
+</execution>
+</executions>
+</plugin>

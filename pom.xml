@@ -146,12 +146,7 @@
             <artifactId>javassist</artifactId>
             <version>3.29.2-GA</version>
         </dependency>
-<!--        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy</artifactId>
-            <version>1.14.12</version>
-            <scope>runtime</scope>
-        </dependency>-->
+
         <!-- H2 Database -->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -232,6 +227,20 @@
     </build>
     <profiles>
         <profile>
+            <id>local</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                            <groupId>net.bytebuddy</groupId>
+                            <artifactId>byte-buddy</artifactId>
+                            <version>1.14.12</version>
+                            <scope>runtime</scope>
+                        </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>native</id>
             <build>
                 <plugins>
@@ -254,7 +263,6 @@
 
                                     <buildArgs>
                                         <buildArg>--no-fallback</buildArg>
-
                                         <buildArg>-Dhibernate.bytecode.provider=none</buildArg>
                                         <buildArg>--enable-url-protocols=http,https</buildArg>
                                         <buildArg>--enable-native-access=ALL-UNNAMED</buildArg>
