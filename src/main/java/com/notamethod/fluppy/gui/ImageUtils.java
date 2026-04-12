@@ -85,6 +85,8 @@ public class ImageUtils {
     }
 
     public static Image buildImageFromBytes(byte[] bytes) {
+        if (bytes==null)
+            return null;
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 
 
