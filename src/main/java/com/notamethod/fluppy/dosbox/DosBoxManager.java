@@ -189,6 +189,8 @@ public class DosBoxManager {
         HashMap<String, String> midi = new HashMap<>();
         HashMap<String, String> gus = new HashMap<>();
         HashMap<String, String> mixer = new HashMap<>();
+        HashMap<String, String> speaker = new HashMap<>();
+
 
         ArrayList<String> autoexec = new ArrayList<>();
 
@@ -246,9 +248,7 @@ public class DosBoxManager {
             if (DosboxType.fromString(preferences.getDosBoxType()).equals(DosboxType.CLASSIC)) {
                 sdl.put("fullscreen", "true");
             } else {
-                //  sdl.put("windowresolution", "1920x1080");
                 sdl.put("fullscreen", "false");
-
                 sdl.put("windowborderless", "true");
                 sdl.put("output", "opengl");
                 sdl.put("aspect", "true");
@@ -261,7 +261,7 @@ public class DosBoxManager {
 
             }
         }
-
+        speaker.put("disney", "true");
 
         HelperClass.addOtherSettings(finito, "sdl", sdl);
         allProps.put("SDL", sdl);
@@ -288,6 +288,9 @@ public class DosBoxManager {
         HelperClass.addOtherSettings(finito, "midi", midi);
         allProps.put("MIDI", midi);
 
+        HelperClass.addOtherSettings(finito, "speaker", speaker);
+        allProps.put("SPEAKER", speaker);
+
         if (gameApp.getMachine() != null) {
             dosbox.put("machine", gameApp.getMachine() + "");
             HelperClass.addOtherSettings(finito, "dosbox", dosbox);
@@ -298,7 +301,6 @@ public class DosBoxManager {
             String cd = "mount " + gameApp.getCdromLetter() + " \"" + gameApp.getCdrom() + "\" -t cdrom ";
             if (!gameApp.getCdromLabel().isEmpty()) {
                 cd += "-label " + gameApp.getCdromLabel();
-
             }
             autoexec.add(number++, cd);
         }
