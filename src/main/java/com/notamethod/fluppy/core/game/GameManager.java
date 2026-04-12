@@ -178,9 +178,20 @@ public class GameManager {
     public long countGames() {
         return applicationDatabase.countGames(preferences.isNsfw());
     }
+    public Statistics getStatistics() {
+        System.out.println(applicationDatabase.timePlayed(preferences.isNsfw()));
+        return applicationDatabase.statistics(preferences.isNsfw());
+    }
 
     public CompanyEntity loadCompany(String id) {
         return applicationDatabase.findCompany(id).orElse(null);
+    }
+    public CompanyEntity loadCompany(GameApp game ) {
+        if (game.getPublisher()!=null) {
+            return applicationDatabase.findCompany(game.getPublisher().getId()).orElse(null);
+        }
+        GameEntity gameEntity = applicationDatabase.findFullGameById(game.getId());
+        return gameEntity.getPublisher();
     }
 
     public void save(CompanyEntity company) {

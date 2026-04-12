@@ -8,6 +8,7 @@ import com.notamethod.fluppy.core.category.CategoryType;
 import com.notamethod.fluppy.core.game.GameAlreadyPresentException;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManager;
+import com.notamethod.fluppy.core.game.Statistics;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.dosbox.DosBoxException;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
@@ -18,8 +19,11 @@ import com.notamethod.fluppy.util.HelperClass;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -85,6 +89,7 @@ public class GamesWall extends Application {
     private boolean isFullScreen = false;
     private GameTile hoveredTile = null;
     LongProperty gameCounter = new SimpleLongProperty(0);
+    StringProperty timePlayedProperty = new SimpleStringProperty("");
 
     @Override
     public void init() throws Exception {
@@ -140,11 +145,12 @@ public class GamesWall extends Application {
             throw new RuntimeException(e);
         }
         content = new VBox();
-        gameCounter.set(gameManager.countGames());
+        Statistics  stats = gameManager.getStatistics();
+        gameCounter.set(stats.count());
+        timePlayedProperty.set(stats.formatTimePlayed());
         if (gameCounter.get() > 0) {
             updateList();
         }
-
 
         detailPane.setListener(new PanelListener() {
                                    public void onUpdate() {
@@ -425,7 +431,9 @@ public class GamesWall extends Application {
         VBox globalInfos = new VBox();
         Label param1 = new Label();
         param1.textProperty().bind(gameCounter.asString("%d games"));
-        globalInfos.getChildren().add(param1);
+        Label param2 = new Label();
+        param2.textProperty().bind(Bindings.concat("played ",timePlayedProperty," min"));
+        globalInfos.getChildren().addAll(param1,param2);
         Region spacerRibbon = new Region();
         HBox.setHgrow(spacerRibbon, Priority.ALWAYS);
         topRibbon.setAlignment(Pos.CENTER_LEFT);

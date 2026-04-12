@@ -423,7 +423,23 @@ public class ApplicationDatabase {
             return q.getSingleResult();
         });
     }
+    public Long timePlayed(boolean nsfw) {
+        return sessionFactory.fromSession(session -> {
 
+            Query<Long> q  = session.createQuery("SELECT SUM(game.timePlayed) FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)", Long.class);
+            q.setParameter("nsfw", nsfw);
+
+            return q.getSingleResult();
+        });
+    }
+    public Statistics statistics(boolean nsfw) {
+        return sessionFactory.fromSession(session -> {
+            return session.createQuery(
+                            "SELECT COUNT(game.id) , SUM(game.timePlayed) FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)", Statistics.class)
+                    .setParameter("nsfw", nsfw)
+                    .getSingleResult();
+        });
+    }
     public Optional<CompanyEntity> findCompany(String id) {
         return sessionFactory.fromSession(session -> findCompanyById(session, id));
 
@@ -441,4 +457,6 @@ public class ApplicationDatabase {
 
         });
     }
+
+
 }
