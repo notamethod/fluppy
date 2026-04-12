@@ -55,7 +55,6 @@ public class GameEditorView extends DialogPane {
     private final ComboBox<String> comboMachines = new ComboBox<>();
     private final TextField exeFile = new TextField();
     private final Button exeButton = new Button("...");
-    private final Button coverButton = new Button("...");
     private final TextField protectionPathField = new TextField();
     private final TextField manualPathField = new TextField();
     private final VBox dropZone = new VBox();
@@ -207,7 +206,7 @@ public class GameEditorView extends DialogPane {
         );
 
         comboMachines.setItems(FXCollections.observableArrayList(
-                "hercules", "cga", "ega", "pcjr", "tandy", "svga_s3"
+                "hercules", "cga", "ega", "pcjr", "tandy", "svga_s3","amstrad"
         ));
         comboMachines.setValue("svga_s3");
 
