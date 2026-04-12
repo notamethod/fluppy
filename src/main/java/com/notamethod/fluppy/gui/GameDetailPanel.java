@@ -1,5 +1,6 @@
 package com.notamethod.fluppy.gui;
 
+import com.notamethod.fluppy.core.game.CompanyEntity;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.game.GenreApp;
@@ -8,8 +9,10 @@ import com.notamethod.fluppy.dosbox.DosBoxManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
-import javafx.fxml.FXMLLoader;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -27,22 +30,30 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 public class GameDetailPanel extends StackPane {
     private final StackPane imageView;
-    private final Label descriptionLabel;
+    private final Label description;
+    private final VBox editorBox;
     private final Label genre;
+    private final Label editor;
+    private final ImageView editorImage;
     private final Label timePlayed;
     private final Label year;
     private final Label language;
+    private final ImageView  languageFlag;
     private final Label name;
+    private  final HBox buttonBox;
     private final Button launchButton;
     private final Button editButton;
+    private final VBox infoContent;
     private final DosBoxManager dosBoxManager;
     private final GameManager gameManager;
     private GameApp game;
     private PanelListener listener;
     private final VBox extraFiles;
     private final Rating rating;
+    private final VBox fullContent;
     private String  screenRez;
     VBox detailContent;
+    private boolean isBigView=false;
 
     public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
         this.dosBoxManager = dosBoxManager;
@@ -51,15 +62,37 @@ public class GameDetailPanel extends StackPane {
         setVisible(false);
 
         imageView = new StackPane();
+        imageView.setOnMouseClicked(event -> {
+            if (!isBigView) {
+                toBigView();
+            }
 
+
+        });
         extraFiles = new VBox();
-        descriptionLabel = new Label();
+        description = new Label();
+        description.setWrapText(true);
+        description.setPrefWidth(300);
+        description.setVisible(false);
+        editor  = new Label();
+        editorImage = new ImageView();
+        editorImage.setFitHeight(150);
+        editorImage.setFitWidth(200);
+        editorImage.setPickOnBounds(true);
+        editorImage.setPreserveRatio(true);
+        editorBox = new VBox(10, editor, editorImage);
+        editorBox.managedProperty().bind(editorBox.visibleProperty());
         genre = new Label();
+        genre.setWrapText(true);
+
         name = new Label();
         timePlayed = new Label();
         year = new Label();
         language=new Label();
-        descriptionLabel.setStyle("-fx-text-fill: white; -fx-wrap-text: true;");
+        language.setVisible(false);
+        languageFlag = new ImageView();
+        languageFlag.setFitWidth(100);
+        name.setStyle("-fx-text-fill: white; -fx-wrap-text: true;");
         name.getStyleClass().add("game-title");
         name.setWrapText(true);
 
@@ -88,14 +121,14 @@ public class GameDetailPanel extends StackPane {
         });
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
-        detailContent = new VBox(10, name, year, genre, language,timePlayed, extraFiles);
-
+        detailContent = new VBox(10, year, genre, languageFlag, editorBox, timePlayed, extraFiles);
+        detailContent.setAlignment(Pos.TOP_RIGHT);
         launchButton.setDisable(!dosBoxManager.isDosboxPresent());
-        HBox buttonBox = new HBox(2, launchButton, editButton);
+        buttonBox = new HBox(2, launchButton, editButton);
         buttonBox.setPadding(new Insets(40, 0, 0, 0)); // top, right, bottom, left
-        VBox infoContent = new VBox(detailContent, buttonBox);
-
-        HBox content = new HBox(10, imageView, infoContent);
+        infoContent = new VBox(detailContent);
+        infoContent.getChildren().add(buttonBox);
+        HBox compactContent = new HBox(10, imageView, infoContent);
         setMaxSize(550, 200);
         launchButton.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 1) {
@@ -117,7 +150,32 @@ public class GameDetailPanel extends StackPane {
                 }
             }
         });
-        getChildren().add(content);
+
+        fullContent = new VBox(10, name,compactContent, description);
+        getChildren().add(fullContent);
+
+    }
+
+    private void toBigView() {
+        setMaxHeight(500);
+        CompanyEntity companyEntity=gameManager.loadCompany(game);
+        editor.setText(companyEntity.getName());
+        editorImage.setFitHeight(150);
+        this.editorImage.setImage(ImageUtils.buildImageFromBytes(companyEntity.getImage()));
+        editorBox.setVisible(true);
+        description.setVisible(true);
+        fullContent.getChildren().add(buttonBox);
+        isBigView=true;
+    }
+    private void toCompactView(){
+        setMaxSize(550, 200);
+        if (buttonBox.getParent() == fullContent){
+            infoContent.getChildren().add(buttonBox);
+        }
+
+        editorBox.setVisible(false);
+        description.setVisible(false);
+        isBigView=false;
     }
 
     private long runGame() throws DosBoxException {
@@ -178,13 +236,24 @@ public class GameDetailPanel extends StackPane {
         this.screenRez=screenRez;
         imageView.getChildren().clear();
         imageView.getChildren().add(ImageFactory.getMedium(game));
-        descriptionLabel.setText(game.getName());
+
+        description.setText("dklsdjgkl jsdgksdjgklmsdj gkjsdlgjsdgkj ksdgjksdjglds sdkjgklsdj kgdsjgklsd jsdl jkgjsgklsdg j" +
+                "dksjhgklsdhg jdskghdshgjsdhg hgs");
         name.setText(game.getName());
         year.setText(game.getYear() == null ? "" : String.valueOf(game.getYear()));
         String genres = String.join(" ■ ",
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)
         );
+        BooleanBinding hasText = Bindings.createBooleanBinding(
+                () -> language.getText() != null && !language.getText().isEmpty(),
+                language.textProperty()
+        );
+
+        languageFlag.visibleProperty().bind(hasText);
+        languageFlag.managedProperty().bind(languageFlag.visibleProperty());
         language.setText(game.getLanguage() == null ? "" : game.getLanguage());
+
+
         genre.setText(genres);
         long played = game.getTimePlayed() / 60;
         if (played > 60) {
@@ -220,7 +289,6 @@ public class GameDetailPanel extends StackPane {
 
         new ParallelTransition(scale, fade).play();
 
-
     }
 
     private Button createRButton(String imagePath) {
@@ -232,6 +300,7 @@ public class GameDetailPanel extends StackPane {
         return button;
     }
     public void hide() {
+        toCompactView();
         setVisible(false);
     }
 
@@ -242,6 +311,14 @@ public class GameDetailPanel extends StackPane {
 
     public GameApp getCurrentGame() {
         return game;
+    }
+
+    public Image getCountryFlag(String countryCode){
+       if (countryCode!=null && countryCode.length()==2){
+           Image image = new Image(getClass().getResourceAsStream("/images/country-flag"+countryCode.toLowerCase()+".png"));
+            return image;
+        }
+       return null;
     }
 }
 
