@@ -64,5 +64,26 @@ class ArchiveExtractorTest {
         }
 
     }
+    @Test
+    void extractXz() throws IOException {
+        URL resourceUrl = getClass().getResource("/archive.tar.xz");
+        assertNotNull(resourceUrl);
+        File file=null;
+        try {
+            file = new File(resourceUrl.toURI());
+        } catch (URISyntaxException e) {
+            fail(e);
+        }
+        ArchiveExtractor extractor = new ArchiveExtractor(tempDir.toFile().getCanonicalPath());
 
+        try {
+            File out=extractor.extractFile(file, true);
+            assertTrue(out.exists());
+        } catch (IOException e) {
+            log.error("error", e);
+            fail();
+
+        }
+
+    }
 }

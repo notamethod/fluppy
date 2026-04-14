@@ -6,6 +6,9 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.*;
@@ -34,7 +37,10 @@ public class ArchiveExtractor {
 
         if (archiveFile.getName().toLowerCase().endsWith("7z")){
             return extract7z( archiveFile, replace);
-        }else{
+        }else  if (archiveFile.getName().toLowerCase().endsWith("tar.xz")){
+            return extractXZ( archiveFile, replace);
+        }
+        else{
             return extractZip( archiveFile, replace);
         }
     }
@@ -124,7 +130,37 @@ public class ArchiveExtractor {
         return fileOutputDirectory;
     }
 
+    protected File extractXZ(File archiveFile,  boolean replace) throws IOException {
+        File fileOutputDirectory=new File(outputDirectory,sanitizeName(archiveFile));
+        Path outputPath = fileOutputDirectory.toPath();
+        Files.createDirectories(outputPath);
 
+        try (InputStream fi = Files.newInputStream(archiveFile.toPath());
+             BufferedInputStream bi = new BufferedInputStream(fi);
+             XZCompressorInputStream xzi = new XZCompressorInputStream(bi);
+             TarArchiveInputStream tar = new TarArchiveInputStream(xzi)) {
+
+            TarArchiveEntry entry;
+            while ((entry = tar.getNextEntry()) != null) {
+                Path entryPath = outputPath.resolve(entry.getName()).normalize();
+
+                // Sécurité : éviter le path traversal (../../etc/passwd...)
+                if (!entryPath.startsWith(outputPath)) {
+                    throw new IOException("Path traversal détecté : " + entry.getName());
+                }
+
+                if (entry.isDirectory()) {
+                    Files.createDirectories(entryPath);
+                } else {
+                    Files.createDirectories(entryPath.getParent());
+                    try (OutputStream out = Files.newOutputStream(entryPath)) {
+                        tar.transferTo(out);
+                    }
+                }
+            }
+        }
+        return fileOutputDirectory;
+    }
 
     private File gameOutputDir(File archiveFile, File outputDir) {
         boolean removeAllExtensions=false;
