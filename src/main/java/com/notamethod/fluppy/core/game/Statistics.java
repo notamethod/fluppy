@@ -4,6 +4,8 @@ package com.notamethod.fluppy.core.game;
 public record Statistics(Long count, Long timeplayed) {
 
     public String formatTimePlayed(){
+        if (timeplayed==null)
+            return "";
         long played = timeplayed / 60;
         if (played > 60) {
             return String.valueOf(played / 60);
