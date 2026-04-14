@@ -7,6 +7,7 @@ import javafx.stage.StageStyle;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -127,7 +128,7 @@ public class DialogActionsJfx implements DialogActions {
     public static void showErrorDialog(String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add(DialogActionsJfx.class.getResource("dialog.css").toExternalForm());
+        dialogPane.getStylesheets().add(Objects.requireNonNull(DialogActionsJfx.class.getResource("/com/notamethod/fluppy/gui/dialog.css")).toExternalForm());
         dialogPane.getStyleClass().add("sierra");
         alert.setTitle(TITLE);
         alert.getDialogPane().setPrefSize(500, 220);
