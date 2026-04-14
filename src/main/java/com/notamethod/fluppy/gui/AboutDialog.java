@@ -34,12 +34,12 @@ public class AboutDialog extends Stage {
 
         workDirField = new TextField();
         workDirField.setPrefWidth(420);
-        workDirField.setText(Configuration.appFolder);
+        workDirField.setText(Configuration.dataFolder);
         workDirField.setEditable(false);
 
                 imgField = new TextField();
         imgField.setPrefWidth(420);
-        imgField.setText(Configuration.coverFolder);
+        imgField.setText(Configuration.appFolder);
         imgField.setEditable(false);
         Button okButton = new Button("OK");
 

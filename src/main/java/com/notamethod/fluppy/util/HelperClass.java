@@ -27,92 +27,6 @@ public class HelperClass {
     public static final String REGEX_SIMPLE = "(.*)_DOS_[A-Z][A-Z].*";
     private static final String FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
 
-    /**
-     * Determines the system's OS
-     *
-     * @return the code for the current OS
-     * @author Truben
-     */
-    public static int getOS() {
-        String sysName = System.getProperty("os.name").toLowerCase();
-        if (sysName.contains("linux"))
-            return LINUX;
-        else if (sysName.contains("windows"))
-            return WINDOWS;
-        else if (sysName.contains("solaris"))
-            return SOLARIS;
-        else if (sysName.contains("mac"))
-            return MACOS;
-
-        return -1; // if nothing's found
-    }
-
-    /**
-     * Get and creates a app folder
-     *
-     * @param applicationName
-     * @return the folder file
-     * @author Truben
-     */
-    public static File getWorkingDirectory(final String applicationName) {
-
-        final String userHome = System.getProperty("user.home", ".");
-        final File workingDirectory;
-        switch (getOS()) {
-            case LINUX:
-            case SOLARIS:
-                workingDirectory = new File(userHome, '.' + applicationName + '/');
-                break;
-            case WINDOWS:
-                final String applicationData = System.getenv("APPDATA");
-                if (applicationData != null)
-                    workingDirectory = new File(applicationData,  applicationName + '/');
-                else
-                    workingDirectory = new File(userHome, '.' + applicationName + '/');
-                break;
-            case MACOS:
-                workingDirectory = new File(userHome, "Library/Application Support/" + applicationName);
-                break;
-            default:
-                return new File(".");
-        }
-        if (!workingDirectory.exists())
-            if (!workingDirectory.mkdirs())
-                throw new RuntimeException("The working directory could not be created: " + workingDirectory);
-
-        log.info("Working directory is " + workingDirectory.getAbsolutePath());
-        return workingDirectory;
-    }
-
-
-    public static String getGameDirectory(String appName) {
-        return getDirectory(appName, "games");
-    }
-
-    public static String getDataDirectory(String appName) {
-        return getDirectory(appName, "data");
-    }
-    public static String getLauncherDirectory(String appName) {
-        return getDirectory(appName, "launcher");
-    }
-    public static String getTempDirectory(String appName) {
-        return getDirectory(appName, "temp");
-    }
-
-    public static String getDirectory(String appName, String dir) {
-        File subDirectory = new File(appName, dir);
-        if (!subDirectory.exists()) {
-            if (!subDirectory.mkdirs()) {
-                throw new RuntimeException("The game directory could not be created: " + subDirectory);
-            }
-        }
-        return subDirectory.getAbsolutePath();
-    }
-
-    public static String getCoverDirectory(String appName) {
-
-        return getDirectory(appName, "covers");
-    }
 
     public static boolean gameIsInTempDir(GameApp d) {
         Path parent = Paths.get(Configuration.tempFolder);
@@ -245,7 +159,7 @@ public class HelperClass {
     }
 
     public static String getCaptureDirectory(GameApp di) {
-        return Configuration.appFolder + "captures" + File.separator + di.getId() + File.separator;
+        return Configuration.dataFolder + "captures" + File.separator + di.getId() + File.separator;
     }
 
     public static void addOtherSettings(String[][] finito, String section, HashMap<String, String> props) {
@@ -262,15 +176,42 @@ public class HelperClass {
 
     }
 
-    public static String getExtraDirectory(String appName) {
 
-        return getDirectory(appName, "extras");
-    }
 
     public static String getExtension(File file) {
         String name = file.getName();
         int dot = name.lastIndexOf('.');
         if (dot <= 0 || dot == name.length() - 1) return "";
         return name.substring(dot + 1).toLowerCase();
+    }
+
+    public static String getArchiveExtension(String filename) {
+        if (filename == null || filename.isEmpty()) return "";
+
+        // Extensions doubles connues (ordre important : les plus longues d'abord)
+        String[] doubleExtensions = {
+                "tar.gz", "tar.bz2", "tar.xz", "tar.zst", "tar.lz",
+                "tar.lzma", "tar.lz4", "tar.br", "tar.sz", "tar.Z",
+                "cpio.gz", "cpio.bz2", "cpio.xz",
+                "img.gz", "img.xz",
+                "iso.gz",
+                "shar.gz"
+        };
+
+        String lower = filename.toLowerCase();
+
+        for (String ext : doubleExtensions) {
+            if (lower.endsWith("." + ext)) {
+                return ext;
+            }
+        }
+
+        // Fallback : extension simple
+        int dot = filename.lastIndexOf('.');
+        if (dot >= 0 && dot < filename.length() - 1) {
+            return filename.substring(dot + 1);
+        }
+
+        return "";
     }
 }
