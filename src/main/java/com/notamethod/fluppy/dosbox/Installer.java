@@ -15,18 +15,26 @@ import java.util.Optional;
 
 @Slf4j
 public class Installer {
-    static final String DOSBOXSTAGING_URL="https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-windows-x64-v0.82.2.zip";
+    static final String DOSBOXSTAGING_URL_WIN=  "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-windows-x64-v0.82.2.zip";
+    static final String DOSBOXSTAGING_URL_LINUX="https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-linux-x86_64-v0.82.2.tar.xz";
+
     public String dosboxStaging(){
         final String exeFile="dosbox.exe";
         try {
-            String outputFile= Configuration.tempFolder+"/dosboxStaging.zip";
-            DownloadFiles.download(DOSBOXSTAGING_URL, outputFile);
+            String url = Configuration.getOS()== Configuration.OS.LINUX?DOSBOXSTAGING_URL_LINUX:DOSBOXSTAGING_URL_WIN;
+
+            String outputFile= Configuration.tempFolder+"/dosboxStaging."+HelperClass.getArchiveExtension(url);
+            DownloadFiles.download(url, outputFile);
             log.debug("done");
             ArchiveExtractor extractor = new ArchiveExtractor(Configuration.tempFolder);
             File extracted=extractor.extractFile(new File(outputFile), true);
             Path pathToMove = extracted.toPath();
             Path target = Paths.get(Configuration.launcherFolder);
-              HelperClass.moveDirectory(pathToMove, target);
+            HelperClass.moveDirectory(pathToMove, target);
+            File f = new File(outputFile);
+            if (f!=null && f.exists()){
+                f.delete();
+            }
             log.debug("done");
 
 

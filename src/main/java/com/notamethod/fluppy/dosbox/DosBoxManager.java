@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 public class DosBoxManager {
     private static final int DOSBOX_NOTFOUND = 404;
     private static final int DOSBOX_LAUNCH_ERROR = 400;
+    private static final String CONFIG_FILE = Configuration.dataFolder + "dosbox.conf";
     private PreferencesBean preferences;
 
     public DosBoxManager() {
@@ -159,7 +160,7 @@ public class DosBoxManager {
         }
 
         par[3] = "-conf";
-        par[4] = Configuration.appFolder + "dosbox.conf";
+        par[4] = CONFIG_FILE;
 
         if (preferences.isNoConsole()) {
             par[5] = "-noconsole";
@@ -316,7 +317,7 @@ public class DosBoxManager {
             }
 
         }
-        writeConfig(Configuration.appFolder + "dosbox.conf",
+        writeConfig(CONFIG_FILE,
                 allProps, autoexec);
     }
 
