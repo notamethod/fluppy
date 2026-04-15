@@ -195,15 +195,7 @@ public class DosBoxManager {
 
         ArrayList<String> autoexec = new ArrayList<>();
 
-        String capturePath = HelperClass.getCaptureDirectory(gameApp);
-        File dir = new File(capturePath);
-
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                log.warn("error creating directory");
-
-            }
-        }
+        String capturePath = Configuration.captureFolder;
 
         dosbox.put("captures", capturePath);
 
