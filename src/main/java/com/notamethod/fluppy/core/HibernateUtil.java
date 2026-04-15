@@ -16,7 +16,7 @@ public class HibernateUtil {
             //"jdbc:h2:~/.fluppy/data/ebdb2")
             StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
                     .applySetting("hibernate.connection.driver_class", "org.h2.Driver")
-                    .applySetting("hibernate.connection.url", "jdbc:h2:" + Configuration.dataFolder + "/ebdb2")
+                    .applySetting("hibernate.connection.url", "jdbc:h2:" + Configuration.dbFolder + "/ebdb2")
                     .applySetting("hibernate.connection.username", "sa")
                     .applySetting("hibernate.connection.password", "")
                     .applySetting("hibernate.hbm2ddl.auto", "update")

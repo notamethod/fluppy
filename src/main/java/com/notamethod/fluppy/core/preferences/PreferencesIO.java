@@ -12,7 +12,7 @@ import java.io.IOException;
 @Slf4j
 public class PreferencesIO {
 
-    private static String PREFERENCE_FILE = Configuration.configFolder + "preferences.json";
+    private static String PREFERENCE_FILE = Configuration.configFolder + "/preferences.json";
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static PreferencesBean load(String path) {
