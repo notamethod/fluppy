@@ -89,15 +89,17 @@ public class ImageUtils {
             return null;
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 
-
         Image img = new Image(bis);
-        try (FileOutputStream fos = new FileOutputStream("c:/tmp/test-output.jpg")) {
-            fos.write(bytes);
-            fos.flush();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        String envDebug=System.getenv("FLUPPY_DEBUG");
+        if (envDebug!=null && envDebug.toLowerCase().equals("true")) {
+            try (FileOutputStream fos = new FileOutputStream("/tmp/test-output.jpg")) {
+                fos.write(bytes);
+                fos.flush();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         //  iv.setPreserveRatio(true);
         // iv.setFitWidth(300);
@@ -106,14 +108,16 @@ public class ImageUtils {
     }
 
     public static void testImage(byte[] image) {
-        //FIXME: to delete
-        try (FileOutputStream fos = new FileOutputStream("c:/tmp/test-img.jpg")) {
-            fos.write(image);
-            fos.flush();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        String envDebug=System.getenv("FLUPPY_DEBUG");
+        if (envDebug!=null && envDebug.toLowerCase().equals("true")) {
+            try (FileOutputStream fos = new FileOutputStream("/tmp/test-img.jpg")) {
+                fos.write(image);
+                fos.flush();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
