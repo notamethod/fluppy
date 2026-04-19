@@ -51,7 +51,14 @@ public class Story {
                     storyDialog.setTextButton(StoryButton.ACTION, "automatique");
                     storyDialog.setOnAction(resultat -> {
                         Installer installer = new Installer();
-                        String exeFile = installer.dosboxStaging();
+                        String exeFile = installer.    dosboxStaging(new ProgressCallback() {
+                            @Override
+                            public void onProgress(String message) {
+                                // Update UI or log progress message
+                                System.out.println("Progress: " + message);
+                                storyDialog.setText(message);
+                            }
+                        });
                         if (exeFile != null) {
                             preferences.setDosBoxPath(exeFile);
                             PreferencesIO.save(preferences);
