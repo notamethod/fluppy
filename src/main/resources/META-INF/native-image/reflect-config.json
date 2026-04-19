@@ -114,5 +114,11 @@
   {
     "name": "javafx.geometry.Insets",
     "allDeclaredConstructors": true
+  },
+  {
+    "name": "com.notamethod.fluppy.core.game.Statistics",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
   }
 ]
