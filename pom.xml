@@ -300,7 +300,65 @@
 
             </build>
         </profile>
+        <profile>
+            <id>nativelin</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.11.4</version>
+                        <extensions>true</extensions>
+                        <executions>
+                            <execution>
+                                <id>native-image</id>
+                                <goals>
+                                    <goal>compile-no-fork</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
 
+                                    <imageName>fluppy</imageName>
+                                    <mainClass>com.notamethod.fluppy.gui.GamesWall</mainClass>
+
+                                    <buildArgs>
+                                        <buildArg>--no-fallback</buildArg>
+                                        <buildArg>-Dhibernate.bytecode.provider=none</buildArg>
+                                        <buildArg>--enable-url-protocols=http,https</buildArg>
+                                        <buildArg>--enable-native-access=ALL-UNNAMED</buildArg>
+
+                                                                                <buildArg>-H:GenerateDebugInfo=0</buildArg>
+                                                                                <buildArg>-H:+RemoveUnusedSymbols</buildArg>
+                                                                                <buildArg>-H:Optimize=2</buildArg>
+                                                                                -->
+                                    </buildArgs>
+
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.hibernate.orm</groupId>
+                        <artifactId>hibernate-maven-plugin</artifactId>
+                        <version>7.1.0.Final</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>enhance</goal>
+                                </goals>
+                                <configuration>
+                                    <enableLazyInitialization>true</enableLazyInitialization>
+                                    <enableDirtyTracking>true</enableDirtyTracking>
+                                    <enableAssociationManagement>true</enableAssociationManagement>
+                                    <enableExtendedEnhancement>false</enableExtendedEnhancement>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+
+            </build>
+        </profile>
     </profiles>
 </project>
 
