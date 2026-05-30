@@ -72,7 +72,7 @@ public class GameDetailPanel extends StackPane {
         extraFiles = new VBox();
         description = new Label();
         description.setWrapText(true);
-        description.setPrefWidth(300);
+        description.setPrefWidth(540);
         description.setVisible(false);
         editor  = new Label();
         editorImage = new ImageView();
@@ -122,7 +122,7 @@ public class GameDetailPanel extends StackPane {
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
         detailContent = new VBox(10, year, genre, languageFlag, editorBox, timePlayed, extraFiles);
-        detailContent.setAlignment(Pos.TOP_RIGHT);
+        detailContent.setAlignment(Pos.TOP_LEFT);
         launchButton.setDisable(!dosBoxManager.isDosboxPresent());
         buttonBox = new HBox(2, launchButton, editButton);
         buttonBox.setPadding(new Insets(40, 0, 0, 0)); // top, right, bottom, left
@@ -159,9 +159,12 @@ public class GameDetailPanel extends StackPane {
     private void toBigView() {
         setMaxHeight(500);
         CompanyEntity companyEntity=gameManager.loadCompany(game);
-        editor.setText(companyEntity.getName());
-        editorImage.setFitHeight(150);
-        this.editorImage.setImage(ImageUtils.buildImageFromBytes(companyEntity.getImage()));
+        if (companyEntity!=null) {
+
+            editor.setText(Messages.getString("game.company",companyEntity.getName() == null ? "" : companyEntity.getName()));
+            editorImage.setFitHeight(150);
+            this.editorImage.setImage(ImageUtils.buildImageFromBytes(companyEntity.getImage()));
+        }
         editorBox.setVisible(true);
         description.setVisible(true);
         fullContent.getChildren().add(buttonBox);
@@ -240,7 +243,8 @@ public class GameDetailPanel extends StackPane {
         description.setText("dklsdjgkl jsdgksdjgklmsdj gkjsdlgjsdgkj ksdgjksdjglds sdkjgklsdj kgdsjgklsd jsdl jkgjsgklsdg j" +
                 "dksjhgklsdhg jdskghdshgjsdhg hgs");
         name.setText(game.getName());
-        year.setText(game.getYear() == null ? "" : String.valueOf(game.getYear()));
+
+        year.setText(Messages.getString("game.year",game.getYear() == null ? "" : String.valueOf(game.getYear())));
         String genres = String.join(" ■ ",
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)
         );
@@ -254,7 +258,7 @@ public class GameDetailPanel extends StackPane {
         language.setText(game.getLanguage() == null ? "" : game.getLanguage());
 
 
-        genre.setText(genres);
+        genre.setText(Messages.getString("game.genre",genres));
         long played = game.getTimePlayed() / 60;
         if (played > 60) {
             timePlayed.setText(Messages.getString("game.timeplayed.hour", String.valueOf(played / 60)));

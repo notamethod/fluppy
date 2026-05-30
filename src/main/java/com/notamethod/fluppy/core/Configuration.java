@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 
-@Slf4j
+//@Slf4j
 public class Configuration {
 
     public enum OS {LINUX,WINDOWS,MACOS, UNKNOWN}
@@ -24,7 +24,7 @@ public class Configuration {
     public static final String gamesFolder = getDirectory(dataFolder, "games");
     public static final String launcherFolder = getDirectory(dataFolder, "launcher");
     public static final String captureFolder = getDirectory(dataFolder,"captures");
-
+    public static final String logFolder = getDirectory(dataFolder,"log");
 
 public static OS getOS() {
         if (currentOS==null) {
@@ -117,7 +117,7 @@ public static OS getOS() {
             if (!workingDirectory.mkdirs())
                 throw new RuntimeException("The working directory could not be created: " + workingDirectory);
 
-        log.info("Working directory is " + workingDirectory.getAbsolutePath());
+        //log.info("Working directory is " + workingDirectory.getAbsolutePath());
         return workingDirectory;
     }
 }

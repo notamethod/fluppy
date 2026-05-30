@@ -26,7 +26,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -349,7 +348,7 @@ public class AddGameDialog extends Stage {
 
         GameApp metaGame = null;
         if (inFile.isDirectory()) {
-            metaGame = fileActions.addDirectory(inFile);
+            metaGame = fileActions.addDirectory(inFile, false);
         } else if (ArchiveExtractor.isArchive(inFile)) {
             metaGame = fileActions.addArchive(inFile);
 

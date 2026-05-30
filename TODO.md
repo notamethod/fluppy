@@ -2,3 +2,6 @@
 add warning for protected games
 
 mvn -Pnative native:compile
+
+
+

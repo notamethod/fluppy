@@ -24,7 +24,7 @@ public class FontUtils {
                 log.warn("Erreur lors du chargement de la police : " + fontPath);
                 return Font.getDefault();
             }
-            log.info("Font loaded: "+font.getName()+"<->"+font.getFamily());
+            log.debug("Font loaded: "+font.getName()+"<->"+font.getFamily());
             return font;
         } catch (Exception e) {
             log.warn("Erreur lors du chargement de la police : " + fontPath,e);

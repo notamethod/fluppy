@@ -87,7 +87,7 @@ public class StoryDialog extends Stage {
         VBox.setVgrow(title, Priority.ALWAYS);
         StackPane root = new StackPane(layout);
         root.getStyleClass().add("sierra");
-        layout.setPrefWidth(400);
+        layout.setPrefWidth(500);
 
         scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("dialog.css").toExternalForm());

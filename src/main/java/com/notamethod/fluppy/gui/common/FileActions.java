@@ -33,14 +33,14 @@ public class FileActions {
 
         try {
             File path = extractor.extractFile(file);
-            mgame = addDirectory(path);
+            mgame = addDirectory(path, true);
             return mgame;
         } catch (IOException e) {
             throw new GameManagerException("exception.archive.extract", e);
         }
     }
 
-    public GameApp addDirectory(File inFile) throws GameManagerException, OperationCanceledException {
+    public GameApp addDirectory(File inFile, boolean fromArchive) throws GameManagerException, OperationCanceledException {
         GameApp mgame = new GameApp();
         mgame.setGamePath(inFile.toPath());
 

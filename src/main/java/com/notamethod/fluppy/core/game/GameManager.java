@@ -65,8 +65,13 @@ public class GameManager {
         GameEntity gameEntity = applicationDatabase.findFullGameById(id);
 
             return GameMapper.INSTANCE.toFullGameApp(gameEntity);
-
     }
+
+    /**
+     * 
+     * @param game game to add in database
+     * @throws GameAlreadyPresentException
+     */
     public void addGame(GameApp game) throws GameAlreadyPresentException {
         if (game.getName() == null) {
             log.error("game name is null");

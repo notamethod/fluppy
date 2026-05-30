@@ -6,6 +6,42 @@
     "allDeclaredFields": true
   },
   {
+    "name": "com.notamethod.fluppy.api.igdb.GameApiBean",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.notamethod.fluppy.api.igdb.Genre",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.notamethod.fluppy.api.igdb.InvolvedCompany",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.notamethod.fluppy.api.igdb.IgdbImage",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.notamethod.fluppy.api.igdb.Company",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.notamethod.fluppy.api.igdb.Cover",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  },
+  {
     "name": "com.notamethod.fluppy.core.game.GameEntity",
     "allDeclaredConstructors": true,
     "allDeclaredMethods": true,

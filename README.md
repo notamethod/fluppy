@@ -15,6 +15,12 @@ add link to manual
 
 ## build from sources
 generate native executable: mvn clean -Pnative package
+## post installation:
+### windows
+run post-install.bat. 
+Prerequesite: You need scoop:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
 update to GUI mode:
 editbin /SUBSYSTEM:WINDOWS d:\fluppy.exe

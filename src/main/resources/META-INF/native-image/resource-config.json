@@ -7,13 +7,14 @@
       { "pattern": "org/hibernate/.*\\.dtd" },
       { "pattern": ".*\\.png$"},
       { "pattern": ".*\\.jpg"},
-      { "pattern": "fonts/.*\\.ttf$" },
-      { "pattern": "fonts/.*\\.otf$" },
+      { "pattern": "font/.*\\.ttf$" },
+      { "pattern": "font/.*\\.otf$" },
       { "pattern": ".*language.*\\.properties$" },
       { "pattern": "org/controlsfx/control/.*\\.css$" },
       { "pattern": "org/controlsfx/.*\\.css$"},
       { "pattern": "com/notamethod/fluppy/gui/.*\\.css$" },
       { "pattern": "com/notamethod/fluppy/gui/.*\\.fxml$" },
+      { "pattern": ".*\\.xml"},
       { "pattern": "styles/.*\\.css$" }
 
     ]

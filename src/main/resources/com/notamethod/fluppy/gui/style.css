@@ -19,7 +19,7 @@
 /* Label */
 .label{
 -fx-font-size:14 px;
-    -fx-text-fill: #d3761e;
+    -fx-text-fill: #f7a600;
 }
 
 .subtitle{
@@ -800,14 +800,21 @@
 }
 
 .blockTitle {
-    -fx-font-family: "PxPlus IBM VGA 8x16";
+    -fx-font-family: "Share Tech Mono";
     -fx-font-size: 24px;
-    -fx-text-fill: #129d12;
+    -fx-text-fill: #ede9ee;
+    -fx-background-color: rgba(150, 150, 150, 0.5);
+
+/*    //-fx-background-color: rgba(180, 180, 180, 0.35);*/
+    -fx-background-radius: 1000;   /* valeur très grande = demi-sphères parfaites */
+    -fx-padding: 4 12 4 12;        /* haut droite bas gauche */
 
 }
 
 .blockTitle:hover {
     -fx-cursor: hand;
+    -fx-background-color: #291b21;
+
 }
 
 .testcss{

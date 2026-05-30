@@ -43,6 +43,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,9 +56,15 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
-@Slf4j
+
 public class GamesWall extends Application {
 
+    static {
+        // Déterminer le chemin dynamiquement
+        String logPath = Configuration.logFolder;
+        System.setProperty("LOG_FILE_PATH", logPath+"/app.log");
+    }
+    private static final Logger log = LoggerFactory.getLogger(GamesWall.class);
     private Stage stage;
 
     public enum TILES_VIEW {
@@ -107,6 +115,16 @@ public class GamesWall extends Application {
             throw new RuntimeException(e);
         }
 
+            String igdbUser = System.getenv("IGDB_USER");
+            String igdbToken= System.getenv("IGDB_TOKEN");
+        if (igdbUser!=null && !igdbUser.isEmpty()){
+            log.info("load credentials user API");
+            igdbUser=null;
+        }
+        if (igdbToken!=null && !igdbToken.isEmpty()){
+            log.info("load credentials token API");
+            igdbToken=null;
+        }
         gameManager = new GameManager(applicationDatabase, preferences, dosBoxManager);
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(dosBoxManager, gameManager);
@@ -129,6 +147,8 @@ public class GamesWall extends Application {
         FontUtils.loadCustomFont("Storyboo.ttf", 16);
         FontUtils.loadCustomFont("Retro Gaming.ttf", 16);
         FontUtils.loadCustomFont("PxPlus_IBM_VGA_8x16.ttf", 16);
+        FontUtils.loadCustomFont("PixelifySans-Regular.ttf",14);
+        FontUtils.loadCustomFont("ShareTechMono-Regular.ttf",14);
     }
 
     @Override

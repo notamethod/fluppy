@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 
 @Slf4j
 public class LinkLabelFactory {
@@ -22,14 +23,27 @@ public class LinkLabelFactory {
 
         link.setOnMouseClicked(e -> {
             try {
-                if (Desktop.isDesktopSupported()) {
-                    Desktop.getDesktop().open(file);
-                }
+                openFile(file);
             } catch (Exception ex) {
                 log.error("error", e);
             }
         });
 
         return link;
+    }
+
+    public static void openFile(File file) {
+        try {
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("win")) {
+                new ProcessBuilder("explorer.exe", file.getAbsolutePath()).start();
+            } else if (os.contains("mac")) {
+                new ProcessBuilder("open", file.getAbsolutePath()).start();
+            } else {
+                new ProcessBuilder("xdg-open", file.getAbsolutePath()).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
