@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public class DosBoxManager {
     private static final int DOSBOX_NOTFOUND = 404;
     private static final int DOSBOX_LAUNCH_ERROR = 400;
-    private static final String CONFIG_FILE = Configuration.dataFolder + "dosbox.conf";
+    private static final String CONFIG_FILE = Configuration.dataFolder + File.separator+"dosbox.conf";
     private PreferencesBean preferences;
 
     public DosBoxManager() {
@@ -182,6 +182,7 @@ public class DosBoxManager {
         HashMap<String, HashMap<String, String>> allProps = new HashMap<>();
         HashMap<String, String> cpu = new HashMap<>();
         HashMap<String, String> renderer = new HashMap<>();
+        HashMap<String, String> capture = new HashMap<>();
         HashMap<String, String> sdl = new HashMap<>();
         HashMap<String, String> dos = new HashMap<>();
         HashMap<String, String> serial = new HashMap<>();
@@ -195,8 +196,9 @@ public class DosBoxManager {
 
         ArrayList<String> autoexec = new ArrayList<>();
 
-        String capturePath = Configuration.captureFolder;
 
+
+        String capturePath = Configuration.captureFolder;
         dosbox.put("captures", capturePath);
 
         // Split the extras string
@@ -229,6 +231,10 @@ public class DosBoxManager {
         if (gameApp.getCycles() > 0) {
             cpu.put("cycles", gameApp.getCycles() + "");
         }
+
+        capture.put("capture_dir", Configuration.captureFolder);
+        HelperClass.addOtherSettings(finito, "capture", capture);
+        allProps.put("CAPTURE", capture);
 
         HelperClass.addOtherSettings(finito, "cpu", cpu);
         allProps.put("CPU", cpu);
