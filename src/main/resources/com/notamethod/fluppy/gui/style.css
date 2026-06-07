@@ -8,13 +8,29 @@
 
 
 
-
+/*
 .root{
     -fx-background-color: #2D2D30;
     -fx-font-family: "LucasArts SCUMM - Subtitle - Roman";
     -fx-font-size: 14px;
 }
+*/
 
+.root {
+    -fx-background-color: transparent;
+    -fx-font-family: "LucasArts SCUMM - Subtitle - Roman";
+    -fx-font-size: 14px;
+}
+
+.main-pane {
+    background-color: red;
+    background: linear-gradient(
+            to bottom,
+            #2255cc,
+            #7733cc,
+            transparent
+    );
+}
 
 /* Label */
 .label{
@@ -762,11 +778,6 @@
     -fx-padding: 0;
 }
 
-.main-pane {
-    -fx-background-color: #1A1E2E;
-    -fx-border-color: transparent;
-    -fx-padding: 0;
-}
 
 .ribbon {
     -fx-background-color: #1A1E2E;

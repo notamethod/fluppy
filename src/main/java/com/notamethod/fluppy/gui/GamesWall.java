@@ -98,6 +98,8 @@ public class GamesWall extends Application {
     private GameTile hoveredTile = null;
     LongProperty gameCounter = new SimpleLongProperty(0);
     StringProperty timePlayedProperty = new SimpleStringProperty("");
+    private FFmpegVideoPlayer videoPlayer;
+
 
     @Override
     public void init() throws Exception {
@@ -158,7 +160,9 @@ public class GamesWall extends Application {
         this.stage = stage;
         HBox topRibbon = createTopRibbon(stage);
         Animation bordureAnim = effects.getBordureAnim(topRibbon);
-
+        if (preferences.isVideoBackground()) {
+            videoPlayer = new FFmpegVideoPlayer(getVideo(), 30);
+        }
         try {
             init();
         } catch (Exception e) {
@@ -213,6 +217,11 @@ public class GamesWall extends Application {
 
 
         mainPane = new StackPane();
+        if (preferences.isVideoBackground()){
+            mainPane.getChildren().add(videoPlayer.getImageView());
+            videoPlayer.getImageView().setOpacity(0.3);
+            videoPlayer.getImageView().setStyle("-fx-background-color: red;");
+        }
 
         SearchOverlay searchOverlay = new SearchOverlay();
 
@@ -221,12 +230,17 @@ public class GamesWall extends Application {
         root.getChildren().addAll(/*titleBar, */topRibbon0, mainPane);
 
 
+
         backOverlay = initBackOverlay();
         backOverlay.prefWidthProperty().bind(root.widthProperty());
         backOverlay.prefHeightProperty().bind(root.heightProperty());
         mainPane.getChildren().add(backOverlay);
 
         Scene scene = new Scene(root, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
+
+        // Démarrage de la vidéo
+        if (preferences.isVideoBackground())
+            videoPlayer.start(ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
 
         /*  drag&drop on top ribbon */
         topRibbon0.setOnDragOver(event -> {
@@ -260,11 +274,15 @@ public class GamesWall extends Application {
 
             //try request layuout on reduce
             mainPane.requestLayout();
+            if (preferences.isVideoBackground())
+                videoPlayer.scheduleResize((int) newV.doubleValue(), (int) scene.getHeight());
         });
 //
-        scene.heightProperty().addListener((obs, oldV, newV) ->
-                log.debug("Height = " + newV)
-        );
+        scene.heightProperty().addListener((obs, oldV, newV) ->{
+                log.debug("Height = " + newV);
+            if (preferences.isVideoBackground())
+                videoPlayer.scheduleResize((int) scene.getWidth(), (int) newV.doubleValue());
+    } );
 
         scene.setOnDragExited(event -> {
         });
@@ -311,12 +329,20 @@ public class GamesWall extends Application {
             }
 
         });
-
+        scene.setFill(Color.TRANSPARENT);           // fond de scène transparent
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+       // scrollPane.setStyle("-fx-background: #1A1E2E;"); // Fond du ScrollPane
+        stage.initStyle(StageStyle.TRANSPARENT);
+        mainPane.getStyleClass().add("main-pane");
+
+        scrollPane.getStyleClass().add("scroll-pane");
+       // scrollPane.getStyleClass().add("main-pane");
+        scrollPane.setBackground(Background.EMPTY);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
         scrollPane.setStyle("-fx-background: #1A1E2E;"); // Fond du ScrollPane
 
-        scrollPane.getStyleClass().add("main-pane");
-
+// Et son contenu (le viewport interne de ScrollPane)
+        scrollPane.getContent().setStyle("-fx-background-color: transparent;");
         EventBus.subscribe("highlight-ribbon", () -> {
             System.out.println("A notifié via EventBus !");
             bordureAnim.play();
@@ -332,6 +358,14 @@ public class GamesWall extends Application {
             Story story = new Story(stage, "firstrun", preferences);
             story.start();
         }
+    }
+
+    private String getVideo() {
+        Path path = Paths.get(Configuration.videoFolder, "video0001.mp4");
+
+        System.out.println( path.toAbsolutePath());
+        System.out.println( path.toString());
+        return path.toString();
     }
 
     private Pane initBackOverlay() {
@@ -986,6 +1020,14 @@ public class GamesWall extends Application {
         double physicalWidth = bounds.getWidth() * scaleX;
         double physicalHeight = bounds.getHeight() * scaleY;
         return (int) bounds.getWidth() + "x" + (int) bounds.getHeight();
+    }
+
+    @Override
+    public void stop() {
+        // Arrêt propre délégué au player
+        if (videoPlayer != null) {
+            videoPlayer.stop();
+        }
     }
 }
 
