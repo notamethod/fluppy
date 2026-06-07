@@ -3,16 +3,20 @@ package com.notamethod.fluppy.core;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 //@Slf4j
 public class Configuration {
 
-    public enum OS {LINUX,WINDOWS,MACOS, UNKNOWN}
-
+    public enum OS {LINUX, WINDOWS, MACOS, UNKNOWN}
 
 
     static OS currentOS;
-    static final String APP_NAME="fluppy";
+    static final String APP_NAME = "fluppy";
     static final String HOME = System.getProperty("user.home");
     public static final String appFolder = getWorkingDirectory(APP_NAME).getAbsolutePath() + File.separator;
 
@@ -23,31 +27,33 @@ public class Configuration {
     public static final String extraFolder = getDirectory(dataFolder, "extras");
     public static final String gamesFolder = getDirectory(dataFolder, "games");
     public static final String launcherFolder = getDirectory(dataFolder, "launcher");
-    public static final String captureFolder = getDirectory(dataFolder,"captures");
-    public static final String logFolder = getDirectory(dataFolder,"log");
+    public static final String captureFolder = getDirectory(dataFolder, "captures");
+    public static final String videoFolder = getDirectory(dataFolder, "videos");
+    public static final String logFolder = getDirectory(dataFolder, "log");
 
-public static OS getOS() {
-        if (currentOS==null) {
+    public static OS getOS() {
+        if (currentOS == null) {
             String sysName = System.getProperty("os.name").toLowerCase();
             if (sysName.contains("linux"))
-                currentOS= OS.LINUX;
+                currentOS = OS.LINUX;
             else if (sysName.contains("windows"))
-                currentOS= OS.WINDOWS;
+                currentOS = OS.WINDOWS;
             else if (sysName.contains("mac"))
-                currentOS= OS.MACOS;
+                currentOS = OS.MACOS;
             else
-            currentOS= OS.UNKNOWN; // if nothing's found
+                currentOS = OS.UNKNOWN; // if nothing's found
         }
-            return currentOS;
+        return currentOS;
 
-}
+    }
+
     private static String getConfigDirectory(String appName) {
-        if (getOS().equals(OS.LINUX)){
+        if (getOS().equals(OS.LINUX)) {
             String configDir = System.getenv("XDG_CONFIG_HOME") != null
                     ? System.getenv("XDG_CONFIG_HOME")
                     : HOME + "/.config";
             return getDirectory(configDir, appName);
-        }else if (getOS().equals(OS.WINDOWS)){
+        } else if (getOS().equals(OS.WINDOWS)) {
             String configDir = System.getenv("APPDATA") != null
                     ? System.getenv("APPDATA")
                     : HOME + "/.config";
@@ -55,14 +61,15 @@ public static OS getOS() {
         }
         return appFolder;
     }
+
     private static String getDataDirectory(String appName) {
-        if (getOS().equals(OS.LINUX)){
+        if (getOS().equals(OS.LINUX)) {
             String dataDir = System.getenv("XDG_DATA_HOME") != null
                     ? System.getenv("XDG_DATA_HOME")
                     : HOME + "/.local/share";
             return getDirectory(dataDir, appName);
         }
-        if (getOS().equals(OS.WINDOWS)){
+        if (getOS().equals(OS.WINDOWS)) {
             String dataDir = System.getenv("LOCALAPPDATA") != null
                     ? System.getenv("LOCALAPPDATA")
                     : HOME + "/";
@@ -70,8 +77,6 @@ public static OS getOS() {
         }
         return appFolder;
     }
-
-
 
 
     public static String getDirectory(String parent, String child) {
@@ -103,7 +108,7 @@ public static OS getOS() {
             case WINDOWS:
                 final String applicationData = System.getenv("APPDATA");
                 if (applicationData != null)
-                    workingDirectory = new File(applicationData,  applicationName + '/');
+                    workingDirectory = new File(applicationData, applicationName + '/');
                 else
                     workingDirectory = new File(userHome, '.' + applicationName + '/');
                 break;
@@ -120,4 +125,28 @@ public static OS getOS() {
         //log.info("Working directory is " + workingDirectory.getAbsolutePath());
         return workingDirectory;
     }
-}
+
+    public static String getFFMpeg() throws IOException {
+        String resource = null;
+        boolean isWin = false;
+        switch (getOS()) {
+            case LINUX:
+                resource = "/ffmpeg/linux/ffmpeg";
+                break;
+            case WINDOWS:
+                isWin = true;
+                resource = "/ffmpeg/windows/ffmpeg.exe";
+            default:
+                break;
+        }
+
+            Path ffmpegPath = Files.createTempFile("ffmpeg", isWin ? ".exe" : "");
+            try (InputStream in = Configuration.class.getResourceAsStream(resource)) {
+                Files.copy(in, ffmpegPath, StandardCopyOption.REPLACE_EXISTING);
+            }
+            ffmpegPath.toFile().setExecutable(true);
+            return ffmpegPath.toString();
+        }
+
+    }
+
