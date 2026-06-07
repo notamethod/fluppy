@@ -38,6 +38,9 @@ public class PreferencesBean implements Serializable {
     @JsonProperty("fullScreen")
     private boolean fullScreen = false;
 
+    @JsonProperty("videoBackground")
+    private boolean videoBackground = false;
+
     @JsonProperty("builtInDosBox")
     private boolean builtInDosBox = false;
 
