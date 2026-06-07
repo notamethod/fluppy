@@ -24,23 +24,6 @@ Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
 update to GUI mode:
 editbin /SUBSYSTEM:WINDOWS d:\fluppy.exe
-<plugin>
-<groupId>org.codehaus.mojo</groupId>
-<artifactId>exec-maven-plugin</artifactId>
-<executions>
-<execution>
-<id>editbin</id>
-<phase>package</phase>
-<goals>
-<goal>exec</goal>
-</goals>
-<configuration>
-<executable>editbin</executable>
-<arguments>
-<argument>/SUBSYSTEM:WINDOWS</argument>
-<argument>${project.build.directory}/${project.artifactId}.exe</argument>
-</arguments>
-</configuration>
-</execution>
-</executions>
-</plugin>
+
+## video format
+./ffmpeg.exe -vcodec zmbv -i ../../video/video0003.avi -c:v libx264 -crf 18 -pix_fmt yuv420p video0003.mp4
