@@ -18,6 +18,7 @@ import java.nio.file.Path;
 public class PreferencesDialog extends Stage {
 
     private TextField cheminField;
+    private TextField fsuaePathField;
     private CheckBox fullscreenCheck;
     private PreferencesBean preferences;
     private CheckBox nsfwCheck;
@@ -32,7 +33,11 @@ public class PreferencesDialog extends Stage {
         cheminField = new TextField();
         cheminField.setPrefWidth(350);
         cheminField.setText(preferences.getDosBoxPath());
+        fsuaePathField = new TextField();
+        fsuaePathField.setPrefWidth(350);
+        fsuaePathField.setText(preferences.getFsuaePath());
         Button browseButton = new Button("Parcourir...");
+        Button fsBrowseButton = new Button("Parcourir...");
         browseButton.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Sélectionner DOSBox.exe");
@@ -42,10 +47,19 @@ public class PreferencesDialog extends Stage {
                 cheminField.setText(selectedFile.getAbsolutePath());
             }
         });
-
+        fsBrowseButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Sélectionner FSUAE.exe");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Executable", "*.exe"));
+            File selectedFile = fileChooser.showOpenDialog(this);
+            if (selectedFile != null) {
+                fsuaePathField.setText(selectedFile.getAbsolutePath());
+            }
+        });
         HBox cheminBox = new HBox(10, cheminField, browseButton);
         cheminBox.setAlignment(Pos.CENTER_LEFT);
-
+        HBox fsuaePathBox = new HBox(10, fsuaePathField, fsBrowseButton);
+        fsuaePathBox.setAlignment(Pos.CENTER_LEFT);
         fullscreenCheck = new CheckBox("Plein écran");
         fullscreenCheck.setSelected(preferences.isFullScreen());
 
@@ -59,6 +73,7 @@ public class PreferencesDialog extends Stage {
             log.debug("Plein écran: " + fullscreenCheck.isSelected());
            // log.debug("Types sélectionnés: " + typeList.getSelectionModel().getSelectedItems());
             preferences.setDosBoxPath(cheminField.getText());
+            preferences.setFsuaePath(fsuaePathField.getText());
             DosboxType dosboxType =  DosBoxManager.detectDosboxType(Path.of(preferences.getDosBoxPath()));
             preferences.setDosBoxType(dosboxType.toString());
             preferences.setFullScreen(fullscreenCheck.isSelected());
@@ -80,7 +95,7 @@ public class PreferencesDialog extends Stage {
         VBox layout = new VBox(15,
                 title,
                 new Label("Chemin vers DOSBox:"), cheminBox,
-
+                new Label("Chemin vers FS-UAE:"), fsuaePathBox,
                 new Label("Options:"),   fullscreenCheck,nsfwCheck,
                 buttonBox
         );

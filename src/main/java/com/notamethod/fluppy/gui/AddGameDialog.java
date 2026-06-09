@@ -352,8 +352,8 @@ public class AddGameDialog extends Stage {
         } else if (ArchiveExtractor.isArchive(inFile)) {
             metaGame = fileActions.addArchive(inFile);
 
-        } else if (metaGame == null && (!inFile.getName().toLowerCase().endsWith("exe") && !inFile.getName().toLowerCase().endsWith("com") && !inFile.getName().toLowerCase().endsWith("bat") && !inFile.getName().toLowerCase().endsWith("pif"))) {
-            //one file
+        } else if (inFile.getName().toLowerCase().endsWith("adf") ) {
+            metaGame = fileActions.addAmiga(inFile);
         } else {
             metaGame = new GameApp();
         }

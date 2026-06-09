@@ -6,6 +6,7 @@ import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.game.GenreApp;
 import com.notamethod.fluppy.dosbox.DosBoxException;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
+import com.notamethod.fluppy.dosbox.UAEManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -45,6 +46,7 @@ public class GameDetailPanel extends StackPane {
     private final Button editButton;
     private final VBox infoContent;
     private final DosBoxManager dosBoxManager;
+    private  UAEManager uaeManager;
     private final GameManager gameManager;
     private GameApp game;
     private PanelListener listener;

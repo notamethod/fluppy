@@ -108,6 +108,18 @@ public class FileActions {
         return HelperClass.fromCamelCase(searchString);
     }
 
+    public GameApp addAmiga(File inFile) {
+        log.info("adding amiga file");
+        GameApp mgame = new GameApp();
+        mgame.setPlatform("amiga");
+        mgame.setGamePath(inFile.toPath());
+        mgame.getExeFiles().add(inFile);
+        log.info("analyze directory {}", inFile.getAbsolutePath());
+        mgame.setExePath(mgame.getExeFiles().get(0).toPath());
+        mgame.setGameExe(mgame.getExeFiles().get(0).getName());
+        return mgame;
+    }
+
     /**
      * A metod that tries to insert an application into
      * dbox' database using a file or directory

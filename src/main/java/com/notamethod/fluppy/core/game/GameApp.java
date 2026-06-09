@@ -25,6 +25,7 @@ public class GameApp {
     private Path protectionPath;
     private Path manualPath;
     private String extra;
+    private String platform;
     private int frameskip=0;
     private String cdrom;
     private String cdromLetter;
