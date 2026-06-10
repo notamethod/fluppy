@@ -4,6 +4,7 @@ import com.notamethod.fluppy.core.ApplicationDatabase;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.dosbox.DosBoxException;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
+import com.notamethod.fluppy.dosbox.UAEManager;
 import com.notamethod.fluppy.gui.PanelListener;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class GameManager {
     private ApplicationDatabase applicationDatabase;
     private PreferencesBean preferences;
     private DosBoxManager dosBoxManager;
+    private UAEManager uaeManager;
     public GameManager(ApplicationDatabase applicationDatabase, PreferencesBean preferences, DosBoxManager dosBoxManager) {
         this.applicationDatabase = applicationDatabase;
         this.preferences=preferences;
@@ -149,34 +151,71 @@ public class GameManager {
     public long runGame(GameApp game, String screenRez, PanelListener listener) throws DosBoxException {
 
         AtomicReference<Long> duration= new AtomicReference<>(0L);
-        dosBoxManager.runApplication(
-                game.getGameExe(),
-                game,
-                screenRez,
-                listener,
-                line -> log.info("[DOSBOX] "+line),
-                err -> log.error("[DOSBOX] " + err ),
-                result -> {
+        if (game.getPlatform()!=null && game.getPlatform().contains("amiga")){
+            if (uaeManager==null){
+                uaeManager = new UAEManager();
+            }
+            uaeManager.runApplication(
+                    game.getGameExe(),
+                    game,
+                    screenRez,
+                    listener,
+                    line -> log.info("[FSUAE] " + line),
+                    err -> log.error("[FSUAE] " + err),
+                    result -> {
 
-                    if (listener != null) {
+                        if (listener != null) {
 
-                        listener.onExitGame();
-                    }
-                    if (result.success) {
-                        System.out.println("DOSBox OK");
-                    } else {
-                        System.out.println("Erreur : " + result.error);
-                    }
+                            listener.onExitGame();
+                        }
+                        if (result.success) {
+                            System.out.println("DOSBox OK");
+                        } else {
+                            System.out.println("Erreur : " + result.error);
+                        }
 
-                    System.out.println("Durée : " + result.durationMillis + " ms");
-                    duration.set(result.durationMillis);
-                    if (duration.get()>0){
-                        updateTime(game, duration.get()/1000);
+                        System.out.println("Durée : " + result.durationMillis + " ms");
+                        duration.set(result.durationMillis);
+                        if (duration.get() > 0) {
+                            updateTime(game, duration.get() / 1000);
+                        }
+                        System.out.println("Exit code : " + result.exitCode);
                     }
-                    System.out.println("Exit code : " + result.exitCode);
-                }
-        );
-        return duration.get();
+            );
+
+            return duration.get();
+
+        }else {
+            dosBoxManager.runApplication(
+                    game.getGameExe(),
+                    game,
+                    screenRez,
+                    listener,
+                    line -> log.info("[DOSBOX] " + line),
+                    err -> log.error("[DOSBOX] " + err),
+                    result -> {
+
+                        if (listener != null) {
+
+                            listener.onExitGame();
+                        }
+                        if (result.success) {
+                            System.out.println("DOSBox OK");
+                        } else {
+                            System.out.println("Erreur : " + result.error);
+                        }
+
+                        System.out.println("Durée : " + result.durationMillis + " ms");
+                        duration.set(result.durationMillis);
+                        if (duration.get() > 0) {
+                            updateTime(game, duration.get() / 1000);
+                        }
+                        System.out.println("Exit code : " + result.exitCode);
+                    }
+            );
+
+            return duration.get();
+        }
 
     }
 
@@ -201,5 +240,9 @@ public class GameManager {
 
     public void save(CompanyEntity company) {
          applicationDatabase.saveCompany(company);
+    }
+
+    public DosBoxManager getDosBoxManager() {
+        return dosBoxManager;
     }
 }

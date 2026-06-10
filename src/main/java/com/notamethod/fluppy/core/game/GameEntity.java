@@ -42,6 +42,7 @@ public class GameEntity {
     private Long timePlayed = 0L;
     private int ageRating;
     private String comment;
+    private String platform;
 
     @Lob
     @Column(name = "cover_image")

@@ -46,10 +46,6 @@ public class UAEManager {
             ut.append("\n");
         }
 
-        ut.append("[AUTOEXEC]\n");
-        for (String s : autoexec) {
-            ut.append(s).append("\n");
-        }
 
         try {
             java.io.FileWriter fw = new java.io.FileWriter(filename);
@@ -76,7 +72,7 @@ public class UAEManager {
         generateConfiguration(program, gameApp, screenRez);
 
         // Build execute command
-        String[] par = generateDosBoxParams();
+        String[] par = generateParams();
 
         // Try to execute
         long now = java.time.Instant.now().toEpochMilli();
@@ -146,33 +142,18 @@ public class UAEManager {
         return diff;
     }
 
-    private String[] generateDosBoxParams() {
-        String[] par = new String[6];
-        par[0] = preferences.getDosBoxPath();
+    private String[] generateParams() {
+        String[] par = new String[2];
+        par[0] = preferences.getFsuaePath();
 
-        // If we should try to close the dosbox window or keep it open
-        if (!preferences.isKeepOpen()) {
-            par[1] = "-c";
-            par[2] = "exit";
-        } else {
-            par[1] = "-c";
-            par[2] = "@echo Keep open";
-        }
 
-        par[3] = "-conf";
-        par[4] = CONFIG_FILE;
 
-        if (preferences.isNoConsole()) {
-            par[5] = "-noconsole";
 
-        } else {
-            par[5] = "";
+        par[1] = CONFIG_FILE;
 
-            // try to execute from the path if no dosbox path is present
 
-        }
-        if (preferences.getDosBoxPath().isEmpty()) {
-            par[0] = "dosbox";
+        if (preferences.getFsuaePath().isEmpty()) {
+            par[0] = "fs-uae";
         }
         return par;
     }
@@ -196,11 +177,11 @@ public class UAEManager {
         if (gameApp.getMachine() != null) {
             config.put("amiga_model", gameApp.getMachine());
 
-            allProps.put("config", config);
+
         }
         config.put("kickstart_file",    preferences.getKickstartPath());
         //FIXME
-        config.put("floppy_drive_0",    gameApp.getGameExe());
+        config.put("floppy_drive_0",    gameApp.getGamePath().toString());
         config.put("floppy_drive_speed",   "800");
 
 
@@ -212,7 +193,7 @@ public class UAEManager {
             config.put("fullscreen",   "0");
         }
    //     HelperClass.addOtherSettings(finito, "capture", capture);
-
+        allProps.put("config", config);
         writeConfig(CONFIG_FILE,
                 allProps, null);
     }

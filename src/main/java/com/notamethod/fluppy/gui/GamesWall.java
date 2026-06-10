@@ -129,7 +129,7 @@ public class GamesWall extends Application {
         }
         gameManager = new GameManager(applicationDatabase, preferences, dosBoxManager);
         categoryManager = new CategoryManager(applicationDatabase);
-        detailPane = new GameDetailPanel(dosBoxManager, gameManager);
+        detailPane = new GameDetailPanel(gameManager);
         gameCategories = categoryManager.getShownCategories(TILES_VIEW.DEFAULT);
         LinkedHashMap imageCache = new LinkedHashMap() {
 

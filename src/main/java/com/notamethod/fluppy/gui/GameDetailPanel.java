@@ -57,9 +57,10 @@ public class GameDetailPanel extends StackPane {
     VBox detailContent;
     private boolean isBigView=false;
 
-    public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
-        this.dosBoxManager = dosBoxManager;
+    public GameDetailPanel(GameManager gameManager) {
+
         this.gameManager = gameManager;
+        this.dosBoxManager = this.gameManager.getDosBoxManager();
         setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 10; -fx-background-radius: 8;");
         setVisible(false);
 
@@ -185,37 +186,10 @@ public class GameDetailPanel extends StackPane {
 
     private long runGame() throws DosBoxException {
 
-
-        AtomicReference<Long> duration = new AtomicReference<>(0L);
-        dosBoxManager.runApplication(
-                game.getGameExe(),
+        return gameManager.runGame(
                 game,
                 screenRez,
-                listener,
-                line -> log.info("[DOSBOX] " + line),
-                err -> log.error("[DOSBOX] " + err),
-                result -> {
-
-                    if (listener != null) {
-
-                        listener.onExitGame();
-                    }
-                    if (result.success) {
-                        System.out.println("DOSBox OK");
-                    } else {
-                        System.out.println("Erreur : " + result.error);
-                    }
-
-                    System.out.println("Durée : " + result.durationMillis + " ms");
-                    duration.set(result.durationMillis);
-                    if (duration.get() > 0) {
-                        gameManager.updateTime(game, duration.get() / 1000);
-                    }
-                    System.out.println("Exit code : " + result.exitCode);
-                }
-        );
-        return duration.get();
-
+                listener);
     }
 
     private void editAction() throws IOException {

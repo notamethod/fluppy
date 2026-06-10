@@ -376,7 +376,12 @@ public class AddGameDialog extends Stage {
 
 
         if (sourceFileName != null) {
-            String title = HelperClass.guessTitleFromFilename(sourceFileName);
+            String title=null;
+            if (metaGame.getPlatform() != null && metaGame.getPlatform().contains("amiga")) {
+                 title = HelperClass.guessTitleFromFilename(sourceFileName,metaGame.getPlatform() );
+            }else {
+                title = HelperClass.guessTitleFromFilename(sourceFileName);
+            }
             if (title != null) {
                 searchString = title;
             }

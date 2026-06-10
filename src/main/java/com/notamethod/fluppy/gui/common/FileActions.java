@@ -82,32 +82,6 @@ public class FileActions {
 
 
 
-    private String calculateSearchString(GameApp metaGame, String sourceFileName) {
-        String guessSource = null;
-        File exeFile = null;
-        String searchString="";
-        if (metaGame.getExePath() != null) {
-            exeFile = metaGame.getExePath().toFile();
-            guessSource = exeFile.getName();
-            metaGame.setGameExe(exeFile.getName());
-            metaGame.setExePath(Paths.get(exeFile.getAbsolutePath().substring(0, exeFile.getAbsolutePath().lastIndexOf(File.separatorChar))));
-             searchString = exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
-        }
-
-
-        //TODO: set intallers
-
-
-        if (sourceFileName != null) {
-            String title = HelperClass.guessTitleFromFilename(sourceFileName);
-            if (title != null) {
-
-                searchString = title;
-            }
-        }
-        return HelperClass.fromCamelCase(searchString);
-    }
-
     public GameApp addAmiga(File inFile) {
         log.info("adding amiga file");
         GameApp mgame = new GameApp();

@@ -18,11 +18,13 @@ import java.util.regex.Pattern;
 @Slf4j
 public class HelperClass {
 
+    //^(.+?)\s*\((\d{4})\)(?:\((?!Disk)[^)]+\))*(?:\((Disk[^)]+)\))?\.adf$
     public static final int LINUX = 0;
     public static final int SOLARIS = 1;
     public static final int WINDOWS = 2;
     public static final int MACOS = 3;
     public static final String REGEX_ABANDONWARE = "jeu-[0-9]{5}-.*";
+    public static final String REGEX_AMIGA = "^(.+?)\\s*\\((\\d{4})\\)(?:\\((?!Disk)[^)]+\\))*(?:\\((Disk[^)]+)\\))?\\.adf$";
     //public static final String REGEX_SIMPLE="*._DOS_??.zip";
     public static final String REGEX_SIMPLE = "(.*)_DOS_[A-Z][A-Z].*";
     private static final String FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
@@ -104,7 +106,21 @@ public class HelperClass {
         return toTitleGame(title);
 
     }
-
+    public static String guessTitleFromFilename(String name, String platform) {
+        if (name == null) {
+            return null;
+        }
+        String title=null;
+        SearchInfo info = regexAmiga(name);
+        if (info!=null && info.title!= null) {
+            title = info.title;
+        }
+        if (title == null) {
+            int pos = name.lastIndexOf(".");
+            title = pos > 0 ? name.substring(0, pos) : name;
+        }
+        return toTitleGame(title);
+    }
     public static String fromCamelCase(String nameWithCamelCase) {
         String converted = nameWithCamelCase.replaceAll("([a-z])([A-Z])", "$1 $2");
 
@@ -123,7 +139,14 @@ public class HelperClass {
             return data[2];
         }
         return null;
-
+    }
+    public static SearchInfo regexAmiga(String name) {
+        Pattern pattern = Pattern.compile(REGEX_AMIGA);
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            return new SearchInfo( matcher.group(1) ,matcher.group(2),matcher.group(3));
+        }
+        return null;
     }
 
     public static String regexGroup(String name, String regx, int group) {
@@ -186,32 +209,11 @@ public class HelperClass {
     }
 
     public static String getArchiveExtension(String filename) {
-        if (filename == null || filename.isEmpty()) return "";
+        return null;
+    }
 
-        // Extensions doubles connues (ordre important : les plus longues d'abord)
-        String[] doubleExtensions = {
-                "tar.gz", "tar.bz2", "tar.xz", "tar.zst", "tar.lz",
-                "tar.lzma", "tar.lz4", "tar.br", "tar.sz", "tar.Z",
-                "cpio.gz", "cpio.bz2", "cpio.xz",
-                "img.gz", "img.xz",
-                "iso.gz",
-                "shar.gz"
-        };
 
-        String lower = filename.toLowerCase();
 
-        for (String ext : doubleExtensions) {
-            if (lower.endsWith("." + ext)) {
-                return ext;
-            }
-        }
-
-        // Fallback : extension simple
-        int dot = filename.lastIndexOf('.');
-        if (dot >= 0 && dot < filename.length() - 1) {
-            return filename.substring(dot + 1);
-        }
-
-        return "";
+    public record SearchInfo(String title, String  year, String disk) {
     }
 }
