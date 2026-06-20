@@ -14,6 +14,7 @@ import com.notamethod.fluppy.gui.common.FileActions;
 import com.notamethod.fluppy.gui.common.OperationCanceledException;
 import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.HelperClass;
+import com.notamethod.fluppy.util.SearchInfo;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -170,37 +171,6 @@ public class AddGameDialog extends Stage {
                 }
             }
 
-//            foundBox.setCellFactory(lv -> new ListCell<GameApiBean>() {
-//                @Override
-//                protected void updateItem(GameApiBean item, boolean empty) {
-//                    super.updateItem(item, empty);
-//                    if (empty || item == null) {
-//                        setText(null);
-//                    } else {
-//                        setText(item.getName() + " (" + item.getYear() + ")");
-//                    }
-//                }
-//            });
-
-            // Fabrique de cellule réutilisable
-//            Callback<ListView<GameApiBean>, ListCell<GameApiBean>> cellFactory = lv -> new ListCell<>() {
-//                @Override
-//                protected void updateItem(GameApiBean item, boolean empty) {
-//                    super.updateItem(item, empty);
-//                    if (empty || item == null) {
-//                        setText(null);
-//                        setGraphic(null);
-//                    } else {
-//                        setText(null);
-//                        Label label = new Label(item.getName() + " (" + item.getYear() + ")");
-//                        label.setWrapText(true);
-//                        label.setMaxWidth(300);
-//                        label.prefWidthProperty().bind(widthProperty().subtract(20));
-//                       setPrefHeight(60);
-//                        setGraphic(label);
-//                    }
-//                }
-//            };
 
             foundBox.setCellFactory(param -> new ListCell<GameApiBean>() {
 
@@ -357,15 +327,16 @@ public class AddGameDialog extends Stage {
         } else {
             metaGame = new GameApp();
         }
-        calculateSearchString(metaGame, inFile.getName());
+        calculateSearchInfo(metaGame, inFile.getName());
         return metaGame;
     }
 
-    private String calculateSearchString(GameApp metaGame, String sourceFileName) {
+    private SearchInfo calculateSearchInfo(GameApp metaGame, String sourceFileName) {
         String guessSource = null;
         File exeFile = null;
         String searchString = "";
         if (metaGame.getExePath() != null) {
+            //provisionning value
             exeFile = metaGame.getExePath().toFile();
             guessSource = exeFile.getName();
             metaGame.setGameExe(exeFile.getName());
@@ -373,15 +344,12 @@ public class AddGameDialog extends Stage {
             searchString = exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
         }
         //TODO: set intallers
-
+        SearchInfo searchInfo=null;
 
         if (sourceFileName != null) {
             String title=null;
-            if (metaGame.getPlatform() != null && metaGame.getPlatform().contains("amiga")) {
-                 title = HelperClass.guessTitleFromFilename(sourceFileName,metaGame.getPlatform() );
-            }else {
-                title = HelperClass.guessTitleFromFilename(sourceFileName);
-            }
+            searchInfo = HelperClass.parseFileName(sourceFileName, metaGame.getPlatform());
+            title=searchInfo.getTitle();
             if (title != null) {
                 searchString = title;
             }
@@ -389,7 +357,11 @@ public class AddGameDialog extends Stage {
 
         String textSearch = searchString.isEmpty() ? "" : HelperClass.fromCamelCase(searchString);
         metaGame.setSearchName(textSearch);
-        return textSearch;
+    
+        metaGame.setDiskNumber(searchInfo.getDisk()==null?0:searchInfo.getDisk());
+        metaGame.setNumberOfDisks(searchInfo.getTotalDisk()==null?0:searchInfo.getTotalDisk());
+       //TODO get disk number info
+        return searchInfo;
     }
 
     private List<File> sortRunners(String mainName, List<File> exeFiles) {

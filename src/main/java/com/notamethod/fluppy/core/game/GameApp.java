@@ -32,6 +32,9 @@ public class GameApp {
     private String cdromLabel;
     private String machine;
     private String searchName;
+    private int diskNumber;
+    private int numberOfDisks;
+    private String extraDisks;
     private List<File> exeFiles = new ArrayList<>();
     private List<File> installers = new ArrayList<>();
     private Set<GenreApp> genres = new HashSet<>();

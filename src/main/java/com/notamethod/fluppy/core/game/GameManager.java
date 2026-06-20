@@ -83,6 +83,15 @@ public class GameManager {
         log.debug("adding game ->{} <- to database", game.getName());
         List<GameEntity> entiites = applicationDatabase.findGameByUnique(game.getName(), game.getYear(),game.getLanguage());
         if (!entiites.isEmpty()) {
+            if (entiites.size()==1){
+                if (game.getDiskNumber()>0){
+                    GameEntity storedGame = entiites.getFirst();
+                    if (!isDiskPresent(game,storedGame)){
+                        applicationDatabase.saveGame(storedGame);
+                        return;
+                    }
+                }
+            }
             StringBuilder b = new StringBuilder();
             for (GameEntity gamelog:entiites){
                 b.append(gamelog.getId()).append("/").append(gamelog.getGame()).append("/")
@@ -101,6 +110,41 @@ public class GameManager {
             }
         }
         save(game);
+    }
+
+    private Boolean isDiskPresent(GameApp game, GameEntity storedGame) {
+        List<String> diskList = new ArrayList<>();
+        if (storedGame.getExtraDisks()!=null){
+            String[] disks = storedGame.getExtraDisks().split(";");
+            diskList = new ArrayList<>(Arrays.asList(disks));
+        }
+
+       // Map<String,String> diskSet = new HashMap<>();
+        Boolean found = null;
+
+       if (game.getDiskNumber()>1){
+           found=false;
+           for (String disk:diskList){
+               String[] diskInfo=disk.split("#");
+             //  diskSet.put(diskInfo[0],diskInfo[1]);
+               if (String.valueOf(game.getDiskNumber()).equals(diskInfo[0])){
+                   found=true;
+                   break;
+               }
+           }
+           if (!found){
+               String newDisk = game.getDiskNumber()+"#"+game.getGamePath().toAbsolutePath().toString();
+               diskList.add(newDisk);
+               storedGame.setExtraDisks(String.join( ";",diskList));
+           }
+       }else{
+           if (storedGame.getExePath()==null || storedGame.getExePath().equals("")){
+               storedGame.setExePath(game.getExePath().toAbsolutePath().toString());
+               found= false;
+           }
+
+       }
+       return found;
     }
 
     public void updateTime(GameApp game, Long time) {

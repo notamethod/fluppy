@@ -1,9 +1,6 @@
 package com.notamethod.fluppy.gui;
 
-import com.notamethod.fluppy.core.game.CompanyEntity;
-import com.notamethod.fluppy.core.game.GameApp;
-import com.notamethod.fluppy.core.game.GameManager;
-import com.notamethod.fluppy.core.game.GenreApp;
+import com.notamethod.fluppy.core.game.*;
 import com.notamethod.fluppy.dosbox.DosBoxException;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
 import com.notamethod.fluppy.dosbox.UAEManager;
@@ -33,9 +30,11 @@ public class GameDetailPanel extends StackPane {
     private final StackPane imageView;
     private final Label description;
     private final VBox editorBox;
+    private final VBox platformBox;
     private final Label genre;
     private final Label editor;
     private final ImageView editorImage;
+    private final ImageView platformImage;
     private final Label timePlayed;
     private final Label year;
     private final Label language;
@@ -78,12 +77,22 @@ public class GameDetailPanel extends StackPane {
         description.setPrefWidth(540);
         description.setVisible(false);
         editor  = new Label();
+
         editorImage = new ImageView();
         editorImage.setFitHeight(150);
         editorImage.setFitWidth(200);
         editorImage.setPickOnBounds(true);
         editorImage.setPreserveRatio(true);
+
         editorBox = new VBox(10, editor, editorImage);
+        platformImage = new ImageView();
+        platformImage.setFitHeight(80);
+        platformImage.setFitWidth(140);
+        platformImage.setPickOnBounds(true);
+        platformImage.setPreserveRatio(true);
+
+
+        platformBox = new VBox(10, platformImage);
         editorBox.managedProperty().bind(editorBox.visibleProperty());
         genre = new Label();
         genre.setWrapText(true);
@@ -124,7 +133,7 @@ public class GameDetailPanel extends StackPane {
         });
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
-        detailContent = new VBox(10, year, genre, languageFlag, editorBox, timePlayed, extraFiles);
+        detailContent = new VBox(10, year, genre, languageFlag, platformBox, editorBox, timePlayed, extraFiles);
         detailContent.setAlignment(Pos.TOP_LEFT);
         launchButton.setDisable(!dosBoxManager.isDosboxPresent());
         buttonBox = new HBox(2, launchButton, editButton);
@@ -219,7 +228,13 @@ public class GameDetailPanel extends StackPane {
         description.setText("dklsdjgkl jsdgksdjgklmsdj gkjsdlgjsdgkj ksdgjksdjglds sdkjgklsdj kgdsjgklsd jsdl jkgjsgklsdg j" +
                 "dksjhgklsdhg jdskghdshgjsdhg hgs");
         name.setText(game.getName());
-
+        if (Platform.fromValue(game.getPlatform()).equals(Platform.AMIGA)){
+            Image platformImg = new Image(getClass().getResourceAsStream("/images/Amiga-Logo-1985.png"));
+            platformImage.setImage(platformImg);
+        }else{
+            Image platformImg = new Image(getClass().getResourceAsStream("/images/pcgame.png"));
+            platformImage.setImage(platformImg);
+        }
         year.setText(Messages.getString("game.year",game.getYear() == null ? "" : String.valueOf(game.getYear())));
         String genres = String.join(" ■ ",
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)

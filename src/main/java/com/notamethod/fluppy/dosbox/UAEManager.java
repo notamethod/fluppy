@@ -2,6 +2,7 @@ package com.notamethod.fluppy.dosbox;
 
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.GameEntity;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.gui.PanelListener;
@@ -14,9 +15,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class UAEManager {
@@ -182,6 +183,9 @@ public class UAEManager {
         config.put("kickstart_file",    preferences.getKickstartPath());
         //FIXME
         config.put("floppy_drive_0",    gameApp.getGamePath().toString());
+       if (gameApp.getExtraDisks()!=null){
+           configureDisks(gameApp.getGamePath().toString(), gameApp.getExtraDisks(), config);
+       }
         config.put("floppy_drive_speed",   "800");
 
 
@@ -198,11 +202,36 @@ public class UAEManager {
                 allProps, null);
     }
 
+    private void configureDisks(String gamePath, String extraDisks, HashMap<String, String> config) {
+        Map<Integer, String> extradisks = buildDiskList(gamePath,extraDisks);
+        config.put("floppy_image_0",gamePath);
+        for (Map.Entry<Integer, String> entry : extradisks.entrySet()) {
+            config.put("floppy_image_"+(entry.getKey()-1),entry.getValue());
+            if (entry.getKey().equals(2)){
+                config.put("floppy_drive_1",entry.getValue());
+            }
+
+        }
+    }
+
     public boolean isKickstart() {
         return !preferences.getKickstartPath().isEmpty();
     }
 
 
+    private Map<Integer, String> buildDiskList(String path, String disks){
+        List<String> diskList = new ArrayList<>();
+        diskList.add(path);
+        Map<Integer, String> extradisks = Arrays.stream(disks.split(";"))
+                .map(part -> part.split("#", 2))
+                .filter(arr -> arr.length == 2)
+                .collect(Collectors.toMap(
+                        arr -> Integer.parseInt(arr[0]),
+                        arr -> arr[1]
+                ));
+
+        return extradisks;
+    }
 
 
 }

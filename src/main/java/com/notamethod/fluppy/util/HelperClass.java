@@ -3,6 +3,8 @@ package com.notamethod.fluppy.util;
 
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.Platform;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -24,7 +26,8 @@ public class HelperClass {
     public static final int WINDOWS = 2;
     public static final int MACOS = 3;
     public static final String REGEX_ABANDONWARE = "jeu-[0-9]{5}-.*";
-    public static final String REGEX_AMIGA = "^(.+?)\\s*\\((\\d{4})\\)(?:\\((?!Disk)[^)]+\\))*(?:\\((Disk[^)]+)\\))?\\.adf$";
+    public static final String REGEX_AMIGA = "^(.+?)\\s*\\((\\d{4})\\)(?:\\((?!Disk)[^)]+\\)|(?:\\[[^\\]]+\\]))*(?:\\((Disk[^)]+)\\))?\\.adf$";
+    public static final String REGEX_DISKS_AMIGA="Disk\\s+(\\d+)\\s+of\\s+(\\d+)";
     //public static final String REGEX_SIMPLE="*._DOS_??.zip";
     public static final String REGEX_SIMPLE = "(.*)_DOS_[A-Z][A-Z].*";
     private static final String FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
@@ -91,36 +94,33 @@ public class HelperClass {
                 .forEach(File::delete);
     }
 
-    public static String guessTitleFromFilename(String name) {
+
+    public static SearchInfo
+    parseFileName(String name, String platform) {
         if (name == null) {
             return null;
+        }
+        SearchInfo info = null;
+        if (Platform.fromValue(platform).equals(Platform.AMIGA)) {
+            info = regexAmiga(name);
+        }
+
+        if (info != null && info.getTitle() != null) {
+            return info;
         }
         String title = regexArchive(name);
         if (title == null) {
             title = regexGroup(name, REGEX_SIMPLE, 1);
         }
-        if (title == null) {
-            int pos = name.lastIndexOf(".");
-            title = pos > 0 ? name.substring(0, pos) : name;
-        }
-        return toTitleGame(title);
 
-    }
-    public static String guessTitleFromFilename(String name, String platform) {
-        if (name == null) {
-            return null;
-        }
-        String title=null;
-        SearchInfo info = regexAmiga(name);
-        if (info!=null && info.title!= null) {
-            title = info.title;
-        }
         if (title == null) {
             int pos = name.lastIndexOf(".");
             title = pos > 0 ? name.substring(0, pos) : name;
         }
-        return toTitleGame(title);
+
+        return new SearchInfo(toTitleGame(title));
     }
+
     public static String fromCamelCase(String nameWithCamelCase) {
         String converted = nameWithCamelCase.replaceAll("([a-z])([A-Z])", "$1 $2");
 
@@ -131,7 +131,7 @@ public class HelperClass {
         return converted;
     }
 
-    public static String regexArchive(String name) {
+    private static String regexArchive(String name) {
         Pattern pattern = Pattern.compile(REGEX_ABANDONWARE);
         Matcher matcher = pattern.matcher(name);
         if (matcher.find()) {
@@ -140,11 +140,32 @@ public class HelperClass {
         }
         return null;
     }
+
     public static SearchInfo regexAmiga(String name) {
         Pattern pattern = Pattern.compile(REGEX_AMIGA);
         Matcher matcher = pattern.matcher(name);
         if (matcher.matches()) {
-            return new SearchInfo( matcher.group(1) ,matcher.group(2),matcher.group(3));
+            SearchInfo searchInfo= new SearchInfo(matcher.group(1), matcher.group(2));
+            String diskInfo =  matcher.group(3);
+            if (diskInfo != null) {
+                Pair<Integer, Integer> info = getDiskInfo(diskInfo);
+                if (info != null) {
+                    searchInfo.setDisk(info.getKey());
+                    searchInfo.setTotalDisk(info.getValue());
+                }
+            }
+            return searchInfo;
+        }
+        return null;
+    }
+
+    public static Pair<Integer, Integer> getDiskInfo(String name) {
+        Pattern pattern = Pattern.compile(REGEX_DISKS_AMIGA);
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            Integer disk= Integer.valueOf(matcher.group(1));
+            Integer total= Integer.valueOf(matcher.group(2));
+            return new Pair<>(disk, total);
         }
         return null;
     }
@@ -200,7 +221,6 @@ public class HelperClass {
     }
 
 
-
     public static String getExtension(File file) {
         String name = file.getName();
         int dot = name.lastIndexOf('.');
@@ -213,7 +233,4 @@ public class HelperClass {
     }
 
 
-
-    public record SearchInfo(String title, String  year, String disk) {
-    }
 }

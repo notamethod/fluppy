@@ -43,7 +43,8 @@ public class GameEntity {
     private int ageRating;
     private String comment;
     private String platform;
-
+  //  private int numberOfDisks;
+    private String extraDisks;
     @Lob
     @Column(name = "cover_image")
     private byte[] coverImage;
