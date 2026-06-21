@@ -27,3 +27,4 @@ target/
 /dependency-reduced-pom.xml
 /src/main/resources/images/*.xcf
 /prefs.json
+/src/main/resources/ffmpeg/windows/ffmpeg.exe
