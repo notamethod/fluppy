@@ -1,16 +1,13 @@
 package com.notamethod.fluppy.core.game;
 
-import org.mapstruct.IterableMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GameMapper {
     GameMapper INSTANCE = Mappers.getMapper(GameMapper.class);
 
