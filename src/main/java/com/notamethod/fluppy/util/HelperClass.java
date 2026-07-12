@@ -3,6 +3,8 @@ package com.notamethod.fluppy.util;
 
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
+import com.notamethod.fluppy.core.game.Platform;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -18,11 +20,14 @@ import java.util.regex.Pattern;
 @Slf4j
 public class HelperClass {
 
+    //^(.+?)\s*\((\d{4})\)(?:\((?!Disk)[^)]+\))*(?:\((Disk[^)]+)\))?\.adf$
     public static final int LINUX = 0;
     public static final int SOLARIS = 1;
     public static final int WINDOWS = 2;
     public static final int MACOS = 3;
     public static final String REGEX_ABANDONWARE = "jeu-[0-9]{5}-.*";
+    public static final String REGEX_AMIGA = "^(.+?)\\s*\\((\\d{4})\\)(?:\\((?!Disk)[^)]+\\)|(?:\\[[^\\]]+\\]))*(?:\\((Disk[^)]+)\\))?\\.adf$";
+    public static final String REGEX_DISKS_AMIGA="Disk\\s+(\\d+)\\s+of\\s+(\\d+)";
     //public static final String REGEX_SIMPLE="*._DOS_??.zip";
     public static final String REGEX_SIMPLE = "(.*)_DOS_[A-Z][A-Z].*";
     private static final String FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
@@ -30,6 +35,14 @@ public class HelperClass {
 
     public static boolean gameIsInTempDir(GameApp d) {
         Path parent = Paths.get(Configuration.tempFolder);
+        Path child = d.getGamePath();
+
+        // Vérification
+        return child.normalize().startsWith(parent.normalize());
+    }
+
+    public static boolean gameIsInGameDir(GameApp d) {
+        Path parent = Paths.get(Configuration.gamesFolder);
         Path child = d.getGamePath();
 
         // Vérification
@@ -89,20 +102,30 @@ public class HelperClass {
                 .forEach(File::delete);
     }
 
-    public static String guessTitleFromFilename(String name) {
+
+    public static SearchInfo parseFileName(String name, String platform) {
         if (name == null) {
             return null;
+        }
+        SearchInfo info = null;
+        if (Platform.fromValue(platform).equals(Platform.AMIGA)) {
+            info = regexAmiga(name);
+        }
+
+        if (info != null && info.getTitle() != null) {
+            return info;
         }
         String title = regexArchive(name);
         if (title == null) {
             title = regexGroup(name, REGEX_SIMPLE, 1);
         }
+
         if (title == null) {
             int pos = name.lastIndexOf(".");
             title = pos > 0 ? name.substring(0, pos) : name;
         }
-        return toTitleGame(title);
 
+        return new SearchInfo(toTitleGame(title));
     }
 
     public static String fromCamelCase(String nameWithCamelCase) {
@@ -115,7 +138,7 @@ public class HelperClass {
         return converted;
     }
 
-    public static String regexArchive(String name) {
+    private static String regexArchive(String name) {
         Pattern pattern = Pattern.compile(REGEX_ABANDONWARE);
         Matcher matcher = pattern.matcher(name);
         if (matcher.find()) {
@@ -123,7 +146,35 @@ public class HelperClass {
             return data[2];
         }
         return null;
+    }
 
+    public static SearchInfo regexAmiga(String name) {
+        Pattern pattern = Pattern.compile(REGEX_AMIGA);
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            SearchInfo searchInfo= new SearchInfo(matcher.group(1), matcher.group(2));
+            String diskInfo =  matcher.group(3);
+            if (diskInfo != null) {
+                Pair<Integer, Integer> info = getDiskInfo(diskInfo);
+                if (info != null) {
+                    searchInfo.setDisk(info.getKey());
+                    searchInfo.setTotalDisk(info.getValue());
+                }
+            }
+            return searchInfo;
+        }
+        return null;
+    }
+
+    public static Pair<Integer, Integer> getDiskInfo(String name) {
+        Pattern pattern = Pattern.compile(REGEX_DISKS_AMIGA);
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.matches()) {
+            Integer disk= Integer.valueOf(matcher.group(1));
+            Integer total= Integer.valueOf(matcher.group(2));
+            return new Pair<>(disk, total);
+        }
+        return null;
     }
 
     public static String regexGroup(String name, String regx, int group) {
@@ -177,7 +228,6 @@ public class HelperClass {
     }
 
 
-
     public static String getExtension(File file) {
         String name = file.getName();
         int dot = name.lastIndexOf('.');
@@ -186,32 +236,8 @@ public class HelperClass {
     }
 
     public static String getArchiveExtension(String filename) {
-        if (filename == null || filename.isEmpty()) return "";
-
-        // Extensions doubles connues (ordre important : les plus longues d'abord)
-        String[] doubleExtensions = {
-                "tar.gz", "tar.bz2", "tar.xz", "tar.zst", "tar.lz",
-                "tar.lzma", "tar.lz4", "tar.br", "tar.sz", "tar.Z",
-                "cpio.gz", "cpio.bz2", "cpio.xz",
-                "img.gz", "img.xz",
-                "iso.gz",
-                "shar.gz"
-        };
-
-        String lower = filename.toLowerCase();
-
-        for (String ext : doubleExtensions) {
-            if (lower.endsWith("." + ext)) {
-                return ext;
-            }
-        }
-
-        // Fallback : extension simple
-        int dot = filename.lastIndexOf('.');
-        if (dot >= 0 && dot < filename.length() - 1) {
-            return filename.substring(dot + 1);
-        }
-
-        return "";
+        return null;
     }
+
+
 }

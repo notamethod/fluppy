@@ -42,7 +42,10 @@ public class GameEntity {
     private Long timePlayed = 0L;
     private int ageRating;
     private String comment;
-
+    private String platform;
+    private String format;
+  //  private int numberOfDisks;
+    private String extraDisks;
     @Lob
     @Column(name = "cover_image")
     private byte[] coverImage;

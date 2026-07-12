@@ -1,11 +1,9 @@
 package com.notamethod.fluppy.gui;
 
-import com.notamethod.fluppy.core.game.CompanyEntity;
-import com.notamethod.fluppy.core.game.GameApp;
-import com.notamethod.fluppy.core.game.GameManager;
-import com.notamethod.fluppy.core.game.GenreApp;
+import com.notamethod.fluppy.core.game.*;
 import com.notamethod.fluppy.dosbox.DosBoxException;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
+import com.notamethod.fluppy.dosbox.UAEManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -13,7 +11,9 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -25,16 +25,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.controlsfx.control.Rating;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class GameDetailPanel extends StackPane {
     private final StackPane imageView;
     private final Label description;
     private final VBox editorBox;
+    private final VBox platformBox;
     private final Label genre;
     private final Label editor;
     private final ImageView editorImage;
+    private final ImageView platformImage;
     private final Label timePlayed;
     private final Label year;
     private final Label language;
@@ -45,6 +46,7 @@ public class GameDetailPanel extends StackPane {
     private final Button editButton;
     private final VBox infoContent;
     private final DosBoxManager dosBoxManager;
+    private  UAEManager uaeManager;
     private final GameManager gameManager;
     private GameApp game;
     private PanelListener listener;
@@ -55,9 +57,10 @@ public class GameDetailPanel extends StackPane {
     VBox detailContent;
     private boolean isBigView=false;
 
-    public GameDetailPanel(DosBoxManager dosBoxManager, GameManager gameManager) {
-        this.dosBoxManager = dosBoxManager;
+    public GameDetailPanel(GameManager gameManager) {
+
         this.gameManager = gameManager;
+        this.dosBoxManager = this.gameManager.getDosBoxManager();
         setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 10; -fx-background-radius: 8;");
         setVisible(false);
 
@@ -75,12 +78,22 @@ public class GameDetailPanel extends StackPane {
         description.setPrefWidth(540);
         description.setVisible(false);
         editor  = new Label();
+
         editorImage = new ImageView();
         editorImage.setFitHeight(150);
         editorImage.setFitWidth(200);
         editorImage.setPickOnBounds(true);
         editorImage.setPreserveRatio(true);
+
         editorBox = new VBox(10, editor, editorImage);
+        platformImage = new ImageView();
+        platformImage.setFitHeight(80);
+        platformImage.setFitWidth(140);
+        platformImage.setPickOnBounds(true);
+        platformImage.setPreserveRatio(true);
+
+
+        platformBox = new VBox(10, platformImage);
         editorBox.managedProperty().bind(editorBox.visibleProperty());
         genre = new Label();
         genre.setWrapText(true);
@@ -115,13 +128,9 @@ public class GameDetailPanel extends StackPane {
         rating.setScaleX(0.6);
         rating.setScaleY(0.6);
         rating.setPadding(new Insets(10));
-
-        rating.ratingProperty().addListener((obs, oldV, newV) -> {
-            log.debug("Note modifiée : " + newV);
-        });
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
-        detailContent = new VBox(10, year, genre, languageFlag, editorBox, timePlayed, extraFiles);
+        detailContent = new VBox(10, year, genre, languageFlag, platformBox, editorBox, timePlayed, extraFiles);
         detailContent.setAlignment(Pos.TOP_LEFT);
         launchButton.setDisable(!dosBoxManager.isDosboxPresent());
         buttonBox = new HBox(2, launchButton, editButton);
@@ -183,37 +192,10 @@ public class GameDetailPanel extends StackPane {
 
     private long runGame() throws DosBoxException {
 
-
-        AtomicReference<Long> duration = new AtomicReference<>(0L);
-        dosBoxManager.runApplication(
-                game.getGameExe(),
+        return gameManager.runGame(
                 game,
                 screenRez,
-                listener,
-                line -> log.info("[DOSBOX] " + line),
-                err -> log.error("[DOSBOX] " + err),
-                result -> {
-
-                    if (listener != null) {
-
-                        listener.onExitGame();
-                    }
-                    if (result.success) {
-                        System.out.println("DOSBox OK");
-                    } else {
-                        System.out.println("Erreur : " + result.error);
-                    }
-
-                    System.out.println("Durée : " + result.durationMillis + " ms");
-                    duration.set(result.durationMillis);
-                    if (duration.get() > 0) {
-                        gameManager.updateTime(game, duration.get() / 1000);
-                    }
-                    System.out.println("Exit code : " + result.exitCode);
-                }
-        );
-        return duration.get();
-
+                listener);
     }
 
     private void editAction() throws IOException {
@@ -243,7 +225,13 @@ public class GameDetailPanel extends StackPane {
         description.setText("dklsdjgkl jsdgksdjgklmsdj gkjsdlgjsdgkj ksdgjksdjglds sdkjgklsdj kgdsjgklsd jsdl jkgjsgklsdg j" +
                 "dksjhgklsdhg jdskghdshgjsdhg hgs");
         name.setText(game.getName());
-
+        if (Platform.fromValue(game.getPlatform()).equals(Platform.AMIGA)){
+            Image platformImg = new Image(getClass().getResourceAsStream("/images/Amiga-Logo-1985.png"));
+            platformImage.setImage(platformImg);
+        }else{
+            Image platformImg = new Image(getClass().getResourceAsStream("/images/pcgame.png"));
+            platformImage.setImage(platformImg);
+        }
         year.setText(Messages.getString("game.year",game.getYear() == null ? "" : String.valueOf(game.getYear())));
         String genres = String.join(" ■ ",
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)

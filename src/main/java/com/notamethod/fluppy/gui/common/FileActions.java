@@ -1,18 +1,18 @@
 package com.notamethod.fluppy.gui.common;
 
 
-import com.notamethod.fluppy.core.*;
+import com.notamethod.fluppy.SafeLog;
+import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.util.ArchiveExtractor;
+import com.notamethod.fluppy.util.Fat12ImageReader;
 import com.notamethod.fluppy.util.FileWizard;
-import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
 
 @Slf4j
 public class FileActions {
@@ -77,35 +77,43 @@ public class FileActions {
         return mgame;
     }
 
+    public GameApp addAmiga(File inFile) {
+        log.info("adding amiga file");
+        GameApp mgame = new GameApp();
+        mgame.setPlatform("amiga");
+        mgame.setGamePath(inFile.toPath());
+        mgame.getExeFiles().add(inFile);
+        log.info("analyze directory {}", inFile.getAbsolutePath());
+        mgame.setExePath(mgame.getExeFiles().get(0).toPath());
+        mgame.setGameExe(mgame.getExeFiles().get(0).getName());
+        return mgame;
+    }
 
-
-
-
-
-    private String calculateSearchString(GameApp metaGame, String sourceFileName) {
-        String guessSource = null;
-        File exeFile = null;
-        String searchString="";
-        if (metaGame.getExePath() != null) {
-            exeFile = metaGame.getExePath().toFile();
-            guessSource = exeFile.getName();
-            metaGame.setGameExe(exeFile.getName());
-            metaGame.setExePath(Paths.get(exeFile.getAbsolutePath().substring(0, exeFile.getAbsolutePath().lastIndexOf(File.separatorChar))));
-             searchString = exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
+    public GameApp addImage(File inFile) {
+        log.info("adding Game: type: PC image file {}", inFile);
+        GameApp mgame = new GameApp();
+        mgame.setPlatform("pc");
+        mgame.setFormat("image");
+        mgame.setGamePath(inFile.toPath());
+        try (Fat12ImageReader reader = new Fat12ImageReader(mgame.getGamePath())) {
+            Fat12ImageReader.DosFile best = reader.findBestExecutable(); // le candidat le plus probable
+            List<Fat12ImageReader.DosFile> all = reader.findExecutablesSorted(); // tous, triés
+            mgame.setGameExe(all.getFirst().fullPath());
+            SafeLog.debug(log, "Found", all);
+            List<File> files = all.stream().map(Fat12ImageReader.DosFile::fullPath)
+                    .map(File::new)
+                    .toList();
+            //TODO: classes for diffrent sources files tpyes
+            mgame.getExeFiles().addAll(files);
+            mgame.setName(all.getFirst().name());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
 
-        //TODO: set intallers
+        mgame.setExePath(null);
 
-
-        if (sourceFileName != null) {
-            String title = HelperClass.guessTitleFromFilename(sourceFileName);
-            if (title != null) {
-
-                searchString = title;
-            }
-        }
-        return HelperClass.fromCamelCase(searchString);
+        return mgame;
     }
 
     /**

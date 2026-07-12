@@ -20,6 +20,12 @@ public class PreferencesBean implements Serializable {
 
     @JsonProperty("dosBoxPath")
     private String dosBoxPath = "";
+
+    @JsonProperty("fsuaePath")
+    private String fsuaePath = "";
+    @JsonProperty("kickstartPath")
+    private String kickstartPath = "";
+
     @JsonProperty("dosBoxType")
     private String dosBoxType = "";
 

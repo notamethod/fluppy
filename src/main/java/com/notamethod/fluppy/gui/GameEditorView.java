@@ -15,23 +15,24 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.*;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -177,7 +178,7 @@ public class GameEditorView extends DialogPane {
     private Tab buildLocalTab() {
         Tab tab = new Tab("Informations locales");
         tab.setClosable(false);
-
+        exeFile.setPrefWidth(460);
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -292,7 +293,7 @@ public class GameEditorView extends DialogPane {
                 EXTRA_TYPE.COVER.toString()
         );
         Optional<String> chosen = da.showListInputDialog(
-                "What's the name of the game?",
+                "Choose import type",
                 "What is the title of the application? Select one of the proposals,\n" +
                         "or select \"Something else...\" to type your own.",
                 choices.toArray(String[]::new), choices.get(0)

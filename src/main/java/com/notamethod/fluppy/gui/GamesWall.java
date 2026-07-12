@@ -1,7 +1,8 @@
 package com.notamethod.fluppy.gui;
 
 
-import com.notamethod.fluppy.core.*;
+import com.notamethod.fluppy.core.ApplicationDatabase;
+import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.category.Category;
 import com.notamethod.fluppy.core.category.CategoryManager;
 import com.notamethod.fluppy.core.category.CategoryType;
@@ -10,11 +11,11 @@ import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.game.Statistics;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
+import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.dosbox.DosBoxException;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.GameActions;
-import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.util.HelperClass;
 import javafx.animation.*;
 import javafx.application.Application;
@@ -36,13 +37,11 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-
 import javafx.scene.shape.Circle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-
 
 
 public class GamesWall extends Application {
@@ -129,7 +127,7 @@ public class GamesWall extends Application {
         }
         gameManager = new GameManager(applicationDatabase, preferences, dosBoxManager);
         categoryManager = new CategoryManager(applicationDatabase);
-        detailPane = new GameDetailPanel(dosBoxManager, gameManager);
+        detailPane = new GameDetailPanel(gameManager);
         gameCategories = categoryManager.getShownCategories(TILES_VIEW.DEFAULT);
         LinkedHashMap imageCache = new LinkedHashMap() {
 
@@ -881,15 +879,15 @@ public class GamesWall extends Application {
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
         double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - width/*screen.getMaxX()*/;
         double diffx = (point.getX() + detailPanelEstimatedWidth) - mainPane.getWidth()/*screen.getMaxX()*/;
-        log.debug("midroot " + +mainPane.getWidth() + "-" + mainPane.getHeight());
+        log.trace("midroot " + +mainPane.getWidth() + "-" + mainPane.getHeight());
         double diffy = (point.getY() + detailPanelEstimatedHeight) - mainPane.getHeight()/*screen.getMaxX()*/;
-        log.debug("tile " + "point " + point.getX() + " / " + point.getY());
-        log.debug("tile " + "fixedpoint2 " + fixedPoint2.getX() + " / " + fixedPoint2.getY());
-        log.debug("tile " + "container " + container.getWidth() + " / " + container.getHeight());
-        log.debug("tileSceneBounds min " + tileSceneBounds.getMinX());
+        log.trace("tile " + "point " + point.getX() + " / " + point.getY());
+        log.trace("tile " + "fixedpoint2 " + fixedPoint2.getX() + " / " + fixedPoint2.getY());
+        log.trace("tile " + "container " + container.getWidth() + " / " + container.getHeight());
+        log.trace("tileSceneBounds min " + tileSceneBounds.getMinX());
 
         double decalRatio = -(Screen.getPrimary().getDpi() / 100);
-        log.debug("dpi:" + Screen.getPrimary().getDpi());
+        log.trace("dpi:" + Screen.getPrimary().getDpi());
         if (diffx > 0) {
 
             fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
