@@ -43,6 +43,7 @@ public class GameEntity {
     private int ageRating;
     private String comment;
     private String platform;
+    private String format;
   //  private int numberOfDisks;
     private String extraDisks;
     @Lob

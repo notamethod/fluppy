@@ -3,11 +3,13 @@ package com.notamethod.fluppy.core.game;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -26,6 +28,7 @@ public class GameApp {
     private Path manualPath;
     private String extra;
     private String platform;
+    private String format;
     private int frameskip=0;
     private String cdrom;
     private String cdromLetter;

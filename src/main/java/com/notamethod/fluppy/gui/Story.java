@@ -3,7 +3,6 @@ package com.notamethod.fluppy.gui;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.dosbox.Installer;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 
@@ -51,16 +50,38 @@ public class Story {
                     storyDialog.setTextButton(StoryButton.ACTION, "automatique");
                     storyDialog.setOnAction(resultat -> {
                         Installer installer = new Installer();
-                        String exeFile = installer.    dosboxStaging(new ProgressCallback() {
+                        String exeFile = installer.application(new ProgressCallback() {
                             @Override
                             public void onProgress(String message) {
                                 // Update UI or log progress message
                                 System.out.println("Progress: " + message);
                                 storyDialog.setText(message);
                             }
-                        });
+                        }, Installer.emu1);
                         if (exeFile != null) {
                             preferences.setDosBoxPath(exeFile);
+                            PreferencesIO.save(preferences);
+                        }
+                    });
+                    step++;
+                    storyDialog.showAndWait();
+                }
+                if (preferences.getFsuaePath().isEmpty()) {
+                    storyDialog.setText(Messages.getString("story.dialog.fsuae"));
+                    storyDialog.activate(StoryButton.OK, StoryButton.ACTION);
+                    storyDialog.setTextButton(StoryButton.ACTION, "automatique");
+                    storyDialog.setOnAction(resultat -> {
+                        Installer installer = new Installer();
+                        String exeFile = installer.application(new ProgressCallback() {
+                            @Override
+                            public void onProgress(String message) {
+                                // Update UI or log progress message
+                                System.out.println("Progress: " + message);
+                                storyDialog.setText(message);
+                            }
+                        }, Installer.emu2);
+                        if (exeFile != null) {
+                            preferences.setFsuaePath(exeFile);
                             PreferencesIO.save(preferences);
                         }
                     });

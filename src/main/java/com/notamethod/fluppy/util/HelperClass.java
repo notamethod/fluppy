@@ -41,6 +41,14 @@ public class HelperClass {
         return child.normalize().startsWith(parent.normalize());
     }
 
+    public static boolean gameIsInGameDir(GameApp d) {
+        Path parent = Paths.get(Configuration.gamesFolder);
+        Path child = d.getGamePath();
+
+        // Vérification
+        return child.normalize().startsWith(parent.normalize());
+    }
+
     public static void moveGameToGames(GameApp d) throws IOException {
         Path tempParent = Paths.get(Configuration.tempFolder);
         Path child = d.getGamePath();
@@ -95,8 +103,7 @@ public class HelperClass {
     }
 
 
-    public static SearchInfo
-    parseFileName(String name, String platform) {
+    public static SearchInfo parseFileName(String name, String platform) {
         if (name == null) {
             return null;
         }

@@ -1,6 +1,7 @@
 package com.notamethod.fluppy.dosbox;
 
 import com.notamethod.fluppy.core.Configuration;
+import com.notamethod.fluppy.emulators.Emulator;
 import com.notamethod.fluppy.gui.ProgressCallback;
 import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.DownloadFiles;
@@ -18,16 +19,17 @@ import java.util.Set;
 
 @Slf4j
 public class Installer {
-    static final String DOSBOXSTAGING_URL_WIN=  "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-windows-x64-v0.82.2.zip";
-    static final String DOSBOXSTAGING_URL_LINUX="https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-linux-x86_64-v0.82.2.tar.xz";
+    public static final Emulator emu1 = new Emulator("dosboxStaging", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-windows-x64-v0.82.2.zip", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-linux-x86_64-v0.82.2.tar.xz", "dosbox.exe", "dosbox");
+    public static final Emulator emu2 = new Emulator("fs-uae", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Windows_x86-64.zip", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Linux_x86-64.tar.xz", "fs-uae.exe", "fs-uae");
 
-    public String dosboxStaging(ProgressCallback callback){
+
+    public String application(ProgressCallback callback, Emulator emulator) {
         boolean isLinux = Configuration.getOS()== Configuration.OS.LINUX;
-        final String exeFile= isLinux?"dosbox":"dosbox.exe";
+        final String exeFile = isLinux ? emulator.linuxApp() : emulator.winExe();
         try {
-            String url = isLinux?DOSBOXSTAGING_URL_LINUX:DOSBOXSTAGING_URL_WIN;
+            String url = isLinux ? emulator.installUrlLinux() : emulator.installUrlWindows();
 
-            String outputFile= Configuration.tempFolder+"/dosboxStaging."+HelperClass.getArchiveExtension(url);
+            String outputFile = Configuration.tempFolder + "/" + emulator.name() + "." + HelperClass.getArchiveExtension(url);
             DownloadFiles.download(url, outputFile);
             callback.onProgress("Downloaded file: " + outputFile);
             log.debug("done");
@@ -66,7 +68,6 @@ public class Installer {
             throw new RuntimeException(e);
         }
     }
-
     Optional<Path> findFile(Path startDir, String filename) throws IOException {
         try (var stream = Files.find(startDir, Integer.MAX_VALUE,
                 (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().equals(filename))) {

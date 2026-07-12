@@ -303,9 +303,17 @@ public class DosBoxManager {
             }
             autoexec.add(number++, cd);
         }
-        autoexec.add(number++, "mount c \"" + gameApp.getExePath() + "\"");
-        autoexec.add(number++, "C:");
-        autoexec.add(number++, program);
+        //FIXME
+        if (gameApp.getGamePath().toString().toLowerCase().endsWith(".img")) {
+            log.info("dos image identified for {}", gameApp.getGamePath());
+            autoexec.add(number++, "imgmount a \"" + gameApp.getGamePath().toString() + "\"" + " -t floppy");
+            autoexec.add(number++, "a:");
+            autoexec.add(number++, program);
+        } else {
+            autoexec.add(number++, "mount c \"" + gameApp.getExePath() + "\"");
+            autoexec.add(number++, "C:");
+            autoexec.add(number++, program);
+        }
         for (int i = 0; i < finito.length; i++) {
             if (finito[i][0].equalsIgnoreCase("autoexec")) {
                 autoexec.add(finito[i][1]);

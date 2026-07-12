@@ -1,12 +1,10 @@
 package com.notamethod.fluppy.gui;
 
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.Cursor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
@@ -25,7 +23,7 @@ public class LinkLabelFactory {
             try {
                 openFile(file);
             } catch (Exception ex) {
-                log.error("error", e);
+                log.error("error", ex);
             }
         });
 

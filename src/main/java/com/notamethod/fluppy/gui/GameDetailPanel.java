@@ -11,7 +11,9 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -23,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.controlsfx.control.Rating;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class GameDetailPanel extends StackPane {
@@ -127,10 +128,6 @@ public class GameDetailPanel extends StackPane {
         rating.setScaleX(0.6);
         rating.setScaleY(0.6);
         rating.setPadding(new Insets(10));
-
-        rating.ratingProperty().addListener((obs, oldV, newV) -> {
-            log.debug("Note modifiée : " + newV);
-        });
         HBox ratbox = new HBox(rating);
         ratbox.setPadding(new Insets(10));
         detailContent = new VBox(10, year, genre, languageFlag, platformBox, editorBox, timePlayed, extraFiles);

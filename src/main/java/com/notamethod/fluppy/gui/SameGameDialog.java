@@ -1,41 +1,23 @@
 package com.notamethod.fluppy.gui;
 
-import com.notamethod.fluppy.api.ApiCalls;
-import com.notamethod.fluppy.api.ApiException;
-import com.notamethod.fluppy.api.MappingException;
-import com.notamethod.fluppy.api.igdb.GameApiBean;
-import com.notamethod.fluppy.api.igdb.Genre;
+
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
-import com.notamethod.fluppy.core.game.GameManagerException;
-import com.notamethod.fluppy.core.game.GenreApp;
-import com.notamethod.fluppy.gui.common.DialogActionsJfx;
-import com.notamethod.fluppy.gui.common.FileActions;
-import com.notamethod.fluppy.gui.common.OperationCanceledException;
-import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.HelperClass;
-import javafx.beans.binding.Bindings;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
 
 @Slf4j
 public class SameGameDialog extends Stage {

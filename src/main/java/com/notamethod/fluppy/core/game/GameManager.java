@@ -11,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -30,7 +33,7 @@ public class GameManager {
     public int deleteGame(GameApp gameApp) {
         int nbDeleted = 0;
 
-        if (gameApp.getGamePath() != null) {
+        if (gameApp.getGamePath() != null && HelperClass.gameIsInGameDir(gameApp)) {
             try {
                 HelperClass.deleteDirectory(gameApp.getGamePath());
             } catch (IOException e) {

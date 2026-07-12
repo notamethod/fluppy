@@ -5,7 +5,7 @@ import com.notamethod.fluppy.api.ApiException;
 import com.notamethod.fluppy.api.MappingException;
 import com.notamethod.fluppy.api.igdb.GameApiBean;
 import com.notamethod.fluppy.api.igdb.Genre;
-import com.notamethod.fluppy.core.*;
+import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.core.game.GenreApp;
@@ -296,8 +296,16 @@ public class AddGameDialog extends Stage {
                     }
 
                     File exeFile = comboExeFilesList.get(i).getValue();
-                    metaGame.setGameExe(exeFile.getName());
-                    metaGame.setExePath(Paths.get(exeFile.getAbsolutePath().substring(0, exeFile.getAbsolutePath().lastIndexOf(File.separatorChar))));
+                    //TODO: specialiez class
+                    if (metaGame.getPlatform() != null && metaGame.getPlatform().equals("pc") && metaGame.getFormat().equals("image")) {
+                        metaGame.setGameExe(exeFile.getName());
+                        metaGame.setExePath(Paths.get(exeFile.toString().substring(0, exeFile.toString().lastIndexOf('/') + 1)));
+
+                    } else {
+                        metaGame.setGameExe(exeFile.getName());
+                        metaGame.setExePath(Paths.get(exeFile.getAbsolutePath().substring(0, exeFile.getAbsolutePath().lastIndexOf(File.separatorChar))));
+
+                    }
 
                     log.debug("meta2 " + metaGame.getName() + "-" + metaGame.getGameExe());
                 } else {
@@ -324,7 +332,10 @@ public class AddGameDialog extends Stage {
 
         } else if (inFile.getName().toLowerCase().endsWith("adf") ) {
             metaGame = fileActions.addAmiga(inFile);
+        } else if (inFile.getName().toLowerCase().endsWith("img")) {
+            metaGame = fileActions.addImage(inFile);
         } else {
+            log.error("unkown format for {}", inFile);
             metaGame = new GameApp();
         }
         calculateSearchInfo(metaGame, inFile.getName());
@@ -332,6 +343,9 @@ public class AddGameDialog extends Stage {
     }
 
     private SearchInfo calculateSearchInfo(GameApp metaGame, String sourceFileName) {
+        if (metaGame.getPlatform().equals("pc") && metaGame.getFormat().equals("image")) {
+            return calculateSearchInfoImg(metaGame, sourceFileName);
+        }
         String guessSource = null;
         File exeFile = null;
         String searchString = "";
@@ -357,13 +371,41 @@ public class AddGameDialog extends Stage {
 
         String textSearch = searchString.isEmpty() ? "" : HelperClass.fromCamelCase(searchString);
         metaGame.setSearchName(textSearch);
-    
-        metaGame.setDiskNumber(searchInfo.getDisk()==null?0:searchInfo.getDisk());
-        metaGame.setNumberOfDisks(searchInfo.getTotalDisk()==null?0:searchInfo.getTotalDisk());
-       //TODO get disk number info
+
+        metaGame.setDiskNumber(searchInfo.getDisk() == null ? 0 : searchInfo.getDisk());
+        metaGame.setNumberOfDisks(searchInfo.getTotalDisk() == null ? 0 : searchInfo.getTotalDisk());
+        //TODO get disk number info
         return searchInfo;
     }
 
+    private SearchInfo calculateSearchInfoImg(GameApp metaGame, String sourceFileName) {
+        String guessSource = null;
+        File exeFile = null;
+        String searchString = "";
+        if (metaGame.getExePath() != null) {
+            //provisionning value
+            exeFile = metaGame.getExePath().toFile();
+            guessSource = exeFile.getName();
+            metaGame.setGameExe(guessSource);
+            metaGame.setExePath(Path.of(exeFile.getParentFile().getAbsolutePath()));
+            searchString = guessSource;
+        }
+        //TODO: set intallers
+        SearchInfo searchInfo = new SearchInfo(guessSource);
+
+
+        String textSearch = searchString.isEmpty() ? "" : HelperClass.fromCamelCase(searchString);
+        if (textSearch == null || textSearch.isEmpty()) {
+            metaGame.setSearchName(metaGame.getName());
+        } else {
+
+            metaGame.setSearchName(textSearch);
+        }
+        metaGame.setDiskNumber(searchInfo.getDisk()==null?0:searchInfo.getDisk());
+        metaGame.setNumberOfDisks(searchInfo.getTotalDisk()==null?0:searchInfo.getTotalDisk());
+        //TODO get disk number info
+        return searchInfo;
+    }
     private List<File> sortRunners(String mainName, List<File> exeFiles) {
         File mainFile = null;
         List<File> batFiles = new ArrayList<>();
@@ -393,8 +435,7 @@ public class AddGameDialog extends Stage {
 
     private List<GameApiBean> findGame(String name, ApiCalls apiCalls,int limit) throws ApiException {
         // searching game
-        final List<GameApiBean> games = new ArrayList<>();
-        games.addAll(apiCalls.findGame(name,limit));
+        final List<GameApiBean> games = new ArrayList<>(apiCalls.findGame(name, limit));
         return games;
     }
 

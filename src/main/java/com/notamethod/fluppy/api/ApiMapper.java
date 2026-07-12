@@ -7,13 +7,14 @@ import com.notamethod.fluppy.core.game.GenreApp;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ApiMapper {
     ApiMapper INSTANCE = Mappers.getMapper(ApiMapper.class);
 
