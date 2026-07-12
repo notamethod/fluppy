@@ -66,7 +66,7 @@ public class GamesWall extends Application {
     private Stage stage;
 
     public enum TILES_VIEW {
-        DEFAULT, YEARS, COMPANY;
+        DEFAULT, YEARS, COMPANY
     }
 
     private static final int ORIGINAL_WIDTH = 900;
@@ -76,7 +76,6 @@ public class GamesWall extends Application {
     ApplicationDatabase applicationDatabase;
     PreferencesBean preferences;
     DosBoxManager dosBoxManager = new DosBoxManager();
-    private LinkedHashMap imageCache;
     GameManager gameManager;
     CategoryManager categoryManager;
 
@@ -115,15 +114,13 @@ public class GamesWall extends Application {
             throw new RuntimeException(e);
         }
 
-            String igdbUser = System.getenv("IGDB_USER");
-            String igdbToken= System.getenv("IGDB_TOKEN");
+        String igdbUser = System.getenv("IGDB_USER");
+        String igdbToken = System.getenv("IGDB_TOKEN");
         if (igdbUser!=null && !igdbUser.isEmpty()){
-            log.info("load credentials user API");
-            igdbUser=null;
+            log.info("found IGDB credentials: user API");
         }
         if (igdbToken!=null && !igdbToken.isEmpty()){
-            log.info("load credentials token API");
-            igdbToken=null;
+            log.info("found IGDB credentials: token API");
         }
         gameManager = new GameManager(applicationDatabase, preferences, dosBoxManager);
         categoryManager = new CategoryManager(applicationDatabase);
@@ -136,19 +133,7 @@ public class GamesWall extends Application {
             }
         };
 
-        FontUtils.loadCustomFont("retro-pixel-arcade.ttf", 8);
-        FontUtils.loadCustomFont("MonkeyIsland-1991.ttf", 16);
-        FontUtils.loadCustomFont("MonkeyIsland-1990.ttf", 16);
-        FontUtils.loadCustomFont("lucasarts-scumm-menu-shadow.otf", 16);
-        FontUtils.loadCustomFont("lucasarts-scumm-solid.otf", 16);
-        FontUtils.loadCustomFont("lucasarts-scumm-outline.otf", 16);
-        FontUtils.loadCustomFont("lucasarts-scumm-credits.otf", 16);
-        FontUtils.loadCustomFont("lucasarts-scumm-subtitle-roman.otf", 16);
-        FontUtils.loadCustomFont("Storyboo.ttf", 16);
-        FontUtils.loadCustomFont("Retro Gaming.ttf", 16);
-        FontUtils.loadCustomFont("PxPlus_IBM_VGA_8x16.ttf", 16);
-        FontUtils.loadCustomFont("PixelifySans-Regular.ttf",14);
-        FontUtils.loadCustomFont("ShareTechMono-Regular.ttf",14);
+        FontUtils.loadCustomFonts();
     }
 
     @Override
@@ -179,7 +164,6 @@ public class GamesWall extends Application {
                                        updateList();
                                        detailPane.hide();
                                    }
-
                                    public void onClose() {
                                        detailPane.hide();
                                    }
@@ -360,9 +344,6 @@ public class GamesWall extends Application {
 
     private String getVideo() {
         Path path = Paths.get(Configuration.videoFolder, "video0001.mp4");
-
-        System.out.println( path.toAbsolutePath());
-        System.out.println( path.toString());
         return path.toString();
     }
 
@@ -1010,7 +991,7 @@ public class GamesWall extends Application {
     }
 
     private String getScreenRez() {
-        Screen screen = Screen.getScreensForRectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()).get(0);
+        Screen screen = Screen.getScreensForRectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()).getFirst();
         //exclude task bar: Rectangle2D visualBounds = screen.getVisualBounds();
         Rectangle2D bounds = screen.getBounds();
         double scaleX = screen.getOutputScaleX();

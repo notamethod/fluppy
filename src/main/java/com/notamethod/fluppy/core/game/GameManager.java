@@ -270,7 +270,6 @@ public class GameManager {
         return applicationDatabase.countGames(preferences.isNsfw());
     }
     public Statistics getStatistics() {
-        System.out.println(applicationDatabase.timePlayed(preferences.isNsfw()));
         return applicationDatabase.statistics(preferences.isNsfw());
     }
 
