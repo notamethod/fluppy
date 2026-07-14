@@ -28,7 +28,10 @@ import javafx.beans.property.StringProperty;
 import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
@@ -714,16 +717,6 @@ public class GamesWall extends Application {
 
         container.setEffect(Effects.getDropShadow2());
 
-        // Création du menu contextuel
-        ContextMenu contextMenu = new ContextMenu();
-        contextMenu.setStyle("-fx-background-color: #2c2c2c; -fx-text-fill: white;");
-        MenuItem deleteItem = new MenuItem("Supprimer");
-
-        deleteItem.setOnAction(e -> actionDelete(game));
-
-// Ajout des items au menu
-        contextMenu.getItems().addAll(deleteItem);
-
         PauseTransition hoverDelay = new PauseTransition(Duration.millis(600));
         hoverDelay.setOnFinished(e -> {
             Point2D point = caculatePosition(container);
@@ -773,7 +766,7 @@ public class GamesWall extends Application {
 
         container.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
-                contextMenu.show(container, e.getScreenX(), e.getScreenY());
+                //NOTHING
             } else if (e.getButton() == MouseButton.PRIMARY) {
                 if (e.getClickCount() == 1) {
                     long returne = 0;
@@ -904,12 +897,6 @@ public class GamesWall extends Application {
         if (diffy > 0)
             fixedPoint2 = fixedPoint2.add(0, decalRatio * diffy);
         return fixedPoint2;
-    }
-
-    private void actionDelete(GameApp game) {
-        if (gameManager.deleteGame(game) > 0) {
-            updateList();
-        }
     }
 
     public static void main(String[] args) {

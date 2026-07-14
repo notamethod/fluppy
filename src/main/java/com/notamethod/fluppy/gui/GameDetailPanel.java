@@ -4,6 +4,7 @@ import com.notamethod.fluppy.core.game.*;
 import com.notamethod.fluppy.dosbox.DosBoxException;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
 import com.notamethod.fluppy.dosbox.UAEManager;
+import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.controlsfx.control.Rating;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 public class GameDetailPanel extends StackPane {
@@ -44,6 +46,7 @@ public class GameDetailPanel extends StackPane {
     private  final HBox buttonBox;
     private final Button launchButton;
     private final Button editButton;
+    private final Button deleteButton;
     private final VBox infoContent;
     private final DosBoxManager dosBoxManager;
     private  UAEManager uaeManager;
@@ -56,7 +59,8 @@ public class GameDetailPanel extends StackPane {
     private String  screenRez;
     VBox detailContent;
     private boolean isBigView=false;
-
+    private final DialogActionsJfx da = new DialogActionsJfx();
+    private final String THEME = "fluppy-theme";
     public GameDetailPanel(GameManager gameManager) {
 
         this.gameManager = gameManager;
@@ -109,9 +113,9 @@ public class GameDetailPanel extends StackPane {
         name.getStyleClass().add("game-title");
         name.setWrapText(true);
 
-        launchButton = createRButton("/images/play1.png");
+        launchButton = createRButton("play.png", THEME);
 
-        editButton = createRButton("/images/edit1.png");
+        editButton = createRButton("edit.png", THEME);
         editButton.setOnMouseClicked(event -> {
             try {
                 editAction();
@@ -119,7 +123,14 @@ public class GameDetailPanel extends StackPane {
                 throw new RuntimeException(e);
             }
         });
-
+        deleteButton = createRButton("trashbin.png", THEME);
+        deleteButton.setOnMouseClicked(event -> {
+            try {
+                deleteAction();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
         rating = new Rating();
         rating.setMax(5); // 5 étoiles
         rating.setPartialRating(true);
@@ -133,7 +144,7 @@ public class GameDetailPanel extends StackPane {
         detailContent = new VBox(10, year, genre, languageFlag, platformBox, editorBox, timePlayed, extraFiles);
         detailContent.setAlignment(Pos.TOP_LEFT);
         launchButton.setDisable(!dosBoxManager.isDosboxPresent());
-        buttonBox = new HBox(2, launchButton, editButton);
+        buttonBox = new HBox(2, launchButton, editButton, deleteButton);
         buttonBox.setPadding(new Insets(40, 0, 0, 0)); // top, right, bottom, left
         infoContent = new VBox(detailContent);
         infoContent.getChildren().add(buttonBox);
@@ -175,6 +186,7 @@ public class GameDetailPanel extends StackPane {
             this.editorImage.setImage(ImageUtils.buildImageFromBytes(companyEntity.getImage()));
         }
         editorBox.setVisible(true);
+        deleteButton.setVisible(true);
         description.setVisible(true);
         fullContent.getChildren().add(buttonBox);
         isBigView=true;
@@ -184,7 +196,7 @@ public class GameDetailPanel extends StackPane {
         if (buttonBox.getParent() == fullContent){
             infoContent.getChildren().add(buttonBox);
         }
-
+        deleteButton.setVisible(false);
         editorBox.setVisible(false);
         description.setVisible(false);
         isBigView=false;
@@ -212,6 +224,25 @@ public class GameDetailPanel extends StackPane {
         if (editedGame != null && listener != null) {
             listener.onUpdate();
         }
+
+    }
+
+    private void deleteAction() throws IOException {
+
+        boolean doAction = true;
+
+        doAction = da.showConfirmDialog(Messages.getString("confirmation.delete.header"),
+                Messages.getString("confirmation.delete.game", game.getName()));
+
+        if (!doAction)
+            return;
+
+        if (gameManager.deleteGame(game) > 0) {
+            if (listener != null) {
+                listener.onUpdate();
+            }
+        }
+
 
     }
 
@@ -283,13 +314,22 @@ public class GameDetailPanel extends StackPane {
 
     }
 
-    private Button createRButton(String imagePath) {
-        Image img = new Image(getClass().getResourceAsStream(imagePath), 32, 32, false, false);
-        ImageView imgView = new ImageView(img);
-        Button button = new Button();
-        button.setGraphic(imgView);
-        button.setStyle("-fx-background-color: transparent;");
-        return button;
+    private Button createRButton(String image, String theme) {
+        String imagePath = "/images/" + theme + "/" + image;
+        try (InputStream is = getClass().getResourceAsStream(imagePath)) {
+            if (is == null) {
+                throw new IOException(imagePath + " not found");
+            }
+            Image img = new Image(is, 32, 32, false, false);
+            ImageView imgView = new ImageView(img);
+            Button button = new Button();
+            button.setGraphic(imgView);
+            button.setStyle("-fx-background-color: transparent;");
+            return button;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
     public void hide() {
         toCompactView();
