@@ -1,13 +1,11 @@
 package com.notamethod.fluppy.gui;
 
-import com.notamethod.fluppy.core.Configuration;
 import javafx.application.Platform;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -38,16 +36,18 @@ public class FFmpegVideoPlayer {
 
     private final AtomicBoolean resizePending = new AtomicBoolean(false);
     private Thread readerThread;
+    private final String ffmpegPath;
 
     // ----------------------------------------------------------------
     // Constructeur
     // ----------------------------------------------------------------
 
-    public FFmpegVideoPlayer(String videoPath, int fps) {
+    public FFmpegVideoPlayer(String videoPath, int fps, String ffmpegPath) {
         this.videoPath = videoPath;
         this.fps = fps;
         this.imageView = new ImageView();
         this.imageView.setPreserveRatio(false);
+        this.ffmpegPath = ffmpegPath;
     }
 
     // ----------------------------------------------------------------
@@ -100,11 +100,9 @@ public class FFmpegVideoPlayer {
     private void startFFmpeg(int w, int h) {
         int bytesPerFrame = w * h * 3;
         String command=null;
-        try {
-             command= Configuration.getFFMpeg();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+        command = ffmpegPath;
+
         try {
             ProcessBuilder pb = new ProcessBuilder(
                     command,

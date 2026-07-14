@@ -147,7 +147,7 @@ public class GamesWall extends Application {
         HBox topRibbon = createTopRibbon(stage);
         Animation bordureAnim = effects.getBordureAnim(topRibbon);
         if (preferences.isVideoBackground()) {
-            videoPlayer = new FFmpegVideoPlayer(getVideo(), 30);
+            videoPlayer = new FFmpegVideoPlayer(getVideo(), 30, preferences.getFfmpegPath());
         }
         try {
             init();

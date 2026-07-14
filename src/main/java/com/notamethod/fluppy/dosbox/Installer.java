@@ -1,7 +1,7 @@
 package com.notamethod.fluppy.dosbox;
 
 import com.notamethod.fluppy.core.Configuration;
-import com.notamethod.fluppy.emulators.Emulator;
+import com.notamethod.fluppy.emulators.ExternalTool;
 import com.notamethod.fluppy.gui.ProgressCallback;
 import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.DownloadFiles;
@@ -19,17 +19,18 @@ import java.util.Set;
 
 @Slf4j
 public class Installer {
-    public static final Emulator emu1 = new Emulator("dosboxStaging", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-windows-x64-v0.82.2.zip", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-linux-x86_64-v0.82.2.tar.xz", "dosbox.exe", "dosbox");
-    public static final Emulator emu2 = new Emulator("fs-uae", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Windows_x86-64.zip", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Linux_x86-64.tar.xz", "fs-uae.exe", "fs-uae");
+    public static final ExternalTool emu1 = new ExternalTool("dosboxStaging", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-windows-x64-v0.82.2.zip", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-linux-x86_64-v0.82.2.tar.xz", "dosbox.exe", "dosbox");
+    public static final ExternalTool emu2 = new ExternalTool("fs-uae", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Windows_x86-64.zip", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Linux_x86-64.tar.xz", "fs-uae.exe", "fs-uae");
+    public static final ExternalTool ffmpeg = new ExternalTool("ffmpeg", "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z", "", "ffmpeg.exe", "ffmpeg");
 
 
-    public String application(ProgressCallback callback, Emulator emulator) {
+    public String application(ProgressCallback callback, ExternalTool externalTool) {
         boolean isLinux = Configuration.getOS()== Configuration.OS.LINUX;
-        final String exeFile = isLinux ? emulator.linuxApp() : emulator.winExe();
+        final String exeFile = isLinux ? externalTool.linuxApp() : externalTool.winExe();
         try {
-            String url = isLinux ? emulator.installUrlLinux() : emulator.installUrlWindows();
+            String url = isLinux ? externalTool.installUrlLinux() : externalTool.installUrlWindows();
 
-            String outputFile = Configuration.tempFolder + "/" + emulator.name() + "." + HelperClass.getArchiveExtension(url);
+            String outputFile = Configuration.tempFolder + "/" + externalTool.name() + "." + HelperClass.getArchiveExtension(url);
             DownloadFiles.download(url, outputFile);
             callback.onProgress("Downloaded file: " + outputFile);
             log.debug("done");

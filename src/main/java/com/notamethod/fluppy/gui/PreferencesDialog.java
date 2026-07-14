@@ -4,11 +4,19 @@ import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
 import com.notamethod.fluppy.dosbox.DosBoxManager;
 import com.notamethod.fluppy.dosbox.DosboxType;
-import javafx.stage.*;
-import javafx.scene.*;
-import javafx.scene.layout.*;
-import javafx.scene.control.*;
-import javafx.geometry.*;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -19,6 +27,7 @@ public class PreferencesDialog extends Stage {
 
     private TextField cheminField;
     private TextField fsuaePathField;
+    private TextField ffmpegPathField;
     private TextField kickstartPathField;
     private CheckBox fullscreenCheck;
     private PreferencesBean preferences;
@@ -37,11 +46,15 @@ public class PreferencesDialog extends Stage {
         fsuaePathField = new TextField();
         fsuaePathField.setPrefWidth(350);
         fsuaePathField.setText(preferences.getFsuaePath());
+        ffmpegPathField = new TextField();
+        ffmpegPathField.setPrefWidth(350);
+        ffmpegPathField.setText(preferences.getFfmpegPath());
         kickstartPathField = new TextField();
         kickstartPathField.setPrefWidth(350);
         kickstartPathField.setText(preferences.getKickstartPath());
         Button browseButton = new Button("Parcourir...");
         Button fsBrowseButton = new Button("Parcourir...");
+        Button ffBrowseButton = new Button("Parcourir...");
         Button ksBrowseButton = new Button("Parcourir...");
         browseButton.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
@@ -61,6 +74,15 @@ public class PreferencesDialog extends Stage {
                 fsuaePathField.setText(selectedFile.getAbsolutePath());
             }
         });
+        ffBrowseButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Sélectionner exe");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Executable", "*.exe"));
+            File selectedFile = fileChooser.showOpenDialog(this);
+            if (selectedFile != null) {
+                ffmpegPathField.setText(selectedFile.getAbsolutePath());
+            }
+        });
         ksBrowseButton.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Sélectionner rom kickstart");
@@ -76,6 +98,8 @@ public class PreferencesDialog extends Stage {
         fsuaePathBox.setAlignment(Pos.CENTER_LEFT);
         HBox ksPathBox = new HBox(10, kickstartPathField, ksBrowseButton);
         ksPathBox.setAlignment(Pos.CENTER_LEFT);
+        HBox ffmpegPathBox = new HBox(10, ffmpegPathField, ffBrowseButton);
+        ffmpegPathBox.setAlignment(Pos.CENTER_LEFT);
         fullscreenCheck = new CheckBox("Plein écran");
         fullscreenCheck.setSelected(preferences.isFullScreen());
 

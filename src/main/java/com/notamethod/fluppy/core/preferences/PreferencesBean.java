@@ -8,7 +8,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
@@ -25,7 +28,8 @@ public class PreferencesBean implements Serializable {
     private String fsuaePath = "";
     @JsonProperty("kickstartPath")
     private String kickstartPath = "";
-
+    @JsonProperty("ffmpegPath")
+    private String ffmpegPath = "";
     @JsonProperty("dosBoxType")
     private String dosBoxType = "";
 
