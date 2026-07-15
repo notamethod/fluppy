@@ -100,14 +100,12 @@ public class GamesWall extends Application {
     StringProperty timePlayedProperty = new SimpleStringProperty("");
     private FFmpegVideoPlayer videoPlayer;
 
-
     @Override
     public void init() throws Exception {
         super.init();
         //DTP
 
         effects = new Effects();
-
         applicationDatabase = new ApplicationDatabase();
         preferences = PreferencesIO.load();
         try {
@@ -149,11 +147,11 @@ public class GamesWall extends Application {
         if (preferences.isVideoBackground()) {
             videoPlayer = new FFmpegVideoPlayer(getVideo(), 30, preferences.getFfmpegPath());
         }
-        try {
-            init();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            init();
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
         content = new VBox();
         Statistics  stats = gameManager.getStatistics();
         gameCounter.set(stats.count());

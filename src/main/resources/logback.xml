@@ -21,7 +21,7 @@
     <logger name="org.hibernate.session.metrics" level="ERROR"/>
     <logger name="org.hibernate.HQL_FUNCTIONS" level="ERROR"/>
     <logger name="com.notamethod.fluppy.gui" level="DEBUG"/>
-
+    <logger name="org.hibernate.orm.query" level="ERROR"/>
     <root level="INFO">
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
