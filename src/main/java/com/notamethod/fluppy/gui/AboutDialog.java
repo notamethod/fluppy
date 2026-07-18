@@ -5,7 +5,9 @@ import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -16,7 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AboutDialog extends Stage {
 
-    static final String OURS="FluppyBox (c)2026 notamethod";
+    static final String OURS = """
+            FluppyBox version 0.2
+            
+            (c)2026 notamethod""";
     private TextField dataFolder;
     private TextField appFolder;
     private TextField configFolder;
