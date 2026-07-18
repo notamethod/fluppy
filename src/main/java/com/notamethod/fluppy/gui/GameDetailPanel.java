@@ -1,9 +1,7 @@
 package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.game.*;
-import com.notamethod.fluppy.dosbox.DosBoxException;
-import com.notamethod.fluppy.dosbox.DosBoxManager;
-import com.notamethod.fluppy.dosbox.UAEManager;
+import com.notamethod.fluppy.emulators.dosbox.DosBoxException;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
@@ -48,8 +46,6 @@ public class GameDetailPanel extends StackPane {
     private final Button editButton;
     private final Button deleteButton;
     private final VBox infoContent;
-    private final DosBoxManager dosBoxManager;
-    private  UAEManager uaeManager;
     private final GameManager gameManager;
     private GameApp game;
     private PanelListener listener;
@@ -64,7 +60,6 @@ public class GameDetailPanel extends StackPane {
     public GameDetailPanel(GameManager gameManager) {
 
         this.gameManager = gameManager;
-        this.dosBoxManager = this.gameManager.getDosBoxManager();
         setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 10; -fx-background-radius: 8;");
         setVisible(false);
 
@@ -143,7 +138,7 @@ public class GameDetailPanel extends StackPane {
         ratbox.setPadding(new Insets(10));
         detailContent = new VBox(10, year, genre, languageFlag, platformBox, editorBox, timePlayed, extraFiles);
         detailContent.setAlignment(Pos.TOP_LEFT);
-        launchButton.setDisable(!dosBoxManager.isDosboxPresent());
+        launchButton.setDisable(game == null ? false : !gameManager.isLauncherPresent(game.getPlatform()));
         buttonBox = new HBox(2, launchButton, editButton, deleteButton);
         buttonBox.setPadding(new Insets(40, 0, 0, 0)); // top, right, bottom, left
         infoContent = new VBox(detailContent);
@@ -256,13 +251,8 @@ public class GameDetailPanel extends StackPane {
         description.setText("dklsdjgkl jsdgksdjgklmsdj gkjsdlgjsdgkj ksdgjksdjglds sdkjgklsdj kgdsjgklsd jsdl jkgjsgklsdg j" +
                 "dksjhgklsdhg jdskghdshgjsdhg hgs");
         name.setText(game.getName());
-        if (Platform.fromValue(game.getPlatform()).equals(Platform.AMIGA)){
-            Image platformImg = new Image(getClass().getResourceAsStream("/images/Amiga-Logo-1985.png"));
-            platformImage.setImage(platformImg);
-        }else{
-            Image platformImg = new Image(getClass().getResourceAsStream("/images/pcgame.png"));
-            platformImage.setImage(platformImg);
-        }
+        platformImage.setImage(getPlatformImage(game.getPlatform()));
+
         year.setText(Messages.getString("game.year",game.getYear() == null ? "" : String.valueOf(game.getYear())));
         String genres = String.join(" ■ ",
                 game.getGenres().stream().map(GenreApp::getName).toArray(String[]::new)
@@ -312,6 +302,17 @@ public class GameDetailPanel extends StackPane {
 
         new ParallelTransition(scale, fade).play();
 
+    }
+
+    //TODO
+    private Image getPlatformImage(Platform platform) {
+        if (Platform.AMIGA.equals(platform)) {
+            return new Image(getClass().getResourceAsStream("/images/Amiga-Logo-1985.png"));
+
+        } else {
+            return new Image(getClass().getResourceAsStream("/images/pcgame.png"));
+
+        }
     }
 
     private Button createRButton(String image, String theme) {

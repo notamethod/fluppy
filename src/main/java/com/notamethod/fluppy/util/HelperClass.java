@@ -103,12 +103,12 @@ public class HelperClass {
     }
 
 
-    public static SearchInfo parseFileName(String name, String platform) {
+    public static SearchInfo parseFileName(String name, Platform platform) {
         if (name == null) {
             return null;
         }
         SearchInfo info = null;
-        if (Platform.fromValue(platform).equals(Platform.AMIGA)) {
+        if (platform.equals(Platform.AMIGA)) {
             info = regexAmiga(name);
         }
 

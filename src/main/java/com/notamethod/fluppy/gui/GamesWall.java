@@ -12,8 +12,8 @@ import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.game.Statistics;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.dosbox.DosBoxException;
-import com.notamethod.fluppy.dosbox.DosBoxManager;
+import com.notamethod.fluppy.emulators.EmuManagerFactory;
+import com.notamethod.fluppy.emulators.dosbox.DosBoxException;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.GameActions;
 import com.notamethod.fluppy.util.HelperClass;
@@ -78,7 +78,6 @@ public class GamesWall extends Application {
     double midWidth;
     ApplicationDatabase applicationDatabase;
     PreferencesBean preferences;
-    DosBoxManager dosBoxManager = new DosBoxManager();
     GameManager gameManager;
     CategoryManager categoryManager;
 
@@ -123,7 +122,7 @@ public class GamesWall extends Application {
         if (igdbToken!=null && !igdbToken.isEmpty()){
             log.info("found IGDB credentials: token API");
         }
-        gameManager = new GameManager(applicationDatabase, preferences, dosBoxManager);
+        gameManager = new GameManager(applicationDatabase, preferences, EmuManagerFactory.createDefault(null));
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(gameManager);
         gameCategories = categoryManager.getShownCategories(TILES_VIEW.DEFAULT);
@@ -262,7 +261,7 @@ public class GamesWall extends Application {
         });
 //
         scene.heightProperty().addListener((obs, oldV, newV) ->{
-                log.debug("Height = " + newV);
+            log.trace("Height = " + newV);
             if (preferences.isVideoBackground())
                 videoPlayer.scheduleResize((int) scene.getWidth(), (int) newV.doubleValue());
     } );
@@ -768,7 +767,7 @@ public class GamesWall extends Application {
             } else if (e.getButton() == MouseButton.PRIMARY) {
                 if (e.getClickCount() == 1) {
                     long returne = 0;
-                    log.debug(game.toString());
+                    log.debug(game.getName());
                     try {
 
                         long duration = gameManager.runGame(game, getScreenRez(), null);

@@ -5,6 +5,7 @@ import com.notamethod.fluppy.SafeLog;
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManagerException;
+import com.notamethod.fluppy.core.game.Platform;
 import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.Fat12ImageReader;
 import com.notamethod.fluppy.util.FileWizard;
@@ -80,7 +81,7 @@ public class FileActions {
     public GameApp addAmiga(File inFile) {
         log.info("adding amiga file");
         GameApp mgame = new GameApp();
-        mgame.setPlatform("amiga");
+        mgame.setPlatform(Platform.AMIGA);
         mgame.setGamePath(inFile.toPath());
         mgame.getExeFiles().add(inFile);
         log.info("analyze directory {}", inFile.getAbsolutePath());
@@ -92,7 +93,7 @@ public class FileActions {
     public GameApp addImage(File inFile) {
         log.info("adding Game: type: PC image file {}", inFile);
         GameApp mgame = new GameApp();
-        mgame.setPlatform("pc");
+        mgame.setPlatform(Platform.DOS);
         mgame.setFormat("image");
         mgame.setGamePath(inFile.toPath());
         try (Fat12ImageReader reader = new Fat12ImageReader(mgame.getGamePath())) {
@@ -114,6 +115,22 @@ public class FileActions {
         mgame.setExePath(null);
 
         return mgame;
+    }
+
+    public GameApp detect(File inFile) throws GameManagerException, OperationCanceledException {
+        if (inFile.isDirectory()) {
+            return addDirectory(inFile, false);
+        } else if (ArchiveExtractor.isArchive(inFile)) {
+            return addArchive(inFile);
+
+        } else if (inFile.getName().toLowerCase().endsWith("adf")) {
+            return addAmiga(inFile);
+        } else if (inFile.getName().toLowerCase().endsWith("img")) {
+            return addImage(inFile);
+        } else {
+            log.error("unkown format for {}", inFile);
+            return new GameApp();
+        }
     }
 
     /**

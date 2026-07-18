@@ -2,8 +2,8 @@ package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.dosbox.DosBoxManager;
-import com.notamethod.fluppy.dosbox.DosboxType;
+import com.notamethod.fluppy.emulators.dosbox.DosBoxManager;
+import com.notamethod.fluppy.emulators.dosbox.DosboxType;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;

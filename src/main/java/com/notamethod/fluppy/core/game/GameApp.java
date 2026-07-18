@@ -2,6 +2,7 @@ package com.notamethod.fluppy.core.game;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 @Data
 @EqualsAndHashCode
+@ToString
 public class GameApp {
     private Long id;
     private String name;
@@ -27,7 +29,7 @@ public class GameApp {
     private Path protectionPath;
     private Path manualPath;
     private String extra;
-    private String platform;
+    private Platform platform;
     private String format;
     private int frameskip=0;
     private String cdrom;
@@ -49,6 +51,7 @@ public class GameApp {
     private String comment;
     private String language;
     private Company publisher;
+    @ToString.Exclude
     private byte[] coverImage;
     private Long edition;
 
@@ -58,4 +61,5 @@ public class GameApp {
         genre.setName(name);
         this.genres.add(genre);
     }
+
 }

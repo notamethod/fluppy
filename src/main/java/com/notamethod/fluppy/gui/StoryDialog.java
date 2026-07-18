@@ -1,10 +1,5 @@
 package com.notamethod.fluppy.gui;
 
-import ch.qos.logback.classic.spi.ThrowableProxyUtil;
-import com.notamethod.fluppy.core.preferences.PreferencesBean;
-import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.dosbox.DosBoxManager;
-import com.notamethod.fluppy.dosbox.DosboxType;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -12,19 +7,16 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.*;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.function.Consumer;
 
 @Slf4j

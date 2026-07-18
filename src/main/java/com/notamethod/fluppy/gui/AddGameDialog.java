@@ -12,7 +12,6 @@ import com.notamethod.fluppy.core.game.GenreApp;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.FileActions;
 import com.notamethod.fluppy.gui.common.OperationCanceledException;
-import com.notamethod.fluppy.util.ArchiveExtractor;
 import com.notamethod.fluppy.util.HelperClass;
 import com.notamethod.fluppy.util.SearchInfo;
 import javafx.beans.binding.Bindings;
@@ -324,20 +323,8 @@ public class AddGameDialog extends Stage {
 
     private GameApp processFile(File inFile) throws GameManagerException, OperationCanceledException {
 
-        GameApp metaGame = null;
-        if (inFile.isDirectory()) {
-            metaGame = fileActions.addDirectory(inFile, false);
-        } else if (ArchiveExtractor.isArchive(inFile)) {
-            metaGame = fileActions.addArchive(inFile);
+        GameApp metaGame = fileActions.detect(inFile);
 
-        } else if (inFile.getName().toLowerCase().endsWith("adf") ) {
-            metaGame = fileActions.addAmiga(inFile);
-        } else if (inFile.getName().toLowerCase().endsWith("img")) {
-            metaGame = fileActions.addImage(inFile);
-        } else {
-            log.error("unkown format for {}", inFile);
-            metaGame = new GameApp();
-        }
         calculateSearchInfo(metaGame, inFile.getName());
         return metaGame;
     }

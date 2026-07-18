@@ -1,4 +1,4 @@
-package com.notamethod.fluppy.dosbox;
+package com.notamethod.fluppy.emulators.dosbox;
 
 public enum DosboxType {
      UNKNOWN,X, STAGING,ECE, CLASSIC;

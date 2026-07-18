@@ -2,7 +2,7 @@ package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.dosbox.Installer;
+import com.notamethod.fluppy.util.Installer;
 import javafx.stage.Stage;
 
 

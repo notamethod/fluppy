@@ -1,41 +1,34 @@
-package com.notamethod.fluppy.dosbox;
+package com.notamethod.fluppy.emulators;
 
-import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
-import com.notamethod.fluppy.core.game.GameEntity;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
+import com.notamethod.fluppy.emulators.dosbox.DosBoxException;
+import com.notamethod.fluppy.emulators.dosbox.DosBoxResult;
 import com.notamethod.fluppy.gui.PanelListener;
-import com.notamethod.fluppy.util.HelperClass;
 import javafx.application.Platform;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 @Slf4j
-public class UAEManager {
-    private static final int LAUNCHER_NOTFOUND = 404;
-    private static final int LAUNCHER_LAUNCH_ERROR = 400;
-    private static final String CONFIG_FILE = Configuration.dataFolder + File.separator+"configuration.fs-uae";
-    private PreferencesBean preferences;
+public abstract class EmulatorManager {
 
-    public UAEManager() {
-        preferences = PreferencesIO.load();
-    }
+    protected static final int LAUNCHER_NOTFOUND = 404;
+    protected static final int LAUNCHER_LAUNCH_ERROR = 400;
+    protected PreferencesBean preferences;
 
     /**
-     * Writes a DosBOX configuration file to a specific file
+     * Writes a  configuration file to a specific file
      *
      * @param filename The name of the config file
      */
-    public void writeConfig(String filename, HashMap<String, HashMap<String, String>> pref, ArrayList<String> autoexec) {
+    public void writeConfig(String filename, Map<String, HashMap<String, String>> pref, BlocParam blocParam) {
 
         StringBuilder ut = new StringBuilder();
         for (String s : pref.keySet()) {
@@ -47,6 +40,12 @@ public class UAEManager {
             ut.append("\n");
         }
 
+        if (blocParam != null) {
+            ut.append(blocParam.name).append("\n");
+            for (String s : blocParam) {
+                ut.append(s).append("\n");
+            }
+        }
 
         try {
             java.io.FileWriter fw = new java.io.FileWriter(filename);
@@ -59,11 +58,10 @@ public class UAEManager {
         }
     }
 
-
     public long runApplication(String program, GameApp gameApp, String screenRez, PanelListener listener,
                                Consumer<String> onStdout,
                                Consumer<String> onStderr,
-                                Consumer<DosBoxResult> onFinish) throws DosBoxException {
+                               Consumer<DosBoxResult> onFinish) throws DosBoxException {
 
         log.info("running {}", program);
         int returnOK = 0;
@@ -112,7 +110,7 @@ public class UAEManager {
                             Platform.runLater(() -> onStderr.accept(finalLine));
                         }
                     } catch (Exception e) {
-                       log.error("error reading process output", e);
+                        log.error("error reading process output", e);
                     }
                 });
 
@@ -124,8 +122,8 @@ public class UAEManager {
                 outThread.join();
                 errThread.join();
             } catch (InterruptedException e) {
-               error=e;
-               log.warn("app interrupted", e);
+                error = e;
+                log.warn("app interrupted", e);
                 /* Clean up whatever needs to be handled before interrupting  */
                 Thread.currentThread().interrupt();
             } catch (IOException e) {
@@ -143,95 +141,10 @@ public class UAEManager {
         return diff;
     }
 
-    private String[] generateParams() {
-        String[] par = new String[2];
-        par[0] = preferences.getFsuaePath();
+    protected abstract String[] generateParams();
 
+    protected abstract void generateConfiguration(String program, GameApp gameApp, String screenRez);
 
-
-
-        par[1] = CONFIG_FILE;
-
-
-        if (preferences.getFsuaePath().isEmpty()) {
-            par[0] = "fs-uae";
-        }
-        return par;
-    }
-
-    private void generateConfiguration(String program, GameApp gameApp, String screenRez) {
-        //Create HashMaps for preferences
-        HashMap<String, HashMap<String, String>> allProps = new HashMap<>();
-        HashMap<String, String> config = new HashMap<>();
-//        HashMap<String, String> memory = new HashMap<>();
-//        HashMap<String, String> rom_path = new HashMap<>();
-//        HashMap<String, String> display = new HashMap<>();
-//        HashMap<String, String> controller = new HashMap<>();
-//        HashMap<String, String> drives = new HashMap<>();
-//        HashMap<String, String> drive_speed = new HashMap<>();
-//        HashMap<String, String> keyboard_input = new HashMap<>();
-
-
-        // Split the extras string
-        String[] properties = new String[0];
-        String[][] finito = new String[0][0];
-        if (gameApp.getMachine() != null) {
-            config.put("amiga_model", gameApp.getMachine());
-
-
-        }
-        config.put("kickstart_file",    preferences.getKickstartPath());
-        //FIXME
-        config.put("floppy_drive_0",    gameApp.getGamePath().toString());
-       if (gameApp.getExtraDisks()!=null){
-           configureDisks(gameApp.getGamePath().toString(), gameApp.getExtraDisks(), config);
-       }
-        config.put("floppy_drive_speed",   "800");
-
-
-
-        if (preferences.isFullScreen()) {
-            config.put("fullscreen",   "1");
-            config.put("fullscreen_mode",   "fullscreen-window");
-        }else{
-            config.put("fullscreen",   "0");
-        }
-   //     HelperClass.addOtherSettings(finito, "capture", capture);
-        allProps.put("config", config);
-        writeConfig(CONFIG_FILE,
-                allProps, null);
-    }
-
-    private void configureDisks(String gamePath, String extraDisks, HashMap<String, String> config) {
-        Map<Integer, String> extradisks = buildDiskList(gamePath,extraDisks);
-        config.put("floppy_image_0",gamePath);
-        for (Map.Entry<Integer, String> entry : extradisks.entrySet()) {
-            config.put("floppy_image_"+(entry.getKey()-1),entry.getValue());
-            if (entry.getKey().equals(2)){
-                config.put("floppy_drive_1",entry.getValue());
-            }
-
-        }
-    }
-
-    public boolean isKickstart() {
-        return !preferences.getKickstartPath().isEmpty();
-    }
-
-
-    private Map<Integer, String> buildDiskList(String path, String disks){
-        List<String> diskList = new ArrayList<>();
-        diskList.add(path);
-        Map<Integer, String> extradisks = Arrays.stream(disks.split(";"))
-                .map(part -> part.split("#", 2))
-                .filter(arr -> arr.length == 2)
-                .collect(Collectors.toMap(
-                        arr -> Integer.parseInt(arr[0]),
-                        arr -> arr[1]
-                ));
-
-        return extradisks;
-    }
-
-
+    public abstract String getlogPrefix();
 }
+

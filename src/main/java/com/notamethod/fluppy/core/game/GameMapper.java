@@ -15,11 +15,19 @@ public interface GameMapper {
     @Mapping( target = "gameYear", source="year")
     @Mapping( target = "genres", ignore = true)
     GameEntity toEntity(GameApp gameApp);
+
     @Mapping(source = "game", target = "gameExe")
     @Mapping(source = "gameYear", target = "year")
     @Mapping(target = "publisher", ignore = true)
+
     @Named("toGameApp")
     GameApp toGameApp(GameEntity gameEntity);
+
+    @ValueMapping(source = "amiga", target = "AMIGA")
+    @ValueMapping(source = "dos", target = "DOS")
+    @ValueMapping(source = "pc", target = "DOS")
+    @ValueMapping(source = MappingConstants.ANY_REMAINING, target = "DOS")
+    Platform toPlatform(String string);
     @Mapping(source = "game", target = "gameExe")
     @Mapping(source = "gameYear", target = "year")
     GameApp toFullGameApp(GameEntity gameEntity);

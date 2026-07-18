@@ -1,11 +1,8 @@
-package com.notamethod.fluppy.dosbox;
+package com.notamethod.fluppy.util;
 
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.emulators.ExternalTool;
 import com.notamethod.fluppy.gui.ProgressCallback;
-import com.notamethod.fluppy.util.ArchiveExtractor;
-import com.notamethod.fluppy.util.DownloadFiles;
-import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
