@@ -15,6 +15,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+
 @Slf4j
 public class AboutDialog extends Stage {
 
@@ -25,6 +27,9 @@ public class AboutDialog extends Stage {
     private TextField dataFolder;
     private TextField appFolder;
     private TextField configFolder;
+    private Button openDataFolder;
+    private Button openAppFolder;
+    private Button openConfigFolder;
 
     private PreferencesBean result;
 
@@ -37,14 +42,15 @@ public class AboutDialog extends Stage {
         configFolder = new TextField(Configuration.configFolder);
         configFolder.setPrefWidth(420);
         configFolder.setEditable(false);
-
+        openConfigFolder = new Button("->");
         dataFolder = new TextField(Configuration.dataFolder);
         dataFolder.setPrefWidth(420);
         dataFolder.setEditable(false);
-
+        openDataFolder = new Button("->");
         appFolder = new TextField(Configuration.appFolder);
         appFolder.setPrefWidth(420);
         appFolder.setEditable(false);
+        openAppFolder = new Button("->");
         Button okButton = new Button("OK");
 
         Label oursLabel = new Label(OURS);
@@ -53,15 +59,24 @@ public class AboutDialog extends Stage {
             result = null;
             close();
         });
+        openConfigFolder.setOnAction(e -> {
+            LinkLabelFactory.openFile(new File(configFolder.getText()));
+        });
+        openAppFolder.setOnAction(e -> {
+            LinkLabelFactory.openFile(new File(appFolder.getText()));
+        });
+        openDataFolder.setOnAction(e -> {
+            LinkLabelFactory.openFile(new File(dataFolder.getText()));
+        });
         oursLabel.getStyleClass().add("title");
         HBox buttonBox = new HBox(10, okButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
         VBox layout = new VBox(15,
                oursLabel,
-                new HBox(new Label("config:"), configFolder),
-               new HBox(new Label("data:"), dataFolder),
-                new HBox( new Label("app:"), appFolder),
+                new HBox(new Label("config:"), configFolder, openConfigFolder),
+                new HBox(new Label("data  :"), dataFolder, openDataFolder),
+                new HBox(new Label("app   :"), appFolder, openAppFolder),
                 buttonBox
         );
         layout.setPadding(new Insets(20));
