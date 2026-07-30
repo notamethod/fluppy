@@ -1,8 +1,8 @@
 package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.game.*;
-import com.notamethod.fluppy.emulators.dosbox.DosBoxException;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
+import com.notamethod.fluppy.platform.dosbox.EmulatorException;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -155,7 +155,7 @@ public class GameDetailPanel extends StackPane {
                         gameManager.updateTime(game, returne);
                     }
                     //  returne = dosBoxManager.runApplication(game.getGameExe(), game, listener);
-                } catch (DosBoxException ex) {
+                } catch (EmulatorException ex) {
                     throw new RuntimeException(ex);
                 }
                 //   gameManager.updateTime(game, returne);
@@ -197,7 +197,7 @@ public class GameDetailPanel extends StackPane {
         isBigView=false;
     }
 
-    private long runGame() throws DosBoxException {
+    private long runGame() throws EmulatorException {
 
         return gameManager.runGame(
                 game,

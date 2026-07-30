@@ -13,6 +13,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,13 +22,9 @@ import java.util.regex.Pattern;
 public class HelperClass {
 
     //^(.+?)\s*\((\d{4})\)(?:\((?!Disk)[^)]+\))*(?:\((Disk[^)]+)\))?\.adf$
-    public static final int LINUX = 0;
-    public static final int SOLARIS = 1;
-    public static final int WINDOWS = 2;
-    public static final int MACOS = 3;
     public static final String REGEX_ABANDONWARE = "jeu-[0-9]{5}-.*";
     public static final String REGEX_AMIGA = "^(.+?)\\s*\\((\\d{4})\\)(?:\\((?!Disk)[^)]+\\)|(?:\\[[^\\]]+\\]))*(?:\\((Disk[^)]+)\\))?\\.adf$";
-    public static final String REGEX_DISKS_AMIGA="Disk\\s+(\\d+)\\s+of\\s+(\\d+)";
+    public static final String REGEX_DISKS_AMIGA = "Disk\\s+(\\d+)\\s+of\\s+(\\d+)";
     //public static final String REGEX_SIMPLE="*._DOS_??.zip";
     public static final String REGEX_SIMPLE = "(.*)_DOS_[A-Z][A-Z].*";
     private static final String FORBIDDEN_CHARS_NAME = "[\\\\/:*?\"<>|]";
@@ -53,25 +50,30 @@ public class HelperClass {
         Path tempParent = Paths.get(Configuration.tempFolder);
         Path child = d.getGamePath();
         Path pathToMove = getDirToMove(tempParent, child);
-        String endTarget = pathToMove.getFileName().toString();
+        String endTarget = d.getPlatform().equals(Platform.AMIGA) ? "amiga/" + pathToMove.getFileName().toString() : pathToMove.getFileName().toString();
         Path target = Paths.get(Configuration.gamesFolder).resolve(endTarget);
         moveDirectory(pathToMove, target);
 
-        d.setGamePath(Paths.get(d.getGamePath().toString().replace(Configuration.tempFolder, Configuration.gamesFolder)));
-        d.setExePath(Paths.get(d.getExePath().toString().replace(Configuration.tempFolder, Configuration.gamesFolder)));
+        d.setGamePath(target);
+        d.setExePath(Paths.get(d.getExePath().toString().replace(Configuration.tempFolder, target.getParent().toString())));
     }
 
-    private static Path getDirToMove(Path tempParent, Path child) {
-        boolean sameName = tempParent.getFileName().equals(child.getParent().getFileName());
+    public static Path getDirToMove(Path parent, Path child) {
+        boolean sameName = parent.getFileName().equals(child.getParent().getFileName());
         if (sameName) {
             return child;
         } else {
-            return getDirToMove(tempParent, child.getParent());
+            return getDirToMove(parent, child.getParent());
         }
     }
 
     public static void moveDirectory(Path sourceDir, Path targetDir) throws IOException {
 
+        if (Files.isRegularFile(sourceDir)) {
+            Files.createDirectories(targetDir.getParent());
+            Files.move(sourceDir, targetDir, StandardCopyOption.REPLACE_EXISTING);
+            return;
+        }
         Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -152,8 +154,8 @@ public class HelperClass {
         Pattern pattern = Pattern.compile(REGEX_AMIGA);
         Matcher matcher = pattern.matcher(name);
         if (matcher.matches()) {
-            SearchInfo searchInfo= new SearchInfo(matcher.group(1), matcher.group(2));
-            String diskInfo =  matcher.group(3);
+            SearchInfo searchInfo = new SearchInfo(matcher.group(1), matcher.group(2));
+            String diskInfo = matcher.group(3);
             if (diskInfo != null) {
                 Pair<Integer, Integer> info = getDiskInfo(diskInfo);
                 if (info != null) {
@@ -166,12 +168,13 @@ public class HelperClass {
         return null;
     }
 
+    @Deprecated
     public static Pair<Integer, Integer> getDiskInfo(String name) {
         Pattern pattern = Pattern.compile(REGEX_DISKS_AMIGA);
         Matcher matcher = pattern.matcher(name);
         if (matcher.matches()) {
-            Integer disk= Integer.valueOf(matcher.group(1));
-            Integer total= Integer.valueOf(matcher.group(2));
+            Integer disk = Integer.valueOf(matcher.group(1));
+            Integer total = Integer.valueOf(matcher.group(2));
             return new Pair<>(disk, total);
         }
         return null;
@@ -239,5 +242,34 @@ public class HelperClass {
         return null;
     }
 
+    public static boolean isOnPath(String executable) {
+        return findOnPath(executable) != null;
+    }
 
+    public static File findOnPath(String executable) {
+        String pathEnv = System.getenv("PATH");
+        if (pathEnv == null) {
+            return null;
+        }
+
+        boolean isWindows = System.getProperty("os.name")
+                .toLowerCase().contains("win");
+
+        // Sous Windows, on teste plusieurs extensions possibles
+        List<String> extensions = isWindows
+                ? List.of("", ".exe", ".bat", ".cmd")
+                : List.of("");
+
+        String[] dirs = pathEnv.split(File.pathSeparator);
+
+        for (String dir : dirs) {
+            for (String ext : extensions) {
+                File candidate = new File(dir, executable + ext);
+                if (candidate.isFile() && candidate.canExecute()) {
+                    return candidate;
+                }
+            }
+        }
+        return null;
+    }
 }

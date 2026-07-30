@@ -1,9 +1,9 @@
-package com.notamethod.fluppy.emulators;
+package com.notamethod.fluppy.platform;
 
 import com.notamethod.fluppy.core.game.Platform;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
-import com.notamethod.fluppy.emulators.amiga.UAEManager;
-import com.notamethod.fluppy.emulators.dosbox.DosBoxManager;
+import com.notamethod.fluppy.platform.amiga.UAEManager;
+import com.notamethod.fluppy.platform.dosbox.DosBoxManager;
 
 import java.util.EnumMap;
 import java.util.Map;

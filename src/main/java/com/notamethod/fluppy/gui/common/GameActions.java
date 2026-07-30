@@ -6,21 +6,26 @@ import com.notamethod.fluppy.api.igdb.GameApiBean;
 import com.notamethod.fluppy.core.game.GameAlreadyPresentException;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManager;
+import com.notamethod.fluppy.core.game.Platform;
 import com.notamethod.fluppy.gui.AddGameDialog;
 import com.notamethod.fluppy.gui.SameGameAction;
 import com.notamethod.fluppy.gui.SameGameDialog;
+import com.notamethod.fluppy.platform.PlatformGameHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 @Slf4j
 public class GameActions {
 
+    private final Map<Platform, PlatformGameHandler> platformHandlers;
     private DialogActions da;
 
-    public GameActions(DialogActions da) {
+    public GameActions(DialogActions da, Map<Platform, PlatformGameHandler> handlers) {
         this.da = da;
+        this.platformHandlers = handlers;
     }
     public record ActionResult(SameGameAction type, String valeur) {}
     public GameApiBean chooseGame(List<GameApiBean> games) {
@@ -54,7 +59,7 @@ public class GameActions {
             return gameAppList;
 
         ApiCalls apiCalls = new ApiCalls();
-        AddGameDialog dialog = new AddGameDialog(inFiles, apiCalls);
+        AddGameDialog dialog = new AddGameDialog(inFiles, apiCalls, platformHandlers);
         gameAppList = dialog.showAndWaitForResult();
 
 
@@ -74,7 +79,7 @@ public class GameActions {
                 try {
                     gameManager.addGame(first);
                     return "ok";
-                } catch (GameAlreadyPresentException e) {
+                } catch (GameAlreadyPresentException | IOException e) {
                     throw new RuntimeException(e);
                 }
             }

@@ -1,10 +1,11 @@
-package com.notamethod.fluppy.emulators.amiga;
+package com.notamethod.fluppy.platform.amiga;
 
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.emulators.EmulatorManager;
+import com.notamethod.fluppy.platform.EmulatorManager;
+import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -16,7 +17,7 @@ public class UAEManager extends EmulatorManager {
 
     private static final String CONFIG_FILE = Configuration.dataFolder + File.separator + "configuration.fs-uae";
 
-
+    private static String runnerName = "fs-uae";
     public UAEManager() {
         preferences = PreferencesIO.load();
     }
@@ -85,6 +86,13 @@ public class UAEManager extends EmulatorManager {
         }
     }
 
+    @Override
+    protected boolean hasRunner() {
+        if (preferences.getFsuaePath().isEmpty()) {
+            return HelperClass.isOnPath(runnerName);
+        }
+        return true;
+    }
     public boolean isKickstart() {
         return !preferences.getKickstartPath().isEmpty();
     }

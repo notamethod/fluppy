@@ -10,8 +10,10 @@ import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.game.GameMapper;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.GameActions;
+import com.notamethod.fluppy.util.FileType;
 import com.notamethod.fluppy.util.HelperClass;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -38,7 +40,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GameEditorView extends DialogPane {
 
-    public enum EXTRA_TYPE {PROTECTION, MANUAL, PUBLISHER, COVER}
 
     // --- Champs UI ---
     private final TextField titleField = new TextField();
@@ -58,6 +59,8 @@ public class GameEditorView extends DialogPane {
     private final Button exeButton = new Button("...");
     private final TextField protectionPathField = new TextField();
     private final TextField manualPathField = new TextField();
+    private final TextField diskInfo = new TextField();
+    private final ListView<String> extraDisks = new ListView();
     private final VBox dropZone = new VBox();
     private final Button okButton = new Button("OK");
     private final Button cancelButton = new Button("Annuler");
@@ -73,6 +76,8 @@ public class GameEditorView extends DialogPane {
     private Path protectionPath;
     private final DialogActionsJfx da = new DialogActionsJfx();
     private boolean isChanged=false;
+    private static final ObservableList diskList =
+            FXCollections.observableArrayList();
 
     // -------------------------------------------------------------------------
     // Constructeur
@@ -190,7 +195,13 @@ public class GameEditorView extends DialogPane {
         grid.add(protectionPathField, 1, 2);
         grid.add(new Label("Manual:"), 0, 3);
         grid.add(manualPathField, 1, 3);
-
+        grid.add(new Label("Disk:"), 0, 4);
+        grid.add(diskInfo, 1, 4);
+        grid.add(new Label("Extra disks:"), 0, 5);
+        grid.add(extraDisks, 1, 5);
+        extraDisks.setItems(diskList);
+        extraDisks.setPrefWidth(300);
+        extraDisks.setPrefHeight(70);
         dropZone.getStyleClass().add("dropZone");
 
         tab.setContent(new VBox(grid, dropZone));
@@ -253,7 +264,7 @@ public class GameEditorView extends DialogPane {
                 log.debug("Dropped file : {}", file.getAbsolutePath());
                 label.setText("Fichier : " + file.getName());
                 try {
-                    addExtra(file, originalGame.getName());
+                    addExtra(file, originalGame);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -286,12 +297,9 @@ public class GameEditorView extends DialogPane {
         ((Stage) getScene().getWindow()).close();
     }
 
-    private Path addExtra(File file, String name) throws IOException {
-        List<String> choices = List.of(
-                EXTRA_TYPE.PROTECTION.toString(),
-                EXTRA_TYPE.MANUAL.toString(),
-                EXTRA_TYPE.COVER.toString()
-        );
+    private Path addExtra(File file, GameApp gameApp) throws IOException {
+        List<String> choices = gameManager.getExtraList(file, gameApp).stream().map(x -> x.getBaseType().toString()).toList();
+
         Optional<String> chosen = da.showListInputDialog(
                 "Choose import type",
                 "What is the title of the application? Select one of the proposals,\n" +
@@ -301,19 +309,19 @@ public class GameEditorView extends DialogPane {
         if (chosen.isEmpty()) return null;
 
         String choice = chosen.get();
-        String extraFilename = "extra_" + HelperClass.sanitizeName(name) + "_" + choice + "." + HelperClass.getExtension(file);
+        String extraFilename = "extra_" + HelperClass.sanitizeName(gameApp.getName()) + "_" + choice + "." + HelperClass.getExtension(file);
         Path outputPath = Paths.get(Configuration.extraFolder);
         Files.createDirectories(outputPath);
         Path target = outputPath.resolve(extraFilename);
         Files.copy(file.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
 
-        if (choice.equals(EXTRA_TYPE.PROTECTION.toString())) {
+        if (choice.equals(FileType.BASE_TYPE.PROTECTION.toString())) {
             protectionPath = target;
             protectionPathField.setText(target.toFile().getCanonicalPath());
-        } else if (choice.equals(EXTRA_TYPE.MANUAL.toString())) {
+        } else if (choice.equals(FileType.BASE_TYPE.MANUAL.toString())) {
             manualPath = target;
             manualPathField.setText(target.toFile().getCanonicalPath());
-        } else if (choice.equals(EXTRA_TYPE.COVER.toString())) {
+        } else if (choice.equals(FileType.BASE_TYPE.COVER.toString())) {
             updateImage(target.toFile(), choice);
         }
         return target;
@@ -379,13 +387,14 @@ public class GameEditorView extends DialogPane {
             protectionPathField.setText(game.getProtectionPath().toFile().getAbsolutePath());
         if (game.getManualPath() != null)
             manualPathField.setText(game.getManualPath().toFile().getAbsolutePath());
-
+        diskInfo.setText(String.valueOf(1 + game.toExtraDiskList().size()));
+        diskList.addAll(game.toExtraDiskList().values());
         editedGame = GameMapper.INSTANCE.copyGameApp(originalGame);
     }
 
     public boolean updateAPI() {
         ApiCalls apiCalls = new ApiCalls();
-        GameActions gameActions = new GameActions(new DialogActionsJfx());
+        GameActions gameActions = new GameActions(new DialogActionsJfx(), gameManager.getHandlers());
         List<GameApiBean> games;
         try {
             games = apiCalls.findGame(titleField.getText());

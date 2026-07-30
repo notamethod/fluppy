@@ -1,11 +1,11 @@
-package com.notamethod.fluppy.emulators.dosbox;
+package com.notamethod.fluppy.platform.dosbox;
 
 import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.emulators.BlocParam;
-import com.notamethod.fluppy.emulators.EmulatorManager;
+import com.notamethod.fluppy.platform.BlocParam;
+import com.notamethod.fluppy.platform.EmulatorManager;
 import com.notamethod.fluppy.util.HelperClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class DosBoxManager extends EmulatorManager {
 
     private static final String CONFIG_FILE = Configuration.dataFolder + File.separator+"dosbox.conf";
-
+    private String runnerName = "dosbox";
 
     public DosBoxManager() {
         preferences = PreferencesIO.load();
@@ -27,6 +27,14 @@ public class DosBoxManager extends EmulatorManager {
         preferences = config != null ? config : PreferencesIO.load();
     }
 
+
+    @Override
+    protected boolean hasRunner() {
+        if (preferences.getDosBoxPath().isEmpty()) {
+            return HelperClass.isOnPath(runnerName);
+        }
+        return true;
+    }
 
     protected String[] generateParams() {
         String[] par = new String[6];
@@ -212,10 +220,6 @@ public class DosBoxManager extends EmulatorManager {
     @Override
     public String getlogPrefix() {
         return "[DOSBOX] ";
-    }
-
-    public boolean isDosboxPresent() {
-        return !preferences.getDosBoxPath().isEmpty();
     }
 
 

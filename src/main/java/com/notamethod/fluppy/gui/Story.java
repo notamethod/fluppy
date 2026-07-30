@@ -57,7 +57,7 @@ public class Story {
                                 System.out.println("Progress: " + message);
                                 storyDialog.setText(message);
                             }
-                        }, Installer.emu1);
+                        }, Installer.dosbox);
                         if (exeFile != null) {
                             preferences.setDosBoxPath(exeFile);
                             PreferencesIO.save(preferences);
@@ -79,7 +79,7 @@ public class Story {
                                 System.out.println("Progress: " + message);
                                 storyDialog.setText(message);
                             }
-                        }, Installer.emu2);
+                        }, Installer.fsuae);
                         if (exeFile != null) {
                             preferences.setFsuaePath(exeFile);
                             PreferencesIO.save(preferences);

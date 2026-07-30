@@ -12,10 +12,11 @@ import com.notamethod.fluppy.core.game.GameManager;
 import com.notamethod.fluppy.core.game.Statistics;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.emulators.EmuManagerFactory;
-import com.notamethod.fluppy.emulators.dosbox.DosBoxException;
 import com.notamethod.fluppy.gui.common.DialogActionsJfx;
 import com.notamethod.fluppy.gui.common.GameActions;
+import com.notamethod.fluppy.platform.EmuManagerFactory;
+import com.notamethod.fluppy.platform.GameHandlerFactory;
+import com.notamethod.fluppy.platform.dosbox.EmulatorException;
 import com.notamethod.fluppy.util.HelperClass;
 import javafx.animation.*;
 import javafx.application.Application;
@@ -122,7 +123,9 @@ public class GamesWall extends Application {
         if (igdbToken!=null && !igdbToken.isEmpty()){
             log.info("found IGDB credentials: token API");
         }
-        gameManager = new GameManager(applicationDatabase, preferences, EmuManagerFactory.createDefault(null));
+        gameManager = new GameManager(applicationDatabase, preferences,
+                EmuManagerFactory.createDefault(null),
+                GameHandlerFactory.createDefault(null));
         categoryManager = new CategoryManager(applicationDatabase);
         detailPane = new GameDetailPanel(gameManager);
         gameCategories = categoryManager.getShownCategories(TILES_VIEW.DEFAULT);
@@ -493,7 +496,7 @@ public class GamesWall extends Application {
     }
 
     private void importFiles(List<File> files) {
-        GameActions gameActions = new GameActions(new DialogActionsJfx());
+        GameActions gameActions = new GameActions(new DialogActionsJfx(), gameManager.getHandlers());
         List<GameApp> gameApps = gameActions.createFromFiles(files);
         List<String> errors = new ArrayList<>();
         int added = 0;
@@ -509,13 +512,16 @@ public class GamesWall extends Application {
                     log.error("import error", e);
                 }
 
+            } catch (IOException e) {
+                errors.add(e.getLocalizedMessage() + ": " + gameApps.getFirst().getGamePath());
+                log.error("import error", e);
             }
         } else {
             for (GameApp gameApp : gameApps) {
                 try {
                     gameManager.addGame(gameApp);
                     added++;
-                } catch (GameAlreadyPresentException e) {
+                } catch (GameAlreadyPresentException | IOException e) {
                     errors.add(e.getLocalizedMessage() + ": " + gameApp.getGamePath());
                     log.error("import error", e);
                 }
@@ -777,7 +783,7 @@ public class GamesWall extends Application {
                         //  returne = dosBoxManager.runApplication(game.getGameExe(), game, listener);
 
                         //   returne = dosBoxManager.runApplication(game.getGameExe(), game, null,null );
-                    } catch (DosBoxException ex) {
+                    } catch (EmulatorException ex) {
                         throw new RuntimeException(ex);
                     }
                     // gameManager.updateTime(game, returne);
@@ -897,7 +903,10 @@ public class GamesWall extends Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        Thread.setDefaultUncaughtExceptionHandler((t, e) ->
+                log.error("Fluppy Uncaught [{}]", t.getName(), e));
+        launch(args);
+
     }
 
     public void changeView(TILES_VIEW change) {

@@ -2,8 +2,9 @@ package com.notamethod.fluppy.gui;
 
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.emulators.dosbox.DosBoxManager;
-import com.notamethod.fluppy.emulators.dosbox.DosboxType;
+import com.notamethod.fluppy.platform.dosbox.DosBoxManager;
+import com.notamethod.fluppy.platform.dosbox.DosboxType;
+import com.notamethod.fluppy.util.Installer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -52,6 +53,8 @@ public class PreferencesDialog extends Stage {
         kickstartPathField = new TextField();
         kickstartPathField.setPrefWidth(350);
         kickstartPathField.setText(preferences.getKickstartPath());
+        Button installFSButton = new Button("<-");
+        Button installDBButton = new Button("<-");
         Button browseButton = new Button("Parcourir...");
         Button fsBrowseButton = new Button("Parcourir...");
         Button ffBrowseButton = new Button("Parcourir...");
@@ -92,9 +95,41 @@ public class PreferencesDialog extends Stage {
                 kickstartPathField.setText(selectedFile.getAbsolutePath());
             }
         });
-        HBox cheminBox = new HBox(10, cheminField, browseButton);
+        installFSButton.setOnAction(resultat -> {
+            Installer installer = new Installer();
+            String exeFile = installer.application(new ProgressCallback() {
+                @Override
+                public void onProgress(String message) {
+                    // Update UI or log progress message
+                    System.out.println("Progress: " + message);
+
+                }
+            }, Installer.fsuae);
+            if (exeFile != null) {
+                preferences.setFsuaePath(exeFile);
+                fsuaePathField.setText(exeFile);
+                PreferencesIO.save(preferences);
+            }
+        });
+        installDBButton.setOnAction(resultat -> {
+            Installer installer = new Installer();
+            String exeFile = installer.application(new ProgressCallback() {
+                @Override
+                public void onProgress(String message) {
+                    // Update UI or log progress message
+                    System.out.println("Progress: " + message);
+
+                }
+            }, Installer.dosbox);
+            if (exeFile != null) {
+                preferences.setDosBoxPath(exeFile);
+                cheminField.setText(exeFile);
+                PreferencesIO.save(preferences);
+            }
+        });
+        HBox cheminBox = new HBox(10, cheminField, browseButton, installDBButton);
         cheminBox.setAlignment(Pos.CENTER_LEFT);
-        HBox fsuaePathBox = new HBox(10, fsuaePathField, fsBrowseButton);
+        HBox fsuaePathBox = new HBox(10, fsuaePathField, fsBrowseButton, installFSButton);
         fsuaePathBox.setAlignment(Pos.CENTER_LEFT);
         HBox ksPathBox = new HBox(10, kickstartPathField, ksBrowseButton);
         ksPathBox.setAlignment(Pos.CENTER_LEFT);

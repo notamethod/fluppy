@@ -1,8 +1,8 @@
 package com.notamethod.fluppy.util;
 
 import com.notamethod.fluppy.core.Configuration;
-import com.notamethod.fluppy.emulators.ExternalTool;
 import com.notamethod.fluppy.gui.ProgressCallback;
+import com.notamethod.fluppy.platform.ExternalTool;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -16,8 +16,8 @@ import java.util.Set;
 
 @Slf4j
 public class Installer {
-    public static final ExternalTool emu1 = new ExternalTool("dosboxStaging", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-windows-x64-v0.82.2.zip", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-linux-x86_64-v0.82.2.tar.xz", "dosbox.exe", "dosbox");
-    public static final ExternalTool emu2 = new ExternalTool("fs-uae", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Windows_x86-64.zip", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Linux_x86-64.tar.xz", "fs-uae.exe", "fs-uae");
+    public static final ExternalTool dosbox = new ExternalTool("dosboxStaging", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-windows-x64-v0.82.2.zip", "https://github.com/dosbox-staging/dosbox-staging/releases/download/v0.82.2/dosbox-staging-linux-x86_64-v0.82.2.tar.xz", "dosbox.exe", "dosbox");
+    public static final ExternalTool fsuae = new ExternalTool("fs-uae", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Windows_x86-64.zip", "https://github.com/FrodeSolheim/fs-uae/releases/download/v3.2.35/FS-UAE_3.2.35_Linux_x86-64.tar.xz", "fs-uae.exe", "fs-uae");
     public static final ExternalTool ffmpeg = new ExternalTool("ffmpeg", "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z", "", "ffmpeg.exe", "ffmpeg");
 
 

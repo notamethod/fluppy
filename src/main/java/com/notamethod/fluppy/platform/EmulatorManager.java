@@ -1,11 +1,11 @@
-package com.notamethod.fluppy.emulators;
+package com.notamethod.fluppy.platform;
 
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.preferences.PreferencesBean;
 import com.notamethod.fluppy.core.preferences.PreferencesIO;
-import com.notamethod.fluppy.emulators.dosbox.DosBoxException;
-import com.notamethod.fluppy.emulators.dosbox.DosBoxResult;
 import com.notamethod.fluppy.gui.PanelListener;
+import com.notamethod.fluppy.platform.dosbox.DosBoxResult;
+import com.notamethod.fluppy.platform.dosbox.EmulatorException;
 import javafx.application.Platform;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,8 +61,11 @@ public abstract class EmulatorManager {
     public long runApplication(String program, GameApp gameApp, String screenRez, PanelListener listener,
                                Consumer<String> onStdout,
                                Consumer<String> onStderr,
-                               Consumer<DosBoxResult> onFinish) throws DosBoxException {
+                               Consumer<DosBoxResult> onFinish) throws EmulatorException {
 
+        if (!hasRunner()) {
+            throw new EmulatorException(LAUNCHER_NOTFOUND);
+        }
         log.info("running {}", program);
         int returnOK = 0;
 
@@ -141,10 +144,14 @@ public abstract class EmulatorManager {
         return diff;
     }
 
+    protected abstract boolean hasRunner();
+
     protected abstract String[] generateParams();
 
     protected abstract void generateConfiguration(String program, GameApp gameApp, String screenRez);
 
     public abstract String getlogPrefix();
+
+
 }
 

@@ -1,4 +1,4 @@
-package com.notamethod.fluppy.emulators;
+package com.notamethod.fluppy.platform;
 
 import java.util.ArrayList;
 

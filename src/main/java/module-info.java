@@ -19,6 +19,7 @@ module com.notamethod.fluppy {
     requires javafx.graphics;
     requires com.fasterxml.jackson.annotation;
     requires ch.qos.logback.classic;
+    requires com.h2database;
 
 
     exports com.notamethod.fluppy.gui;
@@ -32,14 +33,14 @@ module com.notamethod.fluppy {
     exports com.notamethod.fluppy.core.game;
     exports com.notamethod.fluppy.core.category;
     opens com.notamethod.fluppy.core.category to org.hibernate.orm.core;
-    exports com.notamethod.fluppy.emulators.dosbox;
-    opens com.notamethod.fluppy.emulators.dosbox to org.hibernate.orm.core;
+    exports com.notamethod.fluppy.platform.dosbox;
+    opens com.notamethod.fluppy.platform.dosbox to org.hibernate.orm.core;
     exports com.notamethod.fluppy.gui.common;
     opens com.notamethod.fluppy.gui.common to javafx.fxml, org.hibernate.orm.core;
-    exports com.notamethod.fluppy.emulators;
-    opens com.notamethod.fluppy.emulators to org.hibernate.orm.core;
-    exports com.notamethod.fluppy.emulators.amiga;
-    opens com.notamethod.fluppy.emulators.amiga to org.hibernate.orm.core;
+    exports com.notamethod.fluppy.platform;
+    opens com.notamethod.fluppy.platform to org.hibernate.orm.core;
+    exports com.notamethod.fluppy.platform.amiga;
+    opens com.notamethod.fluppy.platform.amiga to org.hibernate.orm.core;
     exports com.notamethod.fluppy.util;
     opens com.notamethod.fluppy.util to org.hibernate.orm.core;
 }

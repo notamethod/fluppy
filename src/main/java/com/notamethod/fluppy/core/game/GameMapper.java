@@ -1,5 +1,6 @@
 package com.notamethod.fluppy.core.game;
 
+import com.notamethod.fluppy.gui.common.FileFormat;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -21,6 +22,7 @@ public interface GameMapper {
     @Mapping(target = "publisher", ignore = true)
 
     @Named("toGameApp")
+    @Mapping(source = "format", target = "format", qualifiedByName = "toFileFormat")
     GameApp toGameApp(GameEntity gameEntity);
 
     @ValueMapping(source = "amiga", target = "AMIGA")
@@ -30,6 +32,7 @@ public interface GameMapper {
     Platform toPlatform(String string);
     @Mapping(source = "game", target = "gameExe")
     @Mapping(source = "gameYear", target = "year")
+    @Mapping(source = "format", target = "format", qualifiedByName = "toFileFormat")
     GameApp toFullGameApp(GameEntity gameEntity);
     GameApp copyGameApp(GameApp a);
     GenreEntity toEntity(GenreApp genre);
@@ -46,6 +49,13 @@ public interface GameMapper {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    @Named("toFileFormat")
+    default FileFormat toFileFormat(String format) {
+        if (format == null)
+            return FileFormat.UNKNOWN;
+        return FileFormat.fromValue(format);
     }
 
     default String map(Path path) {

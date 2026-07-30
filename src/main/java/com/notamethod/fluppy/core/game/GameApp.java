@@ -1,5 +1,6 @@
 package com.notamethod.fluppy.core.game;
 
+import com.notamethod.fluppy.gui.common.FileFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -7,10 +8,8 @@ import lombok.ToString;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -30,7 +29,7 @@ public class GameApp {
     private Path manualPath;
     private String extra;
     private Platform platform;
-    private String format;
+    private FileFormat format;
     private int frameskip=0;
     private String cdrom;
     private String cdromLetter;
@@ -62,4 +61,19 @@ public class GameApp {
         this.genres.add(genre);
     }
 
+    public Map<Integer, String> toExtraDiskList() {
+
+        if (extraDisks == null) {
+            return new HashMap<>();
+        }
+        return Arrays.stream(extraDisks.split(";"))
+                .map(part -> part.split("#", 2))
+                .filter(arr -> arr.length == 2)
+                .collect(Collectors.toMap(
+                        arr -> Integer.parseInt(arr[0]),
+                        arr -> arr[1],
+                        (v1, v2) -> v1, // en cas de clé dupliquée, garde la première valeur
+                        TreeMap::new
+                ));
+    }
 }

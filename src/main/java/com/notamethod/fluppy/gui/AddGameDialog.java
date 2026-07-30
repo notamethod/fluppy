@@ -9,11 +9,10 @@ import com.notamethod.fluppy.core.Configuration;
 import com.notamethod.fluppy.core.game.GameApp;
 import com.notamethod.fluppy.core.game.GameManagerException;
 import com.notamethod.fluppy.core.game.GenreApp;
-import com.notamethod.fluppy.gui.common.DialogActionsJfx;
-import com.notamethod.fluppy.gui.common.FileActions;
-import com.notamethod.fluppy.gui.common.OperationCanceledException;
+import com.notamethod.fluppy.core.game.Platform;
+import com.notamethod.fluppy.gui.common.*;
+import com.notamethod.fluppy.platform.PlatformGameHandler;
 import com.notamethod.fluppy.util.HelperClass;
-import com.notamethod.fluppy.util.SearchInfo;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -43,13 +42,15 @@ public class AddGameDialog extends Stage {
 
     private ApiCalls apiCalls;
     private final ObservableList<GameApp> result = FXCollections.observableArrayList();
-
+    private Map<Platform, PlatformGameHandler> gameHandlers;
     private FileActions fileActions;
     private boolean haErrors = false;
     private int limit=10;
-    public AddGameDialog(List<File> metaGamesFiles, ApiCalls apiCalls) {
+
+    public AddGameDialog(List<File> metaGamesFiles, ApiCalls apiCalls, Map<Platform, PlatformGameHandler> gameHandler) {
 
         this.apiCalls = apiCalls;
+        this.gameHandlers = gameHandler;
         initModality(Modality.APPLICATION_MODAL);
         fileActions = new FileActions();
         setTitle("Add Game");
@@ -78,7 +79,7 @@ public class AddGameDialog extends Stage {
             try {
                 metaGame = processFile(metaGameFile);
 
-            } catch (GameManagerException e) {
+            } catch (GameManagerException | ProcessFileException e) {
                 log.error("archive extraction", e);
             } catch (OperationCanceledException e) {
                 throw new RuntimeException(e);
@@ -321,78 +322,18 @@ public class AddGameDialog extends Stage {
         }
     }
 
-    private GameApp processFile(File inFile) throws GameManagerException, OperationCanceledException {
+    private GameApp processFile(File inFile) throws GameManagerException, OperationCanceledException, ProcessFileException {
 
-        GameApp metaGame = fileActions.detect(inFile);
+        FileFormat fileFormat = fileActions.detect(inFile);
+        GameApp metaGame = fileActions.buildGameInfo(inFile, fileFormat);
+        gameHandlers.get(metaGame.getPlatform()).calculateSearchInfo(metaGame, inFile.getName());
 
-        calculateSearchInfo(metaGame, inFile.getName());
         return metaGame;
     }
 
-    private SearchInfo calculateSearchInfo(GameApp metaGame, String sourceFileName) {
-        if (metaGame.getPlatform().equals("pc") && metaGame.getFormat().equals("image")) {
-            return calculateSearchInfoImg(metaGame, sourceFileName);
-        }
-        String guessSource = null;
-        File exeFile = null;
-        String searchString = "";
-        if (metaGame.getExePath() != null) {
-            //provisionning value
-            exeFile = metaGame.getExePath().toFile();
-            guessSource = exeFile.getName();
-            metaGame.setGameExe(exeFile.getName());
-            metaGame.setExePath(Paths.get(exeFile.getAbsolutePath().substring(0, exeFile.getAbsolutePath().lastIndexOf(File.separatorChar))));
-            searchString = exeFile.getParentFile().getAbsolutePath().substring(exeFile.getParentFile().getAbsolutePath().lastIndexOf(File.separator) + 1);
-        }
-        //TODO: set intallers
-        SearchInfo searchInfo=null;
-
-        if (sourceFileName != null) {
-            String title=null;
-            searchInfo = HelperClass.parseFileName(sourceFileName, metaGame.getPlatform());
-            title=searchInfo.getTitle();
-            if (title != null) {
-                searchString = title;
-            }
-        }
-
-        String textSearch = searchString.isEmpty() ? "" : HelperClass.fromCamelCase(searchString);
-        metaGame.setSearchName(textSearch);
-
-        metaGame.setDiskNumber(searchInfo.getDisk() == null ? 0 : searchInfo.getDisk());
-        metaGame.setNumberOfDisks(searchInfo.getTotalDisk() == null ? 0 : searchInfo.getTotalDisk());
-        //TODO get disk number info
-        return searchInfo;
-    }
-
-    private SearchInfo calculateSearchInfoImg(GameApp metaGame, String sourceFileName) {
-        String guessSource = null;
-        File exeFile = null;
-        String searchString = "";
-        if (metaGame.getExePath() != null) {
-            //provisionning value
-            exeFile = metaGame.getExePath().toFile();
-            guessSource = exeFile.getName();
-            metaGame.setGameExe(guessSource);
-            metaGame.setExePath(Path.of(exeFile.getParentFile().getAbsolutePath()));
-            searchString = guessSource;
-        }
-        //TODO: set intallers
-        SearchInfo searchInfo = new SearchInfo(guessSource);
 
 
-        String textSearch = searchString.isEmpty() ? "" : HelperClass.fromCamelCase(searchString);
-        if (textSearch == null || textSearch.isEmpty()) {
-            metaGame.setSearchName(metaGame.getName());
-        } else {
 
-            metaGame.setSearchName(textSearch);
-        }
-        metaGame.setDiskNumber(searchInfo.getDisk()==null?0:searchInfo.getDisk());
-        metaGame.setNumberOfDisks(searchInfo.getTotalDisk()==null?0:searchInfo.getTotalDisk());
-        //TODO get disk number info
-        return searchInfo;
-    }
     private List<File> sortRunners(String mainName, List<File> exeFiles) {
         File mainFile = null;
         List<File> batFiles = new ArrayList<>();

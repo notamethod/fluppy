@@ -1,4 +1,4 @@
-package com.notamethod.fluppy.emulators.dosbox;
+package com.notamethod.fluppy.platform.dosbox;
 
 public class DosBoxResult {
     public final boolean success;
