@@ -195,9 +195,11 @@ public class GameManager {
 
     public List<GameApp> getFromGenre(String genre, int limit, Set<Long> gameIds) {
         return GameMapper.INSTANCE.toGameApps(applicationDatabase.findGameByGenre(genre, limit, gameIds));
-
     }
 
+    public Long countFromGenre(String genre, Set<Long> gameIds) {
+        return applicationDatabase.countGameByGenre(genre, gameIds);
+    }
     public List<GameApp> searchByName(String paramFilter) {
         return applicationDatabase.runGameQuerySelect("SELECT game FROM GameEntity game where LOWER(game.name) LIKE LOWER(CONCAT('%', :paramFilter, '%')) AND (:nsfw is true OR game.ageRating < 1) order by game.lastPlayed DESC", preferences.isNsfw(), paramFilter);
     }

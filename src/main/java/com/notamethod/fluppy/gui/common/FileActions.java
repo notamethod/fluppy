@@ -42,6 +42,7 @@ public class FileActions {
 
     public GameApp addDirectory(File inFile, boolean fromArchive) throws ProcessFileException, OperationCanceledException {
         GameApp mgame = new GameApp();
+        mgame.setFormat(fromArchive ? FileFormat.ARCHIVE : FileFormat.DIRECTORY);
         mgame.setGamePath(inFile.toPath());
 
         log.info("analyze directory {}", inFile.getAbsolutePath());

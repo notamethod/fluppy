@@ -21,7 +21,7 @@ import java.io.File;
 public class AboutDialog extends Stage {
 
     static final String OURS = """
-            FluppyBox version 0.2
+            FluppyBox version 0.3
             
             (c)2026 notamethod""";
     private TextField dataFolder;

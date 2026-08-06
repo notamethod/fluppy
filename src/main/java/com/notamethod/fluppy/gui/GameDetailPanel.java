@@ -268,15 +268,7 @@ public class GameDetailPanel extends StackPane {
 
 
         genre.setText(Messages.getString("game.genre",genres));
-        long played = game.getTimePlayed() / 60;
-        if (played > 60) {
-            timePlayed.setText(Messages.getString("game.timeplayed.hour", String.valueOf(played / 60)));
-        } else if (played > 1) {
-            timePlayed.setText(Messages.getString("game.timeplayed.min", String.valueOf(played)));
-
-        } else {
-            timePlayed.setText(Messages.getString("game.neverplayed"));
-        }
+        timePlayed.setText(Statistics.getTimePlayed(game.getTimePlayed(), false));
         extraFiles.getChildren().clear();
         if (game.getManualPath() != null) {
             extraFiles.getChildren().add(LinkLabelFactory.createFileLink("Manual", game.getManualPath().toFile()));

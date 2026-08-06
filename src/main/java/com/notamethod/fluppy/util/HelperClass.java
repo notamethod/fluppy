@@ -105,14 +105,12 @@ public class HelperClass {
     }
 
 
-    public static SearchInfo parseFileName(String name, Platform platform) {
+    public static SearchInfo parseFileName(String name) {
         if (name == null) {
             return null;
         }
         SearchInfo info = null;
-        if (platform.equals(Platform.AMIGA)) {
-            info = regexAmiga(name);
-        }
+
 
         if (info != null && info.getTitle() != null) {
             return info;
@@ -140,7 +138,7 @@ public class HelperClass {
         return converted;
     }
 
-    private static String regexArchive(String name) {
+    public static String regexArchive(String name) {
         Pattern pattern = Pattern.compile(REGEX_ABANDONWARE);
         Matcher matcher = pattern.matcher(name);
         if (matcher.find()) {

@@ -164,14 +164,39 @@ public class ApplicationDatabase {
         });
     }
 
+    public Long countGameByGenre(String genreId, Set<Long> gameIds) {
+
+        return sessionFactory.fromSession(session -> {
+
+            if (gameIds == null || gameIds.isEmpty()) {
+                return session.createQuery("""
+                                SELECT COUNT(*) FROM GameEntity game JOIN  game.genres genre
+                                                                 WHERE genre.id = :genreId""", Long.class)
+                        .setParameter("genreId", genreId)
+                        .uniqueResult();
+
+            } else {
+                return session.createQuery("""
+                                         SELECT COUNT(*) FROM GameEntity game JOIN  game.genres genre
+                                     WHERE genre.id = :genreId
+                                 AND game.id not in :ids
+                                """, Long.class)
+                        .setParameterList("ids", gameIds)
+                        .setParameter("genreId", genreId)
+                        .uniqueResult();
+            }
+        });
+    }
+
     public List<GameEntity> findGameByYear(Integer year, boolean nsfw, int maxResult) {
         return sessionFactory.fromSession(session -> {
-            Query<GameEntity> q = session.createQuery("""
-                    SELECT game FROM GameEntity game 
-                    left join fetch game.genres
-                    WHERE game.gameYear=:year
-                    AND (:nsfw is true OR game.ageRating < 1)
-                    """, GameEntity.class);
+            Query<GameEntity> q = session.createQuery(
+                    """
+                            SELECT game FROM GameEntity game 
+                            left join fetch game.genres
+                            WHERE game.gameYear=:year
+                            AND (:nsfw is true OR game.ageRating < 1)
+                            """, GameEntity.class);
             q.setParameter("year", year);
             q.setParameter("nsfw", nsfw);
             if (maxResult > 0)
@@ -213,6 +238,7 @@ public class ApplicationDatabase {
             return q.getResultList();
         });
     }
+
     public List<GameEntity> findGameByUnique(String name, Integer year, String language) {
         return sessionFactory.fromSession(session -> {
             String queryString = "SELECT p FROM GameEntity p where p.name=:name";
@@ -417,21 +443,23 @@ public class ApplicationDatabase {
     public Long countGames(boolean nsfw) {
         return sessionFactory.fromSession(session -> {
 
-            Query<Long> q  = session.createQuery("SELECT COUNT(game.id) FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)", Long.class);
+            Query<Long> q = session.createQuery("SELECT COUNT(game.id) FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)", Long.class);
             q.setParameter("nsfw", nsfw);
 
             return q.getSingleResult();
         });
     }
+
     public Long timePlayed(boolean nsfw) {
         return sessionFactory.fromSession(session -> {
 
-            Query<Long> q  = session.createQuery("SELECT SUM(game.timePlayed) FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)", Long.class);
+            Query<Long> q = session.createQuery("SELECT SUM(game.timePlayed) FROM GameEntity game where (:nsfw is true OR game.ageRating < 1)", Long.class);
             q.setParameter("nsfw", nsfw);
 
             return q.getSingleResult();
         });
     }
+
     public Statistics statistics(boolean nsfw) {
         return sessionFactory.fromSession(session -> {
             return session.createQuery(
@@ -440,6 +468,7 @@ public class ApplicationDatabase {
                     .getSingleResult();
         });
     }
+
     public Optional<CompanyEntity> findCompany(String id) {
         return sessionFactory.fromSession(session -> findCompanyById(session, id));
 

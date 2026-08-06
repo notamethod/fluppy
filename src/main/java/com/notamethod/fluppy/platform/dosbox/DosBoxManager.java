@@ -120,6 +120,8 @@ public class DosBoxManager extends EmulatorManager {
         // Add settings to the configuration file
         if (gameApp.getCycles() > 0) {
             cpu.put("cycles", gameApp.getCycles() + "");
+        } else if (gameApp.getYear() != null && gameApp.getYear() > 1970) {
+            cpu.put("cycles", getCyclesForYear(gameApp.getYear()) + "");
         }
 
         capture.put("capture_dir", Configuration.captureFolder);
@@ -236,6 +238,14 @@ public class DosBoxManager extends EmulatorManager {
             return DosboxType.UNKNOWN;
         }
     }
-
+    public static int getCyclesForYear(int annee) {
+        if (annee <= 1970) return 0;
+        if (annee <= 1984) return 400;    // XT/8086
+        if (annee <= 1986) return 500;
+        if (annee <= 1990) return 2000;   // 286
+        if (annee <= 1994) return 6000;   // 386
+        if (annee <= 1997) return 15000;  // 486
+        return 30000;                     // Pentium
+    }
 
 }

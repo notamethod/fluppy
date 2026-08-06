@@ -62,7 +62,6 @@ import java.util.*;
 public class GamesWall extends Application {
 
     static {
-        // Déterminer le chemin dynamiquement
         String logPath = Configuration.logFolder;
         System.setProperty("LOG_FILE_PATH", logPath+"/app.log");
     }
@@ -149,15 +148,12 @@ public class GamesWall extends Application {
         if (preferences.isVideoBackground()) {
             videoPlayer = new FFmpegVideoPlayer(getVideo(), 30, preferences.getFfmpegPath());
         }
-//        try {
-//            init();
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
         content = new VBox();
         Statistics  stats = gameManager.getStatistics();
         gameCounter.set(stats.count());
-        timePlayedProperty.set(stats.formatTimePlayed());
+
+        timePlayedProperty.set(Statistics.getTimePlayed(stats.timeplayed(), true));
+
         if (gameCounter.get() > 0) {
             updateList();
         }
@@ -466,9 +462,10 @@ public class GamesWall extends Application {
         calendarButton.setOnAction(e -> changeView(TILES_VIEW.YEARS));
         VBox globalInfos = new VBox();
         Label param1 = new Label();
-        param1.textProperty().bind(gameCounter.asString("%d games"));
+        String pattern = Messages.getString("game.count"); // "%d parties"
+        param1.textProperty().bind(gameCounter.asString(pattern));
         Label param2 = new Label();
-        param2.textProperty().bind(Bindings.concat("played ",timePlayedProperty," min"));
+        param2.textProperty().bind(Bindings.concat("", timePlayedProperty, ""));
         globalInfos.getChildren().addAll(param1,param2);
         Region spacerRibbon = new Region();
         HBox.setHgrow(spacerRibbon, Priority.ALWAYS);
@@ -589,6 +586,9 @@ public class GamesWall extends Application {
                 if ("all".equals(category.getId())) {
                     games = gameManager.loadAllButNot(gameIds);
                 } else {
+                    category.setCount(gameManager.countFromGenre(category.getId(), gameIds));
+                    if (category.getCount() > count)
+                        category.setHasMore(true);
                     games = gameManager.getFromGenre(category.getId(), count, gameIds);
                 }
                 break;
@@ -640,7 +640,12 @@ public class GamesWall extends Application {
         vBox.setPadding(new Insets(20, 10, 10, 50)); // top, right, bottom, left
         // String expandedSymbol = category.isExpanded() ? "<" : ">";
         HBox blockTitle = new HBox();
-        Label label = new Label(category.getLabel());
+        String labelBloc = category.getLabel();
+        if (category.isExpanded())
+            labelBloc = labelBloc + "<";
+        if (!category.isExpanded() && category.isHasMore())
+            labelBloc = labelBloc + ">>";
+        Label label = new Label(labelBloc);
         label.getStyleClass().add("blockTitle");
         blockTitle.setAlignment(Pos.CENTER_LEFT);
         // Ajouter une action au clic
@@ -669,19 +674,19 @@ public class GamesWall extends Application {
         return vBox;
     }
 
-    private void activateCategory(Category category, Label blockTitle) {
+    private void activateCategory(Category category, Label title) {
 
         if (category.getCategoryType().equals(CategoryType.GENRE) && "all".equals(category.getId()))
             return;
         if (expandCategory != null && expandCategory.getCategoryType().equals(category.getCategoryType())
                 && category.getId().equals(expandCategory.getId())) {
             category.setExpanded(false);
-            blockTitle.setText(category.getLabel() + ">");
+            title.setText(category.getLabel() + ">");
             expandCategory = null;
         } else if (expandCategory == null || (expandCategory != null && !category.getId().equals(expandCategory.getId()))) {
             expandCategory = category;
             category.setExpanded(true);
-            blockTitle.setText(category.getLabel() + "<");
+            title.setText(category.getLabel() + "<");
         } else {
             expandCategory = null;
         }
@@ -691,15 +696,15 @@ public class GamesWall extends Application {
     private void editCategory(Category category, Label blockTitle) {
 
         if (category.getCategoryType().equals(CategoryType.COMPANY)) {
-            CompanyEditorView view = new CompanyEditorView();
-            view.setGameManager(gameManager);
-            view.setCompany(category.getId());
+            CompanyEditorView companyEditorView = new CompanyEditorView();
+            companyEditorView.setGameManager(gameManager);
+            companyEditorView.setCompany(category.getId());
 
             Dialog<Void> dialog = new Dialog<>();
-            dialog.setDialogPane(view);
+            dialog.setDialogPane(companyEditorView);
             dialog.showAndWait();
 
-            Boolean editedCompany = view.getResult();
+            Boolean editedCompany = companyEditorView.getResult();
             if (editedCompany) {
                 //update
             }
@@ -802,41 +807,6 @@ public class GamesWall extends Application {
         return container;
     }
 
-    private Point2D caculatePosition1(GameTile container) {
-        int detailPanelEstimatedWidth = 550;
-        int detailPanelEstimatedHeight = 200;
-        Bounds tileSceneBounds = container.localToScene(container.getBoundsInLocal());
-        detailPane.applyCss();
-        detailPane.layout();
-        double fixWidth = mainPane.getWidth() - ORIGINAL_WIDTH > 0 ? (mainPane.getWidth() - 1) / 2 : 0;
-        double fixHeight = fixWidth > 0 ? (mainPane.getHeight() - ORIGINAL_HEIGHT) / 2 : 0;
-
-        Bounds screenBounds = container.localToScreen(container.getBoundsInLocal());
-
-
-        Bounds tileParentBounds = mainPane.sceneToLocal(tileSceneBounds);
-        Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
-        //TODO recalculate midroot size
-        Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
-        point = point.add(-container.getWidth(), -container.getHeight());
-        double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - mainPane.getWidth()/*screen.getMaxX()*/;
-        double diffx = (point.getX() + detailPanelEstimatedWidth) - mainPane.getWidth()/*screen.getMaxX()*/;
-        double diffy = (point.getY() + detailPanelEstimatedHeight) - mainPane.getHeight()/*screen.getMaxX()*/;
-        log.debug("tile " + "point " + point.getX() + " / " + point.getY());
-        log.debug("tile pt2 " + "point " + fixedPoint2.getX() + " / " + fixedPoint2.getY());
-        log.debug("midroot " + +mainPane.getWidth() + " / " + mainPane.getHeight());
-        log.debug("tileSceneBounds " + tileSceneBounds.getMinX());
-
-        double decalRatio = -(Screen.getPrimary().getDpi() / 100);
-
-        if (diffx > 0)
-            fixedPoint2 = fixedPoint2.add(decalRatio * diffx, 0);
-
-        if (diffy > 0)
-            fixedPoint2 = fixedPoint2.add(0, decalRatio * diffy);
-        // return fixedPoint2;
-        return fixedPoint2;
-    }
 
     private Point2D caculatePosition(GameTile container) {
 
@@ -854,7 +824,6 @@ public class GamesWall extends Application {
         Point2D point = container.getScene().getRoot().sceneToLocal(tileSceneBounds.getMinX(), tileSceneBounds.getMinY());
         //TODO recalculate midroot size
         Point2D fixedPoint2 = new Point2D(tileParentBounds.getMinX() - container.getWidth() - fixWidth - 40, tileParentBounds.getMinY() - container.getHeight() - fixHeight);
-        double diffx1 = (fixedPoint2.getX() + detailPanelEstimatedWidth) - width/*screen.getMaxX()*/;
         double diffx = (point.getX() + detailPanelEstimatedWidth) - mainPane.getWidth()/*screen.getMaxX()*/;
         log.trace("midroot " + +mainPane.getWidth() + "-" + mainPane.getHeight());
         double diffy = (point.getY() + detailPanelEstimatedHeight) - mainPane.getHeight()/*screen.getMaxX()*/;

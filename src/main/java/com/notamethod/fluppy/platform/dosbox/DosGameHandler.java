@@ -11,7 +11,11 @@ import com.notamethod.fluppy.util.SearchInfo;
 import java.io.File;
 import java.nio.file.Path;
 
+import static com.notamethod.fluppy.util.HelperClass.regexArchive;
+import static com.notamethod.fluppy.util.HelperClass.regexGroup;
+
 public class DosGameHandler extends PlatformGameHandler {
+    public static final String REGEX_SIMPLE = "(.*)_DOS_[A-Z][A-Z].*";
     protected PreferencesBean preferences;
 
     public DosGameHandler() {
@@ -37,7 +41,26 @@ public class DosGameHandler extends PlatformGameHandler {
 
     @Override
     public SearchInfo parseFileName(String name) {
-        return null;
+        if (name == null) {
+            return null;
+        }
+        SearchInfo info = null;
+
+
+        if (info != null && info.getTitle() != null) {
+            return info;
+        }
+        String title = regexArchive(name);
+        if (title == null) {
+            title = regexGroup(name, REGEX_SIMPLE, 1);
+        }
+
+        if (title == null) {
+            int pos = name.lastIndexOf(".");
+            title = pos > 0 ? name.substring(0, pos) : name;
+        }
+
+        return new SearchInfo(HelperClass.toTitleGame(title));
     }
 
     private SearchInfo calculateSearchInfoImg(GameApp metaGame, String sourceFileName) {

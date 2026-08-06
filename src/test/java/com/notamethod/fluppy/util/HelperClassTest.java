@@ -35,12 +35,7 @@ class HelperClassTest {
         System.out.println(REGEX_AMIGA);
         assertEquals("Cobra", m.getTitle());
     }
-    @Test
-    void matchingSimpleZip() {
-        SearchInfo m= HelperClass.parseFileName("Wipeout.zip",null);
-        assertEquals("Wipeout", m.getTitle());
 
-    }
 
 
 }

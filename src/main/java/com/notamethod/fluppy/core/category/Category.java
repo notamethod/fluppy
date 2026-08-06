@@ -15,6 +15,8 @@ public class Category {
     private Image image;
     private String filter;
     private boolean expanded=false;
+    private boolean hasMore = false;
+    private long count;
 
     public Category(CategoryType categoryType, String id, String label) {
         this.categoryType = categoryType;

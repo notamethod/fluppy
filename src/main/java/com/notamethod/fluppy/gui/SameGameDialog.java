@@ -81,8 +81,6 @@ public class SameGameDialog extends Stage {
         group.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 SameGameAction selected = (SameGameAction ) newVal.getUserData();
-                System.out.println("Valeur enum : " + selected);         // ROUGE
-                System.out.println("Texte affiché : " + selected.getLabel()); // Rouge vif
                 if (selected.equals(SameGameAction.VARIANT)){
                     variantBox.setVisible(true);
                 }else{
