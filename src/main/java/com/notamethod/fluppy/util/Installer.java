@@ -26,7 +26,7 @@ public class Installer {
         final String exeFile = isLinux ? externalTool.linuxApp() : externalTool.winExe();
         try {
             String url = isLinux ? externalTool.installUrlLinux() : externalTool.installUrlWindows();
-
+            log.debug("download {}", url);
             String outputFile = Configuration.tempFolder + "/" + externalTool.name() + "." + HelperClass.getArchiveExtension(url);
             DownloadFiles.download(url, outputFile);
             callback.onProgress("Downloaded file: " + outputFile);

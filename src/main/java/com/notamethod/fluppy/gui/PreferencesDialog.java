@@ -144,9 +144,6 @@ public class PreferencesDialog extends Stage {
         Button cancelButton = new Button("Annuler");
 
         saveButton.setOnAction(e -> {
-            log.debug("Chemin DOSBox: " + cheminField.getText());
-            log.debug("Plein écran: " + fullscreenCheck.isSelected());
-           // log.debug("Types sélectionnés: " + typeList.getSelectionModel().getSelectedItems());
             preferences.setDosBoxPath(cheminField.getText());
             preferences.setFsuaePath(fsuaePathField.getText());
             preferences.setKickstartPath(kickstartPathField.getText());

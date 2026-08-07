@@ -237,7 +237,13 @@ public class HelperClass {
     }
 
     public static String getArchiveExtension(String filename) {
-        return null;
+        String[] split = filename.split("\\.");
+        if (split.length <= 1) return "filename";
+        String end = split[split.length - 1];
+        if (split.length >2 && split[split.length-2].equals("tar")) {
+            return split[split.length-2]+"."+end;
+        }
+        return end;
     }
 
     public static boolean isOnPath(String executable) {
