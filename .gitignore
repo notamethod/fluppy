@@ -29,3 +29,4 @@ target/
 /prefs.json
 .idea/misc.xml
 /src/main/resources/ffmpeg/windows/ffmpeg.exe
+/install/

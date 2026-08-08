@@ -1,0 +1,9 @@
+Package: fluppy
+Version: 1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Christophe Roger <christophe@notamethod.com>
+Description: Fluppy - Retro game launcher
+ aaa aaa.
+Depends: libc6 (>= 2.27)

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Fluppy
+Exec=/usr/bin/fluppy
+Icon=/usr/share/icons/hicolor/128x128/apps/fluppy.png
+Type=Application
+Categories=Game;
+Terminal=false
+StartupWMClass=fluppy
